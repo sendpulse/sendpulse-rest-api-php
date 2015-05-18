@@ -36,7 +36,7 @@
             $this->secret = $secret;
             $this->tokenName = md5( $userId . '::' . $secret );
 
-            if( empty( $_SESSION[$this->tokenName] ) ) {
+            if( empty( $this->tokenName ) ) {
                 if( !$this->getToken() ) {
                     throw new Exception( 'Could not connect to api, check your ID and SECRET' );
                 }
@@ -44,7 +44,7 @@
         }
 
         /**
-         * Get token and store it to session
+         * Get token and store it
          *
          * @return bool
          */
@@ -62,7 +62,7 @@
             }
 
             $this->refreshToken = 0;
-            $_SESSION[$this->tokenName] = $requestResult->data->access_token;
+            $this->tokenName = $requestResult->data->access_token;
             return true;
         }
 
@@ -80,8 +80,8 @@
             $method = strtoupper( $method );
             $curl = curl_init();
 
-            if( $useToken && !empty( $_SESSION[$this->tokenName] ) ) {
-                $headers = array( 'Authorization: Bearer ' . $_SESSION[$this->tokenName] );
+            if( $useToken && !empty( $this->tokenName ) ) {
+                $headers = array( 'Authorization: Bearer ' . $this->tokenName );
                 curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
             }
 

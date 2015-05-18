@@ -8,8 +8,6 @@
      * https://sendpulse.com/api
      */
 
-    session_start();
-
     require_once( 'api/sendpulseInterface.php' );
     require_once( 'api/sendpulse.php' );
 
