@@ -15,9 +15,17 @@
 
         private $userId = NULL;
         private $secret = NULL;
-        private $tokenName = NULL;
+        private $token = NULL;
 
         private $refreshToken = 0;
+
+        /*
+         *  Define where script will save access token
+         *  Types: session, file, memcache
+         */
+        private $storageType = 'file';
+
+        private $apiFilesPath = '/api/';
 
 
         /**
@@ -34,9 +42,31 @@
 
             $this->userId = $userId;
             $this->secret = $secret;
-            $this->tokenName = md5( $userId . '::' . $secret );
+            $hashName = md5( $userId . '::' . $secret );
 
-            if( empty( $this->tokenName ) ) {
+            switch ($this->storageType) {
+                case 'session':
+                    if (isset($_SESSION[$hashName]) && !empty($_SESSION[$hashName])) {
+                        $this->token = $_SESSION[$hashName];
+                    }
+                    break;
+                case 'file':
+                    $filePath = $_SERVER['DOCUMENT_ROOT'].$this->apiFilesPath.$hashName;
+                    if (file_exists($filePath)) {
+                        $this->token = file_get_contents($filePath);
+                    }
+                    break;
+                case 'memcache':
+                    $memcache = new Memcache();
+                    $memcache->connect('localhost', 11211) or die('Could not connect to Memcache');
+                    $token = $memcache->get($hashName);
+                    if (!empty($token)) {
+                        $this->token = $token;
+                    }
+                    break;
+            }
+
+            if( empty( $this->token ) ) {
                 if( !$this->getToken() ) {
                     throw new Exception( 'Could not connect to api, check your ID and SECRET' );
                 }
@@ -62,7 +92,25 @@
             }
 
             $this->refreshToken = 0;
-            $this->tokenName = $requestResult->data->access_token;
+            $this->token = $requestResult->data->access_token;
+
+            $hashName = md5( $this->userId . '::' . $this->secret );
+            switch ($this->storageType) {
+                case 'session':
+                    $_SESSION[$hashName] = $this->token;
+                    break;
+                case 'file':
+                    $tokenFile = fopen($_SERVER['DOCUMENT_ROOT'].$this->apiFilesPath.$hashName, "w");
+                    fwrite($tokenFile, $this->token);
+                    fclose($tokenFile);
+                    break;
+                case 'memcache':
+                    $memcache = new Memcache();
+                    $memcache->connect('localhost', 11211) or die('Could not connect to Memcache');
+                    $memcache->set($hashName, $this->token, false, 3600);
+                    break;
+            }
+
             return true;
         }
 
@@ -80,8 +128,8 @@
             $method = strtoupper( $method );
             $curl = curl_init();
 
-            if( $useToken && !empty( $this->tokenName ) ) {
-                $headers = array( 'Authorization: Bearer ' . $this->tokenName );
+            if( $useToken && !empty( $this->token ) ) {
+                $headers = array( 'Authorization: Bearer ' . $this->token );
                 curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
             }
 
