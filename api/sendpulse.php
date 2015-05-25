@@ -23,9 +23,9 @@
          *  Define where script will save access token
          *  Types: session, file, memcache
          */
-        private $storageType = 'file';
+        private $storageType = '';
 
-        private $apiFilesPath = '/api/';
+        private $apiFilesPath = '';
 
 
         /**
@@ -33,27 +33,25 @@
          *
          * @param $userId
          * @param $secret
+         * @param string $storageType
+         *        Define where script will save access token
+         *        Types: session, file, memcache
          * @throws Exception
          */
-        public function __construct( $userId, $secret ) {
+        public function __construct( $userId, $secret, $storageType = 'file' ) {
             if( empty( $userId ) || empty( $secret ) ) {
                 throw new Exception( 'Empty ID or SECRET' );
             }
 
             $this->userId = $userId;
             $this->secret = $secret;
+            $this->storageType = $storageType;
             $hashName = md5( $userId . '::' . $secret );
 
             switch ($this->storageType) {
                 case 'session':
                     if (isset($_SESSION[$hashName]) && !empty($_SESSION[$hashName])) {
                         $this->token = $_SESSION[$hashName];
-                    }
-                    break;
-                case 'file':
-                    $filePath = $_SERVER['DOCUMENT_ROOT'].$this->apiFilesPath.$hashName;
-                    if (file_exists($filePath)) {
-                        $this->token = file_get_contents($filePath);
                     }
                     break;
                 case 'memcache':
@@ -64,6 +62,11 @@
                         $this->token = $token;
                     }
                     break;
+                default:
+                    $filePath = $this->apiFilesPath.$hashName;
+                    if (file_exists($filePath)) {
+                        $this->token = file_get_contents($filePath);
+                    }
             }
 
             if( empty( $this->token ) ) {
@@ -99,16 +102,15 @@
                 case 'session':
                     $_SESSION[$hashName] = $this->token;
                     break;
-                case 'file':
-                    $tokenFile = fopen($_SERVER['DOCUMENT_ROOT'].$this->apiFilesPath.$hashName, "w");
-                    fwrite($tokenFile, $this->token);
-                    fclose($tokenFile);
-                    break;
                 case 'memcache':
                     $memcache = new Memcache();
                     $memcache->connect('localhost', 11211) or die('Could not connect to Memcache');
                     $memcache->set($hashName, $this->token, false, 3600);
                     break;
+                default:
+                    $tokenFile = fopen($this->apiFilesPath.$hashName, "w");
+                    fwrite($tokenFile, $this->token);
+                    fclose($tokenFile);
             }
 
             return true;
