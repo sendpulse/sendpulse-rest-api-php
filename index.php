@@ -14,9 +14,34 @@
     // https://login.sendpulse.com/settings/#api
     define( 'API_USER_ID', '' );
     define( 'API_SECRET', '' );
+
     define( 'TOKEN_STORAGE', 'file' );
 
     $SPApiProxy = new SendpulseApi( API_USER_ID, API_SECRET, TOKEN_STORAGE );
 
     // Get Mailing Lists list example
     var_dump( $SPApiProxy->listAddressBooks() );
+
+    // Send mail using SMTP
+    $email = array(
+        'html' => '<p>Hello!</p>',
+        'text' => 'text',
+        'subject' => 'Mail subject',
+        'from' => array(
+            'name' => 'John',
+            'email' => 'John@domain.com'
+        ),
+        'to' => array(
+            array(
+                'name' => 'Client',
+                'email' => 'client@domain.com'
+            )
+        ),
+        'bcc' => array(
+            array(
+                'name' => 'Manager',
+                'email' => 'manager@domain.com'
+            )
+        )
+    );
+    var_dump($SPApiProxy->smtpSendMail($email));
