@@ -281,4 +281,62 @@
          * @param $email
          */
         public function smtpSendMail( $email );
+
+        /**
+         * Get list of all push campaigns
+         *
+         * @param null $limit
+         * @param null $offset
+         */
+        public function pushListCampaigns( $limit = NULL, $offset = NULL );
+
+        /**
+         * Get list of websites
+         *
+         * @param null $limit
+         * @param null $offset
+         */
+        public function pushListWebsites( $limit = NULL, $offset = NULL );
+
+        /**
+         * Get amount of websites
+         */
+        public function pushCountWebsites();
+
+        /**
+         * Get list of all variables for the website
+         *
+         * @param $websiteId
+         */
+        public function pushListWebsiteVariables( $websiteId );
+
+        /**
+         * Get list of all subscriptions for the website
+         *
+         * @param $websiteId
+         */
+        public function pushListWebsiteSubscriptions( $websiteId, $limit = NULL, $offset = NULL );
+
+        /**
+         * Get amount of subscriptions for the site
+         *
+         * @param $websiteId
+         */
+        public function pushCountWebsiteSubscriptions( $websiteId );
+
+        /**
+         * Set state for subscription
+         *
+         * @param $subscriptionId
+         * @param $stateValue
+         */
+        public function pushSetSubscriptionState( $subscriptionId, $stateValue );
+
+        /**
+         * Create new push campaign
+         *
+         * @param $taskInfo
+         * @param array $additionalParams
+         */
+        public function createPushTask( $taskInfo, $additionalParams = array() );
     }

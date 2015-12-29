@@ -887,4 +887,145 @@ class SendpulseApi implements SendpulseApi_Interface {
 
         return $this->handleResult( $requestResult );
     }
+
+    /**
+     * Get list of push campaigns
+     *
+     * @param null $limit
+     * @param null $offset
+     * @return mixed
+     */
+    public function pushListCampaigns($limit = NULL, $offset = NULL) {
+        $data = array();
+        if( !is_null( $limit ) ) {
+            $data['limit'] = $limit;
+        }
+        if( !is_null( $offset ) ) {
+            $data['offset'] = $offset;
+        }
+
+        $requestResult = $this->sendRequest( 'push/tasks', 'GET', $data );
+
+        return $this->handleResult( $requestResult );
+    }
+
+    /**
+     * Get list of websites
+     *
+     * @param null $limit
+     * @param null $offset
+     * @return mixed
+     */
+    public function pushListWebsites( $limit = NULL, $offset = NULL ) {
+        $data = array();
+        if( !is_null( $limit ) ) {
+            $data['limit'] = $limit;
+        }
+        if( !is_null( $offset ) ) {
+            $data['offset'] = $offset;
+        }
+
+        $requestResult = $this->sendRequest( 'push/websites', 'GET', $data );
+
+        return $this->handleResult( $requestResult );
+    }
+
+    /**
+     * Get amount of websites
+     *
+     * @return mixed
+     */
+    public function pushCountWebsites() {
+        $requestResult = $this->sendRequest( 'push/websites/total', 'GET' );
+
+        return $this->handleResult( $requestResult );
+    }
+
+    /**
+     * Get list of all variables for website
+     *
+     * @param $websiteId
+     * @return mixed
+     */
+    public function pushListWebsiteVariables( $websiteId ) {
+        $requestResult = $this->sendRequest( 'push/websites/'.$websiteId.'/variables', 'GET' );
+
+        return $this->handleResult( $requestResult );
+    }
+
+    /**
+     * Get list of subscriptions for the website
+     *
+     * @param $websiteId
+     * @return mixed
+     */
+    public function pushListWebsiteSubscriptions( $websiteId, $limit = NULL, $offset = NULL ) {
+        $data = array();
+        if( !is_null( $limit ) ) {
+            $data['limit'] = $limit;
+        }
+        if( !is_null( $offset ) ) {
+            $data['offset'] = $offset;
+        }
+
+        $requestResult = $this->sendRequest( 'push/websites/'.$websiteId.'/subscriptions', 'GET', $data );
+
+        return $this->handleResult( $requestResult );
+    }
+
+    /**
+     * Get amount of subscriptions for the site
+     *
+     * @param $websiteId
+     * @return mixed
+     */
+    public function pushCountWebsiteSubscriptions( $websiteId ) {
+        $requestResult = $this->sendRequest( 'push/websites/'.$websiteId.'/subscriptions/total', 'GET' );
+
+        return $this->handleResult( $requestResult );
+    }
+
+    /**
+     * Set state for subscription
+     *
+     * @param $subscriptionId
+     * @param $stateValue
+     * @return mixed
+     */
+    public function pushSetSubscriptionState( $subscriptionId, $stateValue ) {
+        $data = array(
+            'id' => $subscriptionId,
+            'state' => $stateValue
+        );
+
+        $requestResult = $this->sendRequest( 'push/subscriptions/state', 'POST', $data );
+
+        return $this->handleResult( $requestResult );
+    }
+
+    /**
+     * Create new push campaign
+     *
+     * @param $taskInfo
+     * @param array $additionalParams
+     * @return mixed|stdClass
+     */
+    public function createPushTask( $taskInfo, $additionalParams = array() ) {
+        $data = $taskInfo;
+        if (!isset($data['ttl'])) {
+            $data['ttl'] = 0;
+        }
+        if( empty($data['title']) || empty($data['website_id']) || empty($data['body']) ) {
+            return $this->handleError( 'Not all data' );
+        }
+        if ($additionalParams) {
+            foreach($additionalParams as $key=>$val) {
+                $data[$key] = $val;
+            }
+        }
+
+        $requestResult = $this->sendRequest( '/push/tasks', 'POST', $data );
+
+        return $this->handleResult( $requestResult );
+    }
 }

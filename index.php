@@ -45,3 +45,23 @@
         )
     );
     var_dump($SPApiProxy->smtpSendMail($email));
+
+
+    /*
+     * Example: create new push
+     */
+
+    $task = array(
+        'title'      => 'Hello!',
+        'body'       => 'This is my first push message',
+        'website_id' => 1,
+        'ttl'        => 20
+    );
+    // This is optional
+    $additionalParams = array(
+        'link' => 'http://yoursite.com',
+        'filter_browsers' => 'Chrome,Safari',
+        'filter_lang' => 'en',
+        'filter' => '{"variable_name":"some","operator":"or","conditions":[{"condition":"likewith","value":"a"},{"condition":"notequal","value":"b"}]}'
+    );
+    var_dump($SPApiProxy->createPushTask($task, $additionalParams));
