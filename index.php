@@ -55,7 +55,8 @@
         'title'      => 'Hello!',
         'body'       => 'This is my first push message',
         'website_id' => 1,
-        'ttl'        => 20
+        'ttl'        => 20,
+        'stretch_time' => 10
     );
     // This is optional
     $additionalParams = array(
