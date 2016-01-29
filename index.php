@@ -42,6 +42,9 @@
                 'name' => 'Manager',
                 'email' => 'manager@domain.com'
             )
+        ),
+        'attachments' => array(
+            'file.txt' => file_get_contents(PATH_TO_ATTACH_FILE)
         )
     );
     var_dump($SPApiProxy->smtpSendMail($email));
