@@ -8,6 +8,9 @@
      * https://sendpulse.com/api
      */
 
+    require_once( 'api/Storage/TokenStorageInterface.php' );
+    /** Require token storage type file  */
+    require_once( 'api/Storage/FileStorage.php' );
     require_once( 'api/sendpulseInterface.php' );
     require_once( 'api/sendpulse.php' );
 
@@ -15,9 +18,7 @@
     define( 'API_USER_ID', '' );
     define( 'API_SECRET', '' );
 
-    define( 'TOKEN_STORAGE', 'file' );
-
-    $SPApiProxy = new SendpulseApi( API_USER_ID, API_SECRET, TOKEN_STORAGE );
+    $SPApiProxy = new SendpulseApi( API_USER_ID, API_SECRET, new FileStorage());
 
     // Get Mailing Lists list example
     var_dump( $SPApiProxy->listAddressBooks() );
