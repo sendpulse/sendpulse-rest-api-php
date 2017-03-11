@@ -1,0 +1,12 @@
+{
+    "name": "sendpulse/sendpulse-rest-api-php",
+    "description": "The Sendpulse API functions.",
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "classmap": [
+            "api/"
+        ]
+    }
+}
