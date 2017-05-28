@@ -49,6 +49,14 @@
         public function getBookInfo( $id );
 
         /**
+         * Get book variables.
+         *
+         * @param $id
+         *   Address book id.
+         */
+        public function getBookVariables($id);
+
+        /**
          * Get list pf emails from book
          *
          * @param $id

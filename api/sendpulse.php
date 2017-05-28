@@ -309,6 +309,25 @@ class SendpulseApi implements SendpulseApi_Interface {
     }
 
     /**
+     * Get variables from book
+     *
+     * @param $id
+     *   Address book id.
+     *
+     * @return mixed|\stdClass
+     */
+    public function getBookVariables($id)
+    {
+        if (empty($id)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $requestResult = $this->sendRequest('addressbooks/' . $id . '/variables');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
      * List email addresses from book
      *
      * @param $id
