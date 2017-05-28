@@ -339,4 +339,12 @@
          * @param array $additionalParams
          */
         public function createPushTask( $taskInfo, $additionalParams = array() );
+
+        /**
+         * Get integration code for Push Notifications.
+         *
+         * @param $websiteId
+         *   Website ID.
+         */
+        public function getPushIntegrationCode($websiteId);
     }

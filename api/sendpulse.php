@@ -1028,4 +1028,22 @@ class SendpulseApi implements SendpulseApi_Interface {
 
         return $this->handleResult( $requestResult );
     }
+
+    /**
+     * Get integration code for Push Notifications.
+     *
+     * @param $websiteId
+     *   Website ID.
+     *
+     * @return mixed|\stdClass
+     */
+    public function getPushIntegrationCode($websiteId) {
+        if (empty($websiteId)) {
+            return $this->handleError('Empty website id');
+        }
+
+        $requestResult = $this->sendRequest('/push/websites/' . $websiteId . '/code');
+
+        return $this->handleResult($requestResult);
+    }
 }
