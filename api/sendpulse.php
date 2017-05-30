@@ -309,6 +309,25 @@ class SendpulseApi implements SendpulseApi_Interface {
     }
 
     /**
+     * Get variables from book
+     *
+     * @param $id
+     *   Address book id.
+     *
+     * @return mixed|\stdClass
+     */
+    public function getBookVariables($id)
+    {
+        if (empty($id)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $requestResult = $this->sendRequest('addressbooks/' . $id . '/variables');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
      * List email addresses from book
      *
      * @param $id
@@ -1027,5 +1046,23 @@ class SendpulseApi implements SendpulseApi_Interface {
         $requestResult = $this->sendRequest( '/push/tasks', 'POST', $data );
 
         return $this->handleResult( $requestResult );
+    }
+
+    /**
+     * Get integration code for Push Notifications.
+     *
+     * @param $websiteId
+     *   Website ID.
+     *
+     * @return mixed|\stdClass
+     */
+    public function getPushIntegrationCode($websiteId) {
+        if (empty($websiteId)) {
+            return $this->handleError('Empty website id');
+        }
+
+        $requestResult = $this->sendRequest('/push/websites/' . $websiteId . '/code');
+
+        return $this->handleResult($requestResult);
     }
 }

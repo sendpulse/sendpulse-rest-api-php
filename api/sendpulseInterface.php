@@ -49,6 +49,14 @@
         public function getBookInfo( $id );
 
         /**
+         * Get book variables.
+         *
+         * @param $id
+         *   Address book id.
+         */
+        public function getBookVariables($id);
+
+        /**
          * Get list pf emails from book
          *
          * @param $id
@@ -339,4 +347,12 @@
          * @param array $additionalParams
          */
         public function createPushTask( $taskInfo, $additionalParams = array() );
+
+        /**
+         * Get integration code for Push Notifications.
+         *
+         * @param $websiteId
+         *   Website ID.
+         */
+        public function getPushIntegrationCode($websiteId);
     }
