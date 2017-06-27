@@ -496,9 +496,10 @@ class SendpulseApi implements SendpulseApi_Interface {
      * @param $bookId
      * @param string $name
      * @param string $attachments
+     * @param string $type
      * @return mixed
      */
-    public function createCampaign( $senderName, $senderEmail, $subject, $body, $bookId, $name = '', $attachments = '' ) {
+    public function createCampaign( $senderName, $senderEmail, $subject, $body, $bookId, $name = '', $attachments = '', $type = '' ) {
         if( empty( $senderName ) || empty( $senderEmail ) || empty( $subject ) || empty( $body ) || empty( $bookId ) ) {
             return $this->handleError( 'Not all data.' );
         }
@@ -513,7 +514,8 @@ class SendpulseApi implements SendpulseApi_Interface {
             'body'         => base64_encode( $body ),
             'list_id'      => $bookId,
             'name'         => $name,
-            'attachments'  => $attachments
+            'attachments'  => $attachments,
+            'type'         => $type
         );
 
         $requestResult = $this->sendRequest( 'campaigns', 'POST', $data );

@@ -133,8 +133,9 @@
          * @param $bookId
          * @param null $name
          * @param null $attachments
+         * @param null $type
          */
-        public function createCampaign( $senderName, $senderEmail, $subject, $body, $bookId, $name = NULL, $attachments = NULL );
+        public function createCampaign( $senderName, $senderEmail, $subject, $body, $bookId, $name = NULL, $attachments = NULL, $type = NULL );
 
         /**
          * Cancel campaign
