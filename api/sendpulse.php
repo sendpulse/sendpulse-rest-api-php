@@ -19,13 +19,10 @@ class SendpulseApi implements SendpulseApi_Interface {
 
     private $refreshToken = 0;
 
-    /*
-     *  Define where script will save access token
-     *  Types: session, file, memcache
+    /**
+     * @var null|TokenStorageInterface
      */
-    private $storageType = '';
-
-    private $apiFilesPath = '';
+    private $tokenStorage = null;
 
 
     /**
@@ -33,41 +30,21 @@ class SendpulseApi implements SendpulseApi_Interface {
      *
      * @param $userId
      * @param $secret
-     * @param string $storageType
-     *        Define where script will save access token
-     *        Types: session, file, memcache
+     * @param TokenStorageInterface $tokenStorage
      * @throws Exception
      */
-    public function __construct( $userId, $secret, $storageType = 'file' ) {
+    public function __construct( $userId, $secret, TokenStorageInterface $tokenStorage) {
         if( empty( $userId ) || empty( $secret ) ) {
             throw new Exception( 'Empty ID or SECRET' );
         }
 
         $this->userId = $userId;
         $this->secret = $secret;
-        $this->storageType = $storageType;
+        $this->tokenStorage = $tokenStorage;
         $hashName = md5( $userId . '::' . $secret );
 
-        switch ($this->storageType) {
-            case 'session':
-                if (isset($_SESSION[$hashName]) && !empty($_SESSION[$hashName])) {
-                    $this->token = $_SESSION[$hashName];
-                }
-                break;
-            case 'memcache':
-                $memcache = new Memcache();
-                $memcache->connect('localhost', 11211) or die('Could not connect to Memcache');
-                $token = $memcache->get($hashName);
-                if (!empty($token)) {
-                    $this->token = $token;
-                }
-                break;
-            default:
-                $filePath = $this->apiFilesPath.$hashName;
-                if (file_exists($filePath)) {
-                    $this->token = file_get_contents($filePath);
-                }
-        }
+        /** load token from storage */
+        $this->token = $this->tokenStorage->get($hashName);
 
         if( empty( $this->token ) ) {
             if( !$this->getToken() ) {
@@ -98,20 +75,8 @@ class SendpulseApi implements SendpulseApi_Interface {
         $this->token = $requestResult->data->access_token;
 
         $hashName = md5( $this->userId . '::' . $this->secret );
-        switch ($this->storageType) {
-            case 'session':
-                $_SESSION[$hashName] = $this->token;
-                break;
-            case 'memcache':
-                $memcache = new Memcache();
-                $memcache->connect('localhost', 11211) or die('Could not connect to Memcache');
-                $memcache->set($hashName, $this->token, false, 3600);
-                break;
-            default:
-                $tokenFile = fopen($this->apiFilesPath.$hashName, "w");
-                fwrite($tokenFile, $this->token);
-                fclose($tokenFile);
-        }
+        /** Save token to storage */
+        $this->tokenStorage->set($hashName, $this->token);
 
         return true;
     }
