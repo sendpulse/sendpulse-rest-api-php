@@ -1032,4 +1032,15 @@ class SendpulseApi implements SendpulseApi_Interface {
 
         return $this->handleResult($requestResult);
     }
+
+    /**
+     * Get stats for push campaign
+     *
+     * @return mixed
+     */
+    public function getPushCampaignStat( $campainId ) {
+        $requestResult = $this->sendRequest( 'push/tasks/'.$campainId, 'GET' );
+
+        return $this->handleResult( $requestResult );
+    }
 }
