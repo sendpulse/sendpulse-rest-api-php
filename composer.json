@@ -1,12 +1,28 @@
 {
-    "name": "sendpulse/sendpulse-rest-api-php",
-    "description": "The Sendpulse API functions.",
-    "require": {
-        "php": ">=5.4.0"
+  "name": "sendpulse/rest-api",
+  "description": "Sendpulse REST API client library",
+  "keywords": [
+    "sendpulse",
+    "rest",
+    "api"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Maksym Ustymenko",
+      "email": "m.ustymenko@sendpulse.com"
     },
-    "autoload": {
-        "classmap": [
-            "api/"
-        ]
+    {
+      "name": "Alexey Moroz",
+      "email": "a.moroz@sendpulse.com"
     }
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "sendpulse\\RestApi\\": "src/"
+    }
+  }
 }

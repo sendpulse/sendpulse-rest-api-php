@@ -4,44 +4,50 @@
  * Memcache storage
  * Class Session
  */
-class MemcachedStorage implements TokenStorageInterface
+
+namespace Sendpulse\RestAPI\Storage;
+
+use Memcache;
+
+class MemcacheStorage implements TokenStorageInterface
 {
     /**
-     * @var null | MemcachedStorage
+     * @var null | MemcacheStorage
      */
-    protected $instance = null;
-
+    protected $instance;
+    
     /**
      * 30 days
+     *
      * @var int
      */
     protected $keyTtl = 3600;
-
+    
     /**
      * Session constructor.
-     * @param $host
-     * @param $port
+     *
+     * @param      $host
+     * @param      $port
      * @param bool $persistent
      */
     public function __construct($host, $port, $persistent = false)
     {
+        $this->instance = new Memcache();
         if ($persistent) {
-            $persistentKey = 'sendpulseRestApiTokenStorage';
+            $this->instance->pconnect($host, $port);
         } else {
-            $persistentKey = null;
+            $this->instance->connect($host, $port);
         }
-        $this->instance = new Memcached($persistentKey);
-        $this->instance->addServer($host, $port);
     }
-
+    
     /**
-     * @return MemcachedStorage|null
+     * @return MemcacheStorage|null
      */
     public function getInstance()
     {
         return $this->instance;
     }
-
+    
     /**
      * @return int
      */
@@ -49,39 +55,42 @@ class MemcachedStorage implements TokenStorageInterface
     {
         return $this->keyTtl;
     }
-
+    
     /**
      * @param int $keyTtl
-     * @return MemcachedStorage
+     *
+     * @return MemcacheStorage
      */
     public function setKeyTtl($keyTtl)
     {
         $this->keyTtl = $keyTtl;
-
+        
         return $this;
     }
-
+    
     /**
      * @param $key string
      * @param $token
-     * @return mixed
+     *
+     * @return void
      */
     public function set($key, $token)
     {
-        $this->instance->set($key, $token, $this->keyTtl);
+        $this->instance->set($key, $token, false, $this->keyTtl);
     }
-
+    
     /**
      * @param $key string
+     *
      * @return mixed
      */
     public function get($key)
     {
         $token = $this->instance->get($key);
-        if (!empty($token)) {
+        if (! empty($token)) {
             return $token;
         }
-
+        
         return null;
     }
 }
