@@ -6,9 +6,11 @@
  * Documentation
  * https://login.sendpulse.com/manual/rest-api/
  * https://sendpulse.com/api
+ *
+ * Settings
+ * https://login.sendpulse.com/settings/#api
  */
 
-// https://login.sendpulse.com/settings/#api
 use Sendpulse\RestAPI\ApiClient;
 use Sendpulse\RestAPI\Storage\FileStorage;
 
@@ -23,22 +25,27 @@ var_dump($SPApiClient->listAddressBooks());
 
 // Send mail using SMTP
 $email = array(
-    'html'        => '<p>Hello, Maks!</p>',
-    'text'        => 'Hello, Maks!',
+    'html'        => '<p>Hello!</p>',
+    'text'        => 'text',
     'subject'     => 'Mail subject',
     'from'        => array(
-        'name'  => 'Maks',
-        'email' => 'm.ustymenko@gmail.com',
+        'name'  => 'John',
+        'email' => 'John@domain.com',
     ),
     'to'          => array(
         array(
-            'name'  => 'Maksym Ustymenko',
-            'email' => 'm.ustymenko@sendpulse.com',
+            'name'  => 'Client',
+            'email' => 'client@domain.com',
         ),
     ),
-    'bcc'         => array(),
+    'bcc'         => array(
+        array(
+            'name'  => 'Manager',
+            'email' => 'manager@domain.com',
+        ),
+    ),
     'attachments' => array(
-        'index.php' => file_get_contents(PATH_TO_ATTACH_FILE),
+        'file.txt' => file_get_contents(PATH_TO_ATTACH_FILE),
     ),
 );
 var_dump($SPApiClient->smtpSendMail($email));

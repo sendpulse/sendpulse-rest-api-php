@@ -129,10 +129,12 @@ class ApiClient implements ApiInterface
         }
         
         curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_HEADER, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt( $curl,CURLOPT_CONNECTTIMEOUT, 15);
+        curl_setopt( $curl,CURLOPT_TIMEOUT, 15);
         
         $response     = curl_exec($curl);
         $header_size  = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
