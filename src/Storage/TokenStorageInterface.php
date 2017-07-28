@@ -4,7 +4,7 @@
  * Interface TokenStorageInterface
  */
 
-namespace Sendpulse\RestAPI\Storage;
+namespace Sendpulse\RestApi\Storage;
 
 interface TokenStorageInterface
 {
@@ -15,7 +15,7 @@ interface TokenStorageInterface
      * @return mixed
      */
     public function set($key, $token);
-    
+
     /**
      * @param $key string
      *

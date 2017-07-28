@@ -5,7 +5,7 @@
  * Class Session
  */
 
-namespace Sendpulse\RestAPI\Storage;
+namespace Sendpulse\RestApi\Storage;
 
 use Memcached;
 
@@ -15,14 +15,14 @@ class MemcachedStorage implements TokenStorageInterface
      * @var null | MemcachedStorage
      */
     protected $instance;
-    
+
     /**
      * 30 days
      *
      * @var int
      */
     protected $keyTtl = 3600;
-    
+
     /**
      * Session constructor.
      *
@@ -39,7 +39,7 @@ class MemcachedStorage implements TokenStorageInterface
         $this->instance = new Memcached($persistentKey);
         $this->instance->addServer($host, $port);
     }
-    
+
     /**
      * @return MemcachedStorage|null
      */
@@ -47,7 +47,7 @@ class MemcachedStorage implements TokenStorageInterface
     {
         return $this->instance;
     }
-    
+
     /**
      * @return int
      */
@@ -55,7 +55,7 @@ class MemcachedStorage implements TokenStorageInterface
     {
         return $this->keyTtl;
     }
-    
+
     /**
      * @param int $keyTtl
      *
@@ -64,10 +64,10 @@ class MemcachedStorage implements TokenStorageInterface
     public function setKeyTtl($keyTtl)
     {
         $this->keyTtl = $keyTtl;
-        
+
         return $this;
     }
-    
+
     /**
      * @param $key string
      * @param $token
@@ -78,7 +78,7 @@ class MemcachedStorage implements TokenStorageInterface
     {
         $this->instance->set($key, $token, $this->keyTtl);
     }
-    
+
     /**
      * @param $key string
      *
@@ -87,10 +87,10 @@ class MemcachedStorage implements TokenStorageInterface
     public function get($key)
     {
         $token = $this->instance->get($key);
-        if (! empty($token)) {
+        if (!empty($token)) {
             return $token;
         }
-        
+
         return null;
     }
 }

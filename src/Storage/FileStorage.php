@@ -5,16 +5,16 @@
  * Class File
  */
 
-namespace Sendpulse\RestAPI\Storage;
+namespace Sendpulse\RestApi\Storage;
 
 class FileStorage implements TokenStorageInterface
 {
-    
+
     /**
      * @var string
      */
     protected $storageFolder = '';
-    
+
     /**
      * File constructor.
      *
@@ -24,7 +24,7 @@ class FileStorage implements TokenStorageInterface
     {
         $this->storageFolder = $storageFolder;
     }
-    
+
     /**
      * @param $key string
      * @param $token
@@ -37,7 +37,7 @@ class FileStorage implements TokenStorageInterface
         fwrite($tokenFile, $token);
         fclose($tokenFile);
     }
-    
+
     /**
      * @param $key string
      *
@@ -49,7 +49,7 @@ class FileStorage implements TokenStorageInterface
         if (file_exists($filePath)) {
             return file_get_contents($filePath);
         }
-        
+
         return null;
     }
 }

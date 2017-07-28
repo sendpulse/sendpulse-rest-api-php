@@ -22,7 +22,7 @@
   },
   "autoload": {
     "psr-4": {
-      "sendpulse\\RestApi\\": "src/"
+      "Sendpulse\\RestApi\\": "src/"
     }
   }
 }

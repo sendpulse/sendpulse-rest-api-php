@@ -11,8 +11,8 @@
  * https://login.sendpulse.com/settings/#api
  */
 
-use Sendpulse\RestAPI\ApiClient;
-use Sendpulse\RestAPI\Storage\FileStorage;
+use Sendpulse\RestApi\ApiClient;
+use Sendpulse\RestApi\Storage\FileStorage;
 
 define('API_USER_ID', '');
 define('API_SECRET', '');
@@ -25,22 +25,22 @@ var_dump($SPApiClient->listAddressBooks());
 
 // Send mail using SMTP
 $email = array(
-    'html'        => '<p>Hello!</p>',
-    'text'        => 'text',
-    'subject'     => 'Mail subject',
-    'from'        => array(
-        'name'  => 'John',
+    'html' => '<p>Hello!</p>',
+    'text' => 'text',
+    'subject' => 'Mail subject',
+    'from' => array(
+        'name' => 'John',
         'email' => 'John@domain.com',
     ),
-    'to'          => array(
+    'to' => array(
         array(
-            'name'  => 'Client',
+            'name' => 'Client',
             'email' => 'client@domain.com',
         ),
     ),
-    'bcc'         => array(
+    'bcc' => array(
         array(
-            'name'  => 'Manager',
+            'name' => 'Manager',
             'email' => 'manager@domain.com',
         ),
     ),
@@ -56,17 +56,17 @@ var_dump($SPApiClient->smtpSendMail($email));
  */
 
 $task = array(
-    'title'        => 'Hello!',
-    'body'         => 'This is my first push message',
-    'website_id'   => 1,
-    'ttl'          => 20,
+    'title' => 'Hello!',
+    'body' => 'This is my first push message',
+    'website_id' => 1,
+    'ttl' => 20,
     'stretch_time' => 10,
 );
 // This is optional
 $additionalParams = array(
-    'link'            => 'http://yoursite.com',
+    'link' => 'http://yoursite.com',
     'filter_browsers' => 'Chrome,Safari',
-    'filter_lang'     => 'en',
-    'filter'          => '{"variable_name":"some","operator":"or","conditions":[{"condition":"likewith","value":"a"},{"condition":"notequal","value":"b"}]}',
+    'filter_lang' => 'en',
+    'filter' => '{"variable_name":"some","operator":"or","conditions":[{"condition":"likewith","value":"a"},{"condition":"notequal","value":"b"}]}',
 );
 var_dump($SPApiProxy->createPushTask($task, $additionalParams));

@@ -5,7 +5,7 @@
  * Class SessionStorage
  */
 
-namespace Sendpulse\RestAPI\Storage;
+namespace Sendpulse\RestApi\Storage;
 
 class SessionStorage implements TokenStorageInterface
 {
@@ -19,7 +19,7 @@ class SessionStorage implements TokenStorageInterface
     {
         $_SESSION[$key] = $token;
     }
-    
+
     /**
      * @param $key string
      *
@@ -27,10 +27,10 @@ class SessionStorage implements TokenStorageInterface
      */
     public function get($key)
     {
-        if (isset($_SESSION[$key]) && ! empty($_SESSION[$key])) {
+        if (isset($_SESSION[$key]) && !empty($_SESSION[$key])) {
             return $_SESSION[$key];
         }
-        
+
         return null;
     }
 }
