@@ -34,26 +34,41 @@ $SPApiClient = new ApiClient(API_USER_ID, API_SECRET, new FileStorage());
 var_dump($SPApiClient->listAddressBooks());
 
 /*
+ * Example: Add new email to mailing lists
+ */
+ $bookID = 123;
+ $emails = array(
+    array(
+        'email' => 'subscriber@example.com',
+        'variables' => array(
+            'phone' => '+12345678900',
+            'name' => 'User Name',
+        )
+    )
+);
+var_dump($SPApiClient->addEmails($bookID, $emails));
+
+/*
  * Example: Send mail using SMTP
  */
 $email = array(
     'html' => '<p>Hello!</p>',
-    'text' => 'text',
+    'text' => 'Hello!',
     'subject' => 'Mail subject',
     'from' => array(
         'name' => 'John',
-        'email' => 'John@domain.com',
+        'email' => 'sender@example.com',
     ),
     'to' => array(
         array(
-            'name' => 'Client',
-            'email' => 'client@domain.com',
+            'name' => 'Subscriber Name',
+            'email' => 'subscriber@example.com',
         ),
     ),
     'bcc' => array(
         array(
             'name' => 'Manager',
-            'email' => 'manager@domain.com',
+            'email' => 'manager@example.com',
         ),
     ),
     'attachments' => array(
