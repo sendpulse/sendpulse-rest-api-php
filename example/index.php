@@ -69,4 +69,4 @@ $additionalParams = array(
     'filter_lang' => 'en',
     'filter' => '{"variable_name":"some","operator":"or","conditions":[{"condition":"likewith","value":"a"},{"condition":"notequal","value":"b"}]}',
 );
-var_dump($SPApiProxy->createPushTask($task, $additionalParams));
+var_dump($SPApiClient->createPushTask($task, $additionalParams));
