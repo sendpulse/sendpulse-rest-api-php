@@ -326,6 +326,8 @@ class ApiClient implements ApiInterface
      * List email addresses from book
      *
      * @param $id
+     * @param $limit
+     * @param $offset
      *
      * @return stdClass
      */
