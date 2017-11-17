@@ -326,16 +326,26 @@ class ApiClient implements ApiInterface
      * List email addresses from book
      *
      * @param $id
+     * @param $limit
+     * @param $offset
      *
      * @return stdClass
      */
-    public function getEmailsFromBook($id)
+    public function getEmailsFromBook($id, $limit = null, $offset = null)
     {
         if (empty($id)) {
             return $this->handleError('Empty book id');
         }
 
-        $requestResult = $this->sendRequest('addressbooks/' . $id . '/emails');
+        $data = array();
+        if (null !== $limit) {
+            $data['limit'] = $limit;
+        }
+        if (null !== $offset) {
+            $data['offset'] = $offset;
+        }
+
+        $requestResult = $this->sendRequest('addressbooks/' . $id . '/emails', 'GET', $data);
 
         return $this->handleResult($requestResult);
     }
