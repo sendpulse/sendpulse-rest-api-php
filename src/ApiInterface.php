@@ -378,4 +378,12 @@ interface ApiInterface
      * @param $websiteID
      */
     public function getPushIntegrationCode($websiteID);
+
+    /**
+     * @Author Maksym Dzhym m.jim@sendpulse.com
+     * @param $eventName
+     * @param array $variables
+     * @return \stdClass
+     */
+    public function startEventAutomation360($eventName, array $variables);
 }
