@@ -1172,4 +1172,24 @@ class ApiClient implements ApiInterface
 
         return $this->handleResult($requestResult);
     }
+
+    /**
+     * @Author Maksym Dzhym m.jim@sendpulse.com
+     * @param $eventName
+     * @param array $variables
+     * @return stdClass
+     */
+    public function startEventAutomation360($eventName, array $variables)
+    {
+        if (!$eventName) {
+            return $this->handleError('Event name is empty');
+        }
+        if (!array_key_exists('email', $variables) && !array_key_exists('phone', $variables)) {
+            return $this->handleError('Email and phone is empty');
+        }
+
+        $requestResult = $this->sendRequest('events/name/' . $eventName, 'POST', $variables);
+
+        return $this->handleResult($requestResult);
+    }
 }
