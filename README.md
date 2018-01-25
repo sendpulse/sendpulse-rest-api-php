@@ -17,6 +17,11 @@ require 'vendor/autoload.php';
 // Without Composer:
 // require("your-path/sendpulse-rest-api-php/src/ApiInterface.php");
 // require("your-path/sendpulse-rest-api-php/src/ApiClient.php");
+// require("your-path/sendpulse-rest-api-php/src/Storage/FileStorage.php");
+// require("your-path/sendpulse-rest-api-php/src/Storage/TokenStorageInterface.php");
+// require("your-path/sendpulse-rest-api-php/src/Storage/SessionStorage.php");
+// require("your-path/sendpulse-rest-api-php/src/Storage/MemcachedStorage.php");
+// require("your-path/sendpulse-rest-api-php/src/Storage/MemcacheStorage.php");
 
 use Sendpulse\RestApi\ApiClient;
 use Sendpulse\RestApi\Storage\FileStorage;
