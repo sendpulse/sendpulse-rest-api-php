@@ -515,11 +515,12 @@ class ApiClient implements ApiInterface
      * @param        $senderName
      * @param        $senderEmail
      * @param        $subject
-     * @param        $body
+     * @param        $bodyOrTemplateId
      * @param        $bookId
      * @param string $name
      * @param string $attachments
      * @param string $type
+     * @param bool   $useTemplateId
      *
      * @return mixed
      */
@@ -527,24 +528,34 @@ class ApiClient implements ApiInterface
         $senderName,
         $senderEmail,
         $subject,
-        $body,
+        $bodyOrTemplateId,
         $bookId,
         $name = '',
         $attachments = '',
-        $type = ''
+        $type = '',
+        $useTemplateId = false
     ) {
-        if (empty($senderName) || empty($senderEmail) || empty($subject) || empty($body) || empty($bookId)) {
+        if (empty($senderName) || empty($senderEmail) || empty($subject) || empty($bodyOrTemplateId) || empty($bookId)) {
             return $this->handleError('Not all data.');
         }
 
         if (!empty($attachments)) {
             $attachments = serialize($attachments);
         }
+
+        if($useTemplateId) {
+            $paramName = 'template_id';
+            $paramValue = $bodyOrTemplateId;
+        } else {
+            $paramName = 'body';
+            $paramValue = base64_encode($bodyOrTemplateId);
+        }
+
         $data = array(
             'sender_name' => $senderName,
             'sender_email' => $senderEmail,
             'subject' => $subject,
-            'body' => base64_encode($body),
+            $paramName => $paramValue,
             'list_id' => $bookId,
             'name' => $name,
             'attachments' => $attachments,
