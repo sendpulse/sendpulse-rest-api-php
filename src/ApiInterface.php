@@ -386,4 +386,147 @@ interface ApiInterface
      * @return \stdClass
      */
     public function startEventAutomation360($eventName, array $variables);
+
+    /**
+     * Add phones to address book
+     *
+     * @param int $bookId
+     * @param array $phones
+     */
+    public function smsAddPhones($bookId, array $phones);
+
+    /**
+     * Add phones to address book with variables
+     *
+     * @param int $bookId
+     * @param array $phones
+     */
+    public function smsAddPhonesWithVariables($bookId, array $phones);
+
+    /**
+     * Refresh phones variables
+     *
+     * @param int $bookId
+     * @param array $phones
+     * @param array $variables
+     */
+    public function smsRefreshPhonesVariables($bookId, array $phones, array $variables);
+
+    /**
+     * Remove phones from book
+     *
+     * @param int $bookId
+     * @param array $phones
+     */
+    public function smsRemovePhones($bookId, array $phones);
+
+    /**
+     * Get phone info
+     *
+     * @param $bookId
+     * @param $phone
+     */
+    public function smsGetPhoneInfo($bookId, $phone);
+
+    /**
+     * Show phones from blacklist
+     */
+    public function smsGetBlackList();
+
+    /**
+     * Add phones to blacklist
+     *
+     * @param      $phones
+     * @param null $comment
+     */
+    public function smsAddToBlackList($phones, $comment = null);
+
+    /**
+     * Remove phones from blacklist
+     *
+     * @param $phones
+     */
+    public function smsRemoveFromBlackList($phones);
+
+    /**
+     * Create new campaign
+     *
+     * @param $senderName
+     * @param $bookId
+     * @param $body
+     * @param null $date
+     * @param null $transliterate
+     */
+    public function smsCreateCampaign(
+        $senderName,
+        $bookId,
+        $body,
+        $date = null,
+        $transliterate = null
+    );
+
+    /**
+     * Create a campaign by phones
+     *
+     * @param $senderName
+     * @param array $phones
+     * @param $body
+     * @param null $date
+     * @param null $transliterate
+     */
+    public function smsSend(
+        $senderName,
+        array $phones,
+        $body,
+        $date = null,
+        $transliterate = null
+    );
+
+    /**
+     * Get list of campaigns that was sent by SMS
+     *
+     * @param string $fromDate
+     * @param string $toDate
+     */
+    public function smsListCampaigns(
+        $fromDate = '',
+        $toDate = ''
+    );
+
+    /**
+     * Get information about campaign
+     *
+     * @param $id
+     */
+    public function smsGetCampaignInfo($id);
+
+    /**
+     * Cancel SMS campaign
+     *
+     * @param $id
+     * @return stdClass
+     */
+    public function smsCancelCampaign($id);
+
+    /**
+     * Get cost SMS campaign
+     *
+     * @param $senderName
+     * @param $body
+     * @param $bookId
+     * @param $phones
+     */
+    public function smsGetCostCampaign(
+        $senderName,
+        $body,
+        $bookId = null,
+        $phones = null
+    );
+
+    /**
+     * Remove SMS campaign
+     *
+     * @param $id
+     */
+    public function smsRemoveCampaign($id);
 }
