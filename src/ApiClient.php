@@ -103,7 +103,7 @@ class ApiClient implements ApiInterface
      *
      * @return stdClass
      */
-    private function sendRequest($path, $method = 'GET', $data = array(), $useToken = true)
+    protected function sendRequest($path, $method = 'GET', $data = array(), $useToken = true)
     {
         $url = $this->apiUrl . '/' . $path;
         $method = strtoupper($method);
@@ -168,7 +168,7 @@ class ApiClient implements ApiInterface
      *
      * @return stdClass
      */
-    private function handleResult($data)
+    protected function handleResult($data)
     {
         if (empty($data->data)) {
             $data->data = new stdClass();
@@ -188,7 +188,7 @@ class ApiClient implements ApiInterface
      *
      * @return stdClass
      */
-    private function handleError($customMessage = null)
+    protected function handleError($customMessage = null)
     {
         $message = new stdClass();
         $message->is_error = true;
