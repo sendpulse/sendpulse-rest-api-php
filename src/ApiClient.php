@@ -1203,48 +1203,4 @@ class ApiClient implements ApiInterface
 
         return $this->handleResult($requestResult);
     }
-
-	/**
-	 * @param array $data
-	 * Parameter keys:
-	 *   Required parameters:
-	 *   string       'sender'  => Sender name
-	 *   string       'body'    => Message text
-	 *   array|string 'phones'  => ['1234565', '4567895', ...] or '{"1234565","4567895", ...}'
-	 *
-	 *   Optional parameters:
-	 *   int    'transliterate' => 1 or 0
-	 *   string       'date'    => 'Y-m-d H:i:s' or null
-	 *   array|string 'route'   => ['UA'=>'international', 'BY' => 'national', ...]
-	 *                         or '{"UA":"international","BY":"international", ...}'
-	 *
-	 * @return stdClass
-	 * @throws \InvalidArgumentException
-	 */
-	public function sendSms(array $data)
-	{
-		//Required parameters
-		$request['sender'] = isset($data['sender']) ? trim( (string)$data['sender']) : '';
-		$request['body']   = isset($data['body']) ? trim( (string)$data['body']) : '';
-		$request['phones'] = isset($data['phones'])
-			? (\is_array($data['phones']) ? \json_encode($data['phones']) : trim( (string)$data['phones']) )
-			: '';
-
-		//Optional parameters
-		$request['transliterate']   = empty($data['transliterate']) ? 0 : 1;
-		$request['date']   = isset($data['date']) ? trim( (string)$data['date']) : null;
-		$request['route'] = isset($data['route'])
-			? (\is_array($data['route']) ? \json_encode($data['route']) : trim( (string)$data['route']) )
-			: null;
-
-		if(empty($request['sender']) || empty($request['body']) || empty($request['phones']) )
-		{
-			$msg = print_r($request, true);
-			throw new \InvalidArgumentException("One or more required parameters are missing:\n$msg");
-		}
-
-		$requestResult = $this->sendRequest('sms/send', 'POST', $request);
-
-		return $this->handleResult($requestResult);
-	}
 }

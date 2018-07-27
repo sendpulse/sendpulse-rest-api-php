@@ -386,12 +386,4 @@ interface ApiInterface
      * @return \stdClass
      */
     public function startEventAutomation360($eventName, array $variables);
-
-	/**
-	 * @param array $data
-	 *
-	 * @return \stdClass
-	 * @throws \InvalidArgumentException
-	 */
-	public function sendSms(array $data);
 }
