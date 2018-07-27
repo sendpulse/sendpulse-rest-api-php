@@ -1406,50 +1406,58 @@ class ApiClient implements ApiInterface
         return $this->handleResult($requestResult);
     }
 
-    /**
-     * Create a campaign by phones
-     *
-     * @param $senderName
-     * @param array $phones
-     * @param $body
-     * @param null $date
-     * @param null $transliterate
-     * @return stdClass
-     */
-    public function smsSend(
-        $senderName,
-        array $phones,
-        $body,
-        $date = null,
-        $transliterate = null
-    ) {
-        if (empty($senderName)) {
-            return $this->handleError('Empty sender name');
-        }
-        if (empty($phones)) {
-            return $this->handleError('Phone list is empty');
-        }
-        if (empty($body)) {
-            return $this->handleError('Empty sms body');
-        }
-        if (!empty($date)) {
-            $checkDate = \DateTime::createFromFormat('Y-m-d H:i:s', $date);
-            if (!$checkDate || $checkDate->format('Y-m-d H:i:s') !== $date) {
-                return $this->handleError('Sending date is incorrect');
-            }
-        }
-        $data = array(
-            'sender' => $senderName,
-            'phones' => json_encode($phones),
-            'body' => $body,
-            'date' => $date,
-            'transliterate' => $transliterate,
-        );
+	/**
+	 * Create a campaign by phones
+	 *
+	 * @param $senderName
+	 * @param array $phones
+	 * @param $body
+	 * @param null $date
+	 * @param null $transliterate
+	 * @param array $route
+	 *
+	 * @return stdClass
+	 */
+	public function smsSend(
+		$senderName,
+		array $phones,
+		$body,
+		$date = null,
+		$transliterate = null,
+		array $route = null
+	) {
+		if (empty($senderName)) {
+			return $this->handleError('Empty sender name');
+		}
+		if (empty($phones) ) {
+			return $this->handleError('Phone list is empty');
+		}
+		if (empty($body)) {
+			return $this->handleError('Empty sms body');
+		}
+		if (!empty($date)) {
+			$checkDate = \DateTime::createFromFormat('Y-m-d H:i:s', $date);
+			if (!$checkDate || $checkDate->format('Y-m-d H:i:s') !== $date) {
+				return $this->handleError('Sending date is incorrect');
+			}
+		}
+		if(null !== $route && empty($route) ) {
+			return $this->handleError('The "rout" parameter must be either NULL or a full array');
+		}
 
-        $requestResult = $this->sendRequest('sms/send', 'POST', $data);
+		$data = array(
+			'sender' => $senderName,
+			'phones' => json_encode($phones),
+			'body' => $body,
+			'date' => $date,
+			'transliterate' => $transliterate,
+			'route' => json_encode($route),
+		);
 
-        return $this->handleResult($requestResult);
-    }
+		$requestResult = $this->sendRequest('sms/send', 'POST', $data);
+
+		return $this->handleResult($requestResult);
+	}
 
     /**
      * Get list of campaigns that was sent by SMS
