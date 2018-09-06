@@ -14,7 +14,7 @@ composer require sendpulse/rest-api
 <?php
 require 'vendor/autoload.php';
 
-// Without Composer:
+// Without Composer (and instead of "require 'vendor/autoload.php'"):
 // require("your-path/sendpulse-rest-api-php/src/ApiInterface.php");
 // require("your-path/sendpulse-rest-api-php/src/ApiClient.php");
 // require("your-path/sendpulse-rest-api-php/src/Storage/TokenStorageInterface.php");
