@@ -386,4 +386,150 @@ interface ApiInterface
      * @return \stdClass
      */
     public function startEventAutomation360($eventName, array $variables);
+
+    /**
+     * Add phones to mailing list (Adding telephone numbers to a mailing list)
+     *
+     * @param $bookId
+     * @param array $phones
+     */
+    public function smsAddPhones($bookId, array $phones);
+
+    /**
+     * Update phones variables (Updating the list of variables by a phone number)
+     *
+     * @param $bookId
+     * @param array $phones
+     * @param array $variables
+     */
+    public function smsUpdatePhonesVariables($bookId, array $phones, array $variables);
+
+    /**
+     * Remove phones from mailing list (Deleting telephone numbers from a mailing list)
+     *
+     * @param $bookId
+     * @param array $phones
+     */
+    public function smsRemovePhones($bookId, array $phones);
+
+    /**
+     * Get phone variables (Retrieving information for specific phone number)
+     *
+     * @param $bookId
+     * @param $phone
+     */
+    public function smsGetPhoneVariables($bookId, $phone);
+
+    /**
+     * Add phones to blacklist (Adding telephone number to the blacklist)
+     *
+     * @param array $phones
+     * @param $description
+     */
+    public function smsAddBlacklistPhones(array $phones, $description);
+
+    /**
+     * Remove phones from blacklist (Deleting a phone number from the blacklist)
+     *
+     * @param array $phones
+     */
+    public function smsRemoveBlacklistPhones(array $phones);
+
+    /**
+     * Get blacklist (Viewing the blacklist)
+     */
+    public function smsGetBlacklist();
+
+    /**
+     * Get phone data in blacklist (Retrieving information of telephone numbers in the blacklist)
+     *
+     * @param array $phones
+     */
+    public function smsGetBlacklistByPhones(array $phones);
+
+    /**
+     * Create new sms campaign (Creating of a campaign)
+     *
+     * @param      $senderName
+     * @param      $body
+     * @param      $bookId
+     * @param      $transliterate
+     * @param null $date
+     * @param null $route
+     */
+    public function smsCreateCampaign(
+        $senderName,
+        $body,
+        $bookId,
+        $transliterate,
+        string $date = null,
+        string $route = null);
+
+    /**
+     * Create new sms campaign by phones (Creating a campaign to a list of phone numbers)
+     *
+     * @param      $senderName
+     * @param      $body
+     * @param      array $phones
+     * @param      $transliterate
+     * @param null $date
+     * @param null $route
+     */
+    public function smsCreateCampaignByPhones(
+        $senderName,
+        $body,
+        array $phones,
+        $transliterate,
+        string $date = null);
+
+    /**
+     * Get campaigns by time (Retrieving a list of campaigns by date)
+     *
+     * @param string $dateFrom
+     * @param string $dateTo
+     */
+    public function smsGetCampaignsByTime(string $dateFrom, string  $dateTo);
+
+    /**
+     * Get campaign data (Retrieving a campaign information)
+     *
+     * @param $id
+     */
+    public function smsGetCampaign($id);
+
+    /**
+     * Cancel campaign (Cancelling a campaign in case when the sending has not started)
+     *
+     * @param $id
+     */
+    public function smsCancelCampaign($id);
+
+    /**
+     * Calculate cost of campaign (Calculating the cost of a campaign)
+     *
+     * @param      $senderName
+     * @param      $body
+     * @param null $bookId
+     * @param null array $phones
+     */
+    public function smsGetCampaignCost(
+        $senderName,
+        $body,
+        $bookId = null,
+        array $phones = null);
+
+    /**
+     * Delete campaign (Deleting a campaign)
+     *
+     * @param $id
+     */
+    public function smsRemoveCampaign($id);
+
+    /**
+     * Add phones with variables to list (Adding telephone numbers to a mailing list with variables)
+     *
+     * @param $bookId
+     * @param array $phones
+     */
+    public function smsAddPhonesVariables($bookId, array $phones);
 }

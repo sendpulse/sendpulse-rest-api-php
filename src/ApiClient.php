@@ -1203,4 +1203,354 @@ class ApiClient implements ApiInterface
 
         return $this->handleResult($requestResult);
     }
+
+    //----------------------------------------
+
+    /**
+     * Add phones to mailing list (Adding telephone numbers to a mailing list)
+     *
+     * @param $bookId
+     * @param array $phones
+     */
+    public function smsAddPhones($bookId, array $phones)
+    {
+        if (empty($phones) || empty($bookId)) {
+            return $this->handleError('Empty phones list or book id');
+        }
+
+        $data = array('addressBookId' => $bookId, 'phones' => json_encode($phones));
+        $requestResult = $this->sendRequest('sms/numbers', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Update phones variables (Updating the list of variables by a phone number)
+     *
+     * @param $bookId
+     * @param array $phones
+     * @param array $variables
+     */
+    public function smsUpdatePhonesVariables($bookId, array $phones, array $variables)
+    {
+        if (empty($phones) || empty($variables) || empty($bookId)) {
+            return $this->handleError('Empty phones list, variables list or book id');
+        }
+
+        if(count($phones) != count($variables)){
+            return $this->handleError('Phones and variables arrays sizes not equal');
+        }
+
+        $data = array('addressBookId' => $bookId, 'phones' => json_encode($phones), 'variables' => json_encode($variables));
+        $requestResult = $this->sendRequest('sms/numbers', 'PUT', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Remove phones from mailing list (Deleting telephone numbers from a mailing list)
+     *
+     * @param $bookId
+     * @param array $phones
+     */
+    public function smsRemovePhones($bookId, array $phones)
+    {
+        if (empty($phones) || empty($bookId)) {
+            return $this->handleError('Empty phones list or book id');
+        }
+
+        $data = array('addressBookId' => $bookId, 'phones' => json_encode($phones));
+        $requestResult = $this->sendRequest('sms/numbers', 'DELETE', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get phone variables (Retrieving information for specific phone number)
+     *
+     * @param $bookId
+     * @param $phones
+     */
+    public function smsGetPhoneVariables($bookId, $phone)
+    {
+        if (empty($phone) || empty($bookId)) {
+            return $this->handleError('Empty phone or book id');
+        }
+
+        $requestResult = $this->sendRequest('sms/numbers/info/'.$bookId.'/'.$phone);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Add phones to blacklist (Adding telephone number to the blacklist)
+     *
+     * @param array $phones
+     * @param $description
+     */
+    public function smsAddBlacklistPhones(array $phones, $description)
+    {
+        if (empty($phones) || empty($description)) {
+            return $this->handleError('Empty phones list or description');
+        }
+
+        $data = array('description' => $description, 'phones' => json_encode($phones));
+        $requestResult = $this->sendRequest('sms/black_list', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Remove phones from blacklist (Deleting a phone number from the blacklist)
+     *
+     * @param array $phones
+     */
+    public function smsRemoveBlacklistPhones(array $phones)
+    {
+        if (empty($phones)) {
+            return $this->handleError('Empty phones list');
+        }
+
+        $data = array('phones' => json_encode($phones));
+        $requestResult = $this->sendRequest('sms/black_list', 'DELETE', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get blacklist (Viewing the blacklist)
+     */
+    public function smsGetBlacklist()
+    {
+        $requestResult = $this->sendRequest('sms/black_list');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get phone data in blacklist (Retrieving information of telephone numbers in the blacklist)
+     *
+     * @param array $phones
+     */
+    public function smsGetBlacklistByPhones(array $phones)
+    {
+        if (empty($phones)) {
+            return $this->handleError('Empty phones list');
+        }
+
+        $data = array('phones' => json_encode($phones));
+
+        // Misha's note: i not sure... API say here need GET, but... json string in GET? yeah, there no limit, just strange
+        $requestResult = $this->sendRequest('sms/black_list/by_numbers', 'GET', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Create new sms campaign (Creating of a campaign)
+     *
+     * @param      $senderName
+     * @param      $body
+     * @param      $bookId
+     * @param      $transliterate
+     * @param null $date
+     * @param null $route
+     */
+    public function smsCreateCampaign(
+        $senderName,
+        $body,
+        $bookId,
+        $transliterate,
+        string $date = null,
+        string $route = null)
+    {
+        if (/*empty($senderName) ||*/ empty($body) || empty($bookId) || $transliterate===null) {
+            return $this->handleError('Empty sender, body, transliterate or book id');
+        }
+
+        if($date){
+            if(date('Y-m-d H:i:s', strtotime($date)) != $date){
+                return $this->handleError('Date must be in Y-m-d H:i:s format');
+            }
+        }
+
+        $data = array(
+            'sender' => $senderName, 
+            'addressBookId' => $bookId, 
+            'body' => $body, 
+            'transliterate' => $transliterate);
+
+        if($date)$data['date'] = $date;
+        if($route)$data['route'] = $route;
+
+        $requestResult = $this->sendRequest('sms/campaigns', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Create new sms campaign by phones (Creating a campaign to a list of phone numbers)
+     *
+     * @param      $senderName
+     * @param      $body
+     * @param      array $phones
+     * @param      $transliterate
+     * @param null $date
+     * @param null $route
+     */
+    public function smsCreateCampaignByPhones(
+        $senderName,
+        $body,
+        array $phones,
+        $transliterate,
+        string $date = null)
+    {
+        if (empty($senderName) || empty($body) || empty($phones) || $transliterate===null) {
+            return $this->handleError('Empty sender, body, transliterate or phones list');
+        }
+
+        if($date){
+            if(date('Y-m-d H:i:s', strtotime($date)) != $date){
+                return $this->handleError('Date must be in Y-m-d H:i:s format');
+            }
+        }
+
+        $data = array(
+            'sender' => $senderName, 
+            'phones' => json_encode($phones), 
+            'body' => $body, 
+            'transliterate' => $transliterate);
+
+        if($date)$data['date'] = $date;
+
+        $requestResult = $this->sendRequest('sms/send', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get campaigns by time (Retrieving a list of campaigns by date)
+     *
+     * @param string $dateFrom
+     * @param string $dateTo
+     */
+    public function smsGetCampaignsByTime(string $dateFrom, string  $dateTo)
+    {
+        if(date('Y-m-d H:i:s', strtotime($dateFrom)) != $dateFrom){
+            return $this->handleError('DateFrom must be in Y-m-d H:i:s format');
+        }
+        if(date('Y-m-d H:i:s', strtotime($dateTo)) != $dateTo){
+            return $this->handleError('DateTo must be in Y-m-d H:i:s format');
+        }
+
+        $data = array('dateFrom' => $dateFrom, 'dateTo' => $dateTo);
+
+        // Misha's note: and again. why API force me using non-alphanumeric symbols in url? '-' sign is fine, but ' ' and ':'? why not go ahead and not start use emojies in url?
+        // Misha's note: need buy few domains...
+        $requestResult = $this->sendRequest('sms/campaigns/list', 'GET', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get campaign data (Retrieving a campaign information)
+     *
+     * @param $id
+     */
+    public function smsGetCampaign($id)
+    {
+        if (empty($id)) {
+            return $this->handleError('Empty id');
+        }
+
+        $requestResult = $this->sendRequest('sms/campaigns/info/'.$id);
+
+        return $this->handleResult($requestResult);
+    }
+
+
+    /**
+     * Cancel campaign (Cancelling a campaign in case when the sending has not started)
+     *
+     * @param $id
+     */
+    public function smsCancelCampaign($id)
+    {
+        if (empty($id)) {
+            return $this->handleError('Empty id');
+        }
+
+        $requestResult = $this->sendRequest('sms/campaigns/cancel/'.$id);
+
+        return $this->handleResult($requestResult, 'PUT');
+    }
+
+    /**
+     * Calculate cost of campaign (Calculating the cost of a campaign)
+     *
+     * @param      $senderName
+     * @param      $body
+     * @param null $bookId
+     * @param null array $phones
+     */
+    public function smsGetCampaignCost(
+        $senderName,
+        $body,
+        $bookId = null,
+        array $phones = null)
+    {
+        if (empty($senderName) || empty($body)) {
+            return $this->handleError('Empty sender, body');
+        }
+
+        if($phones == null && $bookId == null){
+            return $this->handleError('One of phones or book id need be defined');
+        }
+
+        $data = array( 'sender' => $senderName, 'body' => $body );
+
+        if($phones)$data['phones'] = json_encode($phones);
+        if($bookId)$data['addressBookId'] = $bookId;
+
+        // Misha's note: why you so want use GET? who teach you about this is good idea?
+        $requestResult = $this->sendRequest('sms/campaigns/cost', 'GET', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Delete campaign (Deleting a campaign)
+     *
+     * @param $id
+     */
+    public function smsRemoveCampaign($id)
+    {
+        if (empty($id)) {
+            return $this->handleError('Empty campaign id');
+        }
+
+        $data = array('id' => $id);
+        $requestResult = $this->sendRequest('sms/campaigns', 'DELETE', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Add phones with variables to list (Adding telephone numbers to a mailing list with variables)
+     *
+     * @param $bookId
+     * @param array $phones
+     */
+    public function smsAddPhonesVariables($bookId, array $phones)
+    {
+        if (empty($phones) || empty($bookId)) {
+            return $this->handleError('Empty phones list or book id');
+        }
+
+        $data = array('addressBookId' => $bookId, 'phones' => json_encode($phones));
+        $requestResult = $this->sendRequest('sms/numbers', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
 }
