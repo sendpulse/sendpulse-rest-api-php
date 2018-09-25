@@ -366,7 +366,7 @@ class ApiClient implements ApiInterface
         }
 
         $data = array(
-          'emails' => json_encode($emails),
+          'emails' => $emails,
         );
 
         if ($additionalParams) {
