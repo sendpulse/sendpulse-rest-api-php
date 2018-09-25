@@ -51,6 +51,14 @@ var_dump($SPApiClient->listAddressBooks());
         )
     )
 );
+ $additionalParams = array(
+   'confirmation' => 'force',
+   'sender_email' => 'sender@example.com',
+);
+ // With confirmation
+var_dump($SPApiClient->addEmails($bookID, $emails, $additionalParams));
+
+// Without confirmation
 var_dump($SPApiClient->addEmails($bookID, $emails));
 
 /*
