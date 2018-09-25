@@ -355,18 +355,23 @@ class ApiClient implements ApiInterface
      *
      * @param $bookID
      * @param $emails
+     * @param $additionalParams
      *
      * @return stdClass
      */
-    public function addEmails($bookID, $emails)
+    public function addEmails($bookID, $emails, $additionalParams = [])
     {
         if (empty($bookID) || empty($emails)) {
             return $this->handleError('Empty book id or emails');
         }
 
         $data = array(
-            'emails' => serialize($emails),
+          'emails' => json_encode($emails),
         );
+
+        if ($additionalParams) {
+            $data = array_merge($data, $additionalParams);
+        }
 
         $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails', 'POST', $data);
 
