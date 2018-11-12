@@ -386,4 +386,137 @@ interface ApiInterface
      * @return \stdClass
      */
     public function startEventAutomation360($eventName, array $variables);
+
+    /**
+     * Add phones to addressbook
+     *
+     * @param $bookID
+     * @param array $phones
+     * @return mixed
+     */
+    public function addPhones($bookID, array $phones);
+
+    /**
+     * Add phones with variables to addressbook
+     *
+     * @param $bookID
+     * @param array $phones
+     * @return mixed
+     */
+    public function addPhonesWithVariables($bookID, array $phones);
+
+
+    /**
+     * Update phone variables
+     *
+     * @param $bookID
+     * @param $phones
+     * @param $variables
+     * @return mixed
+     */
+    public function updatePhoneVaribales($bookID, array $phones, array $variables);
+
+    /**
+     * Delete phones from book
+     *
+     * @param $bookID
+     * @param array $phones
+     * @return mixed
+     */
+    public function deletePhones($bookID, array $phones);
+
+    /**
+     * Get information about phone
+     *
+     * @param $bookID
+     * @param $phoneNumber
+     * @return mixed
+     */
+    public function getPhoneInfo($bookID, $phoneNumber);
+
+    /**
+     * Add phones to blacklist
+     *
+     * @param $bookID
+     * @param array $phones
+     * @return mixed
+     */
+    public function addPhonesToBlacklist(array $phones);
+
+    /**
+     * Remove phones from blacklist
+     *
+     * @param array $phones
+     * @return mixed
+     */
+    public function removePhonesFromBlacklist(array $phones);
+
+    /**
+     * Get list of phones from blacklist
+     *
+     * @return mixed
+     */
+    public function getPhonesFromBlacklist();
+
+    /**
+     * Create sms campaign based on phones in book
+     *
+     * @param $bookId
+     * @param array $params
+     * @param array $additionalParams
+     * @return mixed
+     */
+    public function sendSmsByBook($bookId, array $params, array $additionalParams);
+
+    /**
+     * Create sms campaign based on list
+     *
+     * @param $phones
+     * @param array $params
+     * @param array $additionalParams
+     * @return mixed
+     */
+    public function sendSmsByList(array $phones, array $params, array $additionalParams);
+
+    /**
+     * List sms campaigns
+     *
+     * @param $params
+     * @return mixed
+     */
+    public function listSmsCampaigns(array $params);
+
+    /**
+     * get info about SMS campaign
+     *
+     * @param $campaignID
+     * @return mixed
+     */
+    public function getSmsCampaignInfo($campaignID);
+
+    /**
+     * Cancel SMS campaign
+     *
+     * @param $campaignID
+     * @return mixed
+     */
+    public function cancelSmsCampaign($campaignID);
+
+    /**
+     * Get SMS campaign cost based on book or simple list
+     *
+     * @param $params
+     * @param $additionalParams
+     * @return mixed
+     */
+    public function getSmsCampaignCost(array $params, array $additionalParams);
+
+    /**
+     * Delete SMS campaign
+     *
+     * @param $campaignID
+     * @return mixed
+     */
+    public function deleteSmsCampaign($campaignID);
+
 }

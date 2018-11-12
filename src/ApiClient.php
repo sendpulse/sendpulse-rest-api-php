@@ -1208,4 +1208,291 @@ class ApiClient implements ApiInterface
 
         return $this->handleResult($requestResult);
     }
+
+    /**
+     * Add phones to addressbook
+     *
+     * @param $bookID
+     * @param array $phones
+     * @return stdClass
+     */
+    public function addPhones($bookID, array $phones)
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $data = [
+            'addressBookId' => $bookID,
+            'phones' => json_encode($phones)
+        ];
+
+        $requestResult = $this->sendRequest('/sms/numbers', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Add phones with variables to addressbook
+     *
+     * @param $bookID
+     * @param array $phones
+     * @return stdClass
+     */
+    public function addPhonesWithVariables($bookID, array $phonesWithVariables)
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $data = [
+            'addressBookId' => $bookID,
+            'phones' => json_encode($phonesWithVariables)
+        ];
+
+        $requestResult = $this->sendRequest('/sms/numbers/variables', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Update variables for phones
+     *
+     * @param $bookID
+     * @param array $phones
+     * @param array $variables
+     * @return stdClass
+     */
+    public function updatePhoneVaribales($bookID, array $phones, array $variables)
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $data = [
+            'addressBookId' => $bookID,
+            'phones' => json_encode($phones),
+            'variables' => json_encode($variables)
+        ];
+
+        $requestResult = $this->sendRequest('/sms/numbers', 'PUT', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Delete phones from book
+     *
+     * @param $bookID
+     * @param array $phones
+     * @return stdClass
+     */
+    public function deletePhones($bookID, array $phones)
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $data = [
+            'addressBookId' => $bookID,
+            'phones' => json_encode($phones)
+        ];
+
+        $requestResult = $this->sendRequest('/sms/numbers', 'DELETE', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * get information about phone number
+     *
+     * @param $bookID
+     * @param $phoneNumber
+     * @return stdClass
+     */
+    public function getPhoneInfo($bookID, $phoneNumber)
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $requestResult = $this->sendRequest('/sms/numbers/info/'.$bookID.'/'.$phoneNumber);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Add phones to blacklist
+     *
+     * @param $bookID
+     * @param array $phones
+     * @return stdClass
+     */
+    public function addPhonesToBlacklist(array $phones)
+    {
+        $data = [
+            'phones' => json_encode($phones)
+        ];
+
+        $requestResult = $this->sendRequest('/sms/black_list', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Delete phones from blacklist
+     *
+     * @param array $phones
+     * @return stdClass
+     */
+    public function removePhonesFromBlacklist(array $phones)
+    {
+        $data = [
+            'phones' => json_encode($phones)
+        ];
+
+        $requestResult = $this->sendRequest('/sms/black_list', 'DELETE', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get list of phones from blacklist
+     *
+     * @return stdClass
+     */
+    public function getPhonesFromBlacklist()
+    {
+        $requestResult = $this->sendRequest('/sms/black_list');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Create sms campaign based on phones in book
+     *
+     * @param $bookID
+     * @param array $params
+     * @param array $additionalParams
+     * @return stdClass
+     */
+    public function sendSmsByBook($bookID, array $params, array $additionalParams = [])
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $data = [
+            'addressBookId' => $bookID
+        ];
+
+        $data = array_merge($data, $params);
+
+        if ($additionalParams) {
+            $data = array_merge($data, $additionalParams);
+        }
+
+        $requestResult = $this->sendRequest('/sms/campaigns', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Create sms campaign based on list
+     *
+     * @param $phones
+     * @param array $params
+     * @param array $additionalParams
+     * @return stdClass
+     */
+    public function sendSmsByList(array $phones, array $params, array $additionalParams)
+    {
+        $data = [
+            'phones' => json_encode($phones)
+        ];
+
+        $data = array_merge($data, $params);
+
+        if ($additionalParams) {
+            $data = array_merge($data, $additionalParams);
+        }
+
+        $requestResult = $this->sendRequest('/sms/send', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * List sms campaigns
+     *
+     * @param $params
+     * @return stdClass
+     */
+    public function listSmsCampaigns(array $params = null)
+    {
+        $requestResult = $this->sendRequest('/sms/campaigns/list', 'GET', $params);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get info about sms campaign
+     *
+     * @param $campaignID
+     * @return stdClass
+     */
+    public function getSmsCampaignInfo($campaignID)
+    {
+        $requestResult = $this->sendRequest('/sms/campaigns/info/'.$campaignID);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Cancel SMS campaign
+     *
+     * @param $campaignID
+     * @return stdClass
+     */
+    public function cancelSmsCampaign($campaignID)
+    {
+        $requestResult = $this->sendRequest('/sms/campaigns/cancel/'.$campaignID, 'PUT');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get SMS campaign cost based on book or simple list
+     *
+     * @param array $params
+     * @param array|null $additionalParams
+     * @return stdClass
+     */
+    public function getSmsCampaignCost(array $params, array $additionalParams = null)
+    {
+        if (!isset($params['addressBookId']) && !isset($params['phones'])) {
+            return $this->handleError('You mast pass phones list or addressbook ID');
+        }
+
+        if ($additionalParams) {
+            $params = array_merge($params, $additionalParams);
+        }
+
+        $requestResult = $this->sendRequest('/sms/campaigns/cost', 'GET', $params);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Delete SMS campaign
+     *
+     * @param $campaignID
+     * @return stdClass
+     */
+    public function deleteSmsCampaign($campaignID)
+    {
+        $requestResult = $this->sendRequest('/sms/campaigns', 'DELETE', ['id' => $campaignID]);
+
+        return $this->handleResult($requestResult);
+    }
 }
