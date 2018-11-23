@@ -603,6 +603,18 @@ class ApiClient implements ApiInterface
     }
 
     /**
+     * List SMS senders
+     *
+     * @return mixed
+     */
+    public function listSMSSenders()
+    {
+        $requestResult = $this->sendRequest('sms/senders');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
      * Add new sender
      *
      * @param $senderName
@@ -703,6 +715,22 @@ class ApiClient implements ApiInterface
         }
 
         $requestResult = $this->sendRequest('emails/' . $email);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get global information about list of emails
+     *
+     * @param array $emails Emails list
+     * @return stdClass
+     */
+    public function getEmailsGlobalInfo($emails) {
+        if (empty($emails)) {
+            return $this->handleError('Empty emails list');
+        }
+
+        $requestResult = $this->sendRequest('emails', 'POST');
 
         return $this->handleResult($requestResult);
     }
@@ -1128,6 +1156,21 @@ class ApiClient implements ApiInterface
 
         return $this->handleResult($requestResult);
     }
+
+    /**
+     * Get common website info
+     *
+     * @param $websiteId
+     *
+     * @return mixed
+     */
+    public function pushGetWebsiteInfo($websiteId)
+    {
+        $requestResult = $this->sendRequest('push/websites/info/' . $websiteId);
+
+        return $this->handleResult($requestResult);
+    }
+
 
     /**
      * Create new push campaign
