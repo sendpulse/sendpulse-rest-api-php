@@ -858,10 +858,11 @@ class ApiClient implements ApiInterface
      * @param string $toDate
      * @param string $sender
      * @param string $recipient
+     * @param string $country
      *
      * @return mixed
      */
-    public function smtpListEmails($limit = 0, $offset = 0, $fromDate = '', $toDate = '', $sender = '', $recipient = '')
+    public function smtpListEmails($limit = 0, $offset = 0, $fromDate = '', $toDate = '', $sender = '', $recipient = '', $country = 'off')
     {
         $data = array(
             'limit' => $limit,
@@ -870,6 +871,7 @@ class ApiClient implements ApiInterface
             'to' => $toDate,
             'sender' => $sender,
             'recipient' => $recipient,
+            'country' => $country,
         );
 
         $requestResult = $this->sendRequest('/smtp/emails', 'GET', $data);
