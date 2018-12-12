@@ -730,7 +730,7 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty emails list');
         }
 
-        $requestResult = $this->sendRequest('emails', 'POST');
+        $requestResult = $this->sendRequest('emails', 'POST', $emails);
 
         return $this->handleResult($requestResult);
     }
