@@ -248,6 +248,7 @@ interface ApiInterface
      * @param string $toDate
      * @param string $sender
      * @param string $recipient
+     * @param string $country
      */
     public function smtpListEmails(
         $limit = 0,
@@ -255,7 +256,8 @@ interface ApiInterface
         $fromDate = '',
         $toDate = '',
         $sender = '',
-        $recipient = ''
+        $recipient = '',
+        $country = 'off'
     );
 
     /**
