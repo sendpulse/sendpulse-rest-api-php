@@ -327,21 +327,21 @@ class ApiClient implements ApiInterface
      *
      * @param int $bookID
      * @param string $email User email
-     * @param array $data User vars in [key=>value] format
+     * @param array $vars User vars in [key=>value] format
      * @return stdClass
      */
-    public function updateEmailVariables(int $bookID, string $email, array $data)
+    public function updateEmailVariables(int $bookID, string $email, array $vars)
     {
         if (empty($bookID)) {
             return $this->handleError('Empty book id');
         }
 
-        $vars = ['email' => $email, 'variables' => []];
-        foreach ($data as $name => $val) {
-            $vars['variables'][] = ['name' => $name, 'value' => $val];
+        $data = ['email' => $email, 'variables' => []];
+        foreach ($vars as $name => $val) {
+            $data['variables'][] = ['name' => $name, 'value' => $val];
         }
 
-        $requestResult = $this->sendRequest('/addressbooks/' . $bookID . '/emails/variable', 'POST', $vars);
+        $requestResult = $this->sendRequest('/addressbooks/' . $bookID . '/emails/variable', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
