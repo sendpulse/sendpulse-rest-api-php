@@ -323,6 +323,30 @@ class ApiClient implements ApiInterface
     }
 
     /**
+     * Change varible by user email
+     *
+     * @param int $bookID
+     * @param string $email User email
+     * @param array $vars User vars in [key=>value] format
+     * @return stdClass
+     */
+    public function updateEmailVariables(int $bookID, string $email, array $vars)
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $data = ['email' => $email, 'variables' => []];
+        foreach ($vars as $name => $val) {
+            $data['variables'][] = ['name' => $name, 'value' => $val];
+        }
+
+        $requestResult = $this->sendRequest('/addressbooks/' . $bookID . '/emails/variable', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
      * List email addresses from book
      *
      * @param $id
