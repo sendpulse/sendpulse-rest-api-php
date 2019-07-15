@@ -922,6 +922,29 @@ class ApiClient implements ApiInterface
     }
 
     /**
+     * SMTP: get list of unsubscribed emails
+     *
+     * @param null $limit
+     * @param null $offset
+     * 
+     * @return mixed
+     */
+    public function smtpListUnsubscribed($limit = null, $offset = null)
+    {
+        $data = array();
+        if (null !== $limit) {
+            $data['limit'] = $limit;
+        }
+        if (null !== $offset) {
+            $data['offset'] = $offset;
+        }
+
+        $requestResult = $this->sendRequest('smtp/unsubscribe', 'GET', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
      * SMTP: add emails to unsubscribe list
      *
      * @param $emails

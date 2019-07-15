@@ -268,6 +268,14 @@ interface ApiInterface
     public function smtpGetEmailInfoById($id);
 
     /**
+     * SMTP: get list of unsubscribed emails
+     *
+     * @param null $limit
+     * @param null $offset
+     */
+    public function smtpListUnsubscribed($limit = null, $offset = null);
+
+    /**
      * Unsubscribe emails using SMTP
      *
      * @param $emails
