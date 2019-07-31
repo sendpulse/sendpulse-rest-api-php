@@ -25,8 +25,6 @@ class ApiClient implements ApiInterface
     private $secret;
     private $token;
 
-    private $refreshToken = 0;
-
     /**
      * @var null|TokenStorageInterface
      */
@@ -83,7 +81,6 @@ class ApiClient implements ApiInterface
             return false;
         }
 
-        $this->refreshToken = 0;
         $this->token = $requestResult->data->access_token;
 
         $hashName = md5($this->userId . '::' . $this->secret);
@@ -100,10 +97,11 @@ class ApiClient implements ApiInterface
      * @param string $method
      * @param array $data
      * @param bool $useToken
+     * @param bool $tokenRefreshed
      *
      * @return stdClass
      */
-    protected function sendRequest($path, $method = 'GET', $data = array(), $useToken = true)
+    protected function sendRequest($path, $method = 'GET', $data = array(), $useToken = true, $tokenRefreshed = false)
     {
         $url = $this->apiUrl . '/' . $path;
         $method = strtoupper($method);
@@ -148,10 +146,9 @@ class ApiClient implements ApiInterface
 
         curl_close($curl);
 
-        if ($headerCode === 401 && $this->refreshToken === 0) {
-            ++$this->refreshToken;
+        if ($headerCode === 401 && !$tokenRefreshed) {
             $this->getToken();
-            $retval = $this->sendRequest($path, $method, $data);
+            $retval = $this->sendRequest($path, $method, $data, true, true);
         } else {
             $retval = new stdClass();
             $retval->data = json_decode($responseBody);
