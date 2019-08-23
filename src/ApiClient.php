@@ -153,6 +153,7 @@ class ApiClient implements ApiInterface
             $this->getToken();
             $retval = $this->sendRequest($path, $method, $data);
         } else {
+            $this->refreshToken = 0;
             $retval = new stdClass();
             $retval->data = json_decode($responseBody);
             $retval->http_code = $headerCode;
