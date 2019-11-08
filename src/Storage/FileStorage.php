@@ -52,4 +52,19 @@ class FileStorage implements TokenStorageInterface
 
         return null;
     }
+    
+    /**
+     * @param  $key string
+     * 
+     * @return void
+     */
+    public function delete($key) 
+    {
+        $filePath = $this->storageFolder . $key;
+        if (file_exists($filePath)) {
+            return unlink($filePath);
+        }
+
+        return false;
+    }
 }
