@@ -328,9 +328,10 @@ class ApiClient implements ApiInterface
      * @param int $bookID
      * @param string $email User email
      * @param array $vars User vars in [key=>value] format
+     *
      * @return stdClass
      */
-    public function updateEmailVariables(int $bookID, string $email, array $vars)
+    public function updateEmailVariables($bookID, $email, $vars)
     {
         if (empty($bookID)) {
             return $this->handleError('Empty book id');
