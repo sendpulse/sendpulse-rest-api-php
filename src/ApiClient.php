@@ -1065,7 +1065,10 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty email data');
         }
 
-        $email['html'] = base64_encode($email['html']);
+        if(isset($email['html'])){
+            $email['html'] = base64_encode($email['html']);
+        }
+
         $data = array(
             'email' => serialize($email),
         );
