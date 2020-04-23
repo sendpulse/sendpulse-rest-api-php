@@ -110,7 +110,7 @@ class ApiClient implements ApiInterface
         $curl = curl_init();
 
         if ($useToken && !empty($this->token)) {
-            $headers = array('Authorization: Bearer ' . $this->token);
+            $headers = array('Authorization: Bearer ' . $this->token, 'Expect:');
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         }
 
@@ -145,6 +145,7 @@ class ApiClient implements ApiInterface
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         $headerCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $responseBody = substr($response, $header_size);
+        $responseHeaders = substr($response, 0, $header_size);
 
         curl_close($curl);
 
@@ -156,6 +157,7 @@ class ApiClient implements ApiInterface
             $retval = new stdClass();
             $retval->data = json_decode($responseBody);
             $retval->http_code = $headerCode;
+            $retval->headers = $responseHeaders;
         }
 
         return $retval;
@@ -176,6 +178,7 @@ class ApiClient implements ApiInterface
         if ($data->http_code !== 200) {
             $data->data->is_error = true;
             $data->data->http_code = $data->http_code;
+            $data->data->headers = $data->headers;
         }
 
         return $data->data;
