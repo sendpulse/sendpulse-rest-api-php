@@ -339,9 +339,9 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty book id');
         }
 
-        $data = ['email' => $email, 'variables' => []];
+        $data = array('email' => $email, 'variables' => array());
         foreach ($vars as $name => $val) {
-            $data['variables'][] = ['name' => $name, 'value' => $val];
+            $data['variables'][] = array('name' => $name, 'value' => $val);
         }
 
         $requestResult = $this->sendRequest('/addressbooks/' . $bookID . '/emails/variable', 'POST', $data);
@@ -386,7 +386,7 @@ class ApiClient implements ApiInterface
      *
      * @return stdClass
      */
-    public function addEmails($bookID, $emails, $additionalParams = [])
+    public function addEmails($bookID, $emails, $additionalParams = array())
     {
         if (empty($bookID) || empty($emails)) {
             return $this->handleError('Empty book id or emails');
@@ -929,7 +929,7 @@ class ApiClient implements ApiInterface
      *
      * @param null $limit
      * @param null $offset
-     * 
+     *
      * @return mixed
      */
     public function smtpListUnsubscribed($limit = null, $offset = null)
@@ -1320,11 +1320,10 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty book id');
         }
 
-        $data = [
+        $data = array(
             'addressBookId' => $bookID,
-            'phones' => json_encode($phones)
-        ];
-
+            'phones' => json_encode($phones),
+        );
         $requestResult = $this->sendRequest('/sms/numbers', 'POST', $data);
 
         return $this->handleResult($requestResult);
@@ -1343,10 +1342,10 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty book id');
         }
 
-        $data = [
+        $data = array(
             'addressBookId' => $bookID,
-            'phones' => json_encode($phonesWithVariables)
-        ];
+            'phones' => json_encode($phonesWithVariables),
+        );
 
         $requestResult = $this->sendRequest('/sms/numbers/variables', 'POST', $data);
 
@@ -1367,11 +1366,11 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty book id');
         }
 
-        $data = [
+        $data = array(
             'addressBookId' => $bookID,
             'phones' => json_encode($phones),
-            'variables' => json_encode($variables)
-        ];
+            'variables' => json_encode($variables),
+        );
 
         $requestResult = $this->sendRequest('/sms/numbers', 'PUT', $data);
 
@@ -1391,10 +1390,10 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty book id');
         }
 
-        $data = [
+        $data = array(
             'addressBookId' => $bookID,
-            'phones' => json_encode($phones)
-        ];
+            'phones' => json_encode($phones),
+        );
 
         $requestResult = $this->sendRequest('/sms/numbers', 'DELETE', $data);
 
@@ -1428,9 +1427,9 @@ class ApiClient implements ApiInterface
      */
     public function addPhonesToBlacklist(array $phones)
     {
-        $data = [
-            'phones' => json_encode($phones)
-        ];
+        $data = array(
+            'phones' => json_encode($phones),
+        );
 
         $requestResult = $this->sendRequest('/sms/black_list', 'POST', $data);
 
@@ -1445,9 +1444,9 @@ class ApiClient implements ApiInterface
      */
     public function removePhonesFromBlacklist(array $phones)
     {
-        $data = [
-            'phones' => json_encode($phones)
-        ];
+        $data = array(
+            'phones' => json_encode($phones),
+        );
 
         $requestResult = $this->sendRequest('/sms/black_list', 'DELETE', $data);
 
@@ -1474,15 +1473,15 @@ class ApiClient implements ApiInterface
      * @param array $additionalParams
      * @return stdClass
      */
-    public function sendSmsByBook($bookID, array $params, array $additionalParams = [])
+    public function sendSmsByBook($bookID, array $params, array $additionalParams = array())
     {
         if (empty($bookID)) {
             return $this->handleError('Empty book id');
         }
 
-        $data = [
-            'addressBookId' => $bookID
-        ];
+        $data = array(
+            'addressBookId' => $bookID,
+        );
 
         $data = array_merge($data, $params);
 
@@ -1505,9 +1504,9 @@ class ApiClient implements ApiInterface
      */
     public function sendSmsByList(array $phones, array $params, array $additionalParams)
     {
-        $data = [
-            'phones' => json_encode($phones)
-        ];
+        $data = array(
+            'phones' => json_encode($phones),
+        );
 
         $data = array_merge($data, $params);
 
@@ -1589,7 +1588,7 @@ class ApiClient implements ApiInterface
      */
     public function deleteSmsCampaign($campaignID)
     {
-        $requestResult = $this->sendRequest('/sms/campaigns', 'DELETE', ['id' => $campaignID]);
+        $requestResult = $this->sendRequest('/sms/campaigns', 'DELETE', array('id' => $campaignID));
 
         return $this->handleResult($requestResult);
     }
