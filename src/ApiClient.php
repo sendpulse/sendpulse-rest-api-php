@@ -1324,6 +1324,7 @@ class ApiClient implements ApiInterface
             'addressBookId' => $bookID,
             'phones' => json_encode($phones),
         );
+
         $requestResult = $this->sendRequest('/sms/numbers', 'POST', $data);
 
         return $this->handleResult($requestResult);
