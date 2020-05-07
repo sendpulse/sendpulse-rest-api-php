@@ -117,7 +117,7 @@ class ApiClient implements ApiInterface
         switch ($method) {
             case 'POST':
                 curl_setopt($curl, CURLOPT_POST, count($data));
-                curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
                 break;
             case 'PUT':
                 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
