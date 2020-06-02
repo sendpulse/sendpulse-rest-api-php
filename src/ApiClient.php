@@ -117,7 +117,7 @@ class ApiClient implements ApiInterface
         switch ($method) {
             case 'POST':
                 curl_setopt($curl, CURLOPT_POST, count($data));
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
                 break;
             case 'PUT':
                 curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
@@ -138,8 +138,8 @@ class ApiClient implements ApiInterface
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 15);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 15);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 20);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 20);
 
         $response = curl_exec($curl);
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
