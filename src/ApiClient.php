@@ -393,7 +393,7 @@ class ApiClient implements ApiInterface
         }
 
         $data = array(
-          'emails' => json_encode($emails),
+            'emails' => json_encode($emails),
         );
 
         if ($additionalParams) {
@@ -552,7 +552,7 @@ class ApiClient implements ApiInterface
      * @param string $name
      * @param string $attachments
      * @param string $type
-     * @param bool   $useTemplateId
+     * @param bool $useTemplateId
      *
      * @return mixed
      */
@@ -566,7 +566,8 @@ class ApiClient implements ApiInterface
         $attachments = '',
         $type = '',
         $useTemplateId = false
-    ) {
+    )
+    {
         if (empty($senderName) || empty($senderEmail) || empty($subject) || empty($bodyOrTemplateId) || empty($bookId)) {
             return $this->handleError('Not all data.');
         }
@@ -575,7 +576,7 @@ class ApiClient implements ApiInterface
             $attachments = serialize($attachments);
         }
 
-        if($useTemplateId) {
+        if ($useTemplateId) {
             $paramName = 'template_id';
             $paramValue = $bodyOrTemplateId;
         } else {
@@ -752,7 +753,8 @@ class ApiClient implements ApiInterface
      * @param array $emails Emails list
      * @return stdClass
      */
-    public function getEmailsGlobalInfo($emails) {
+    public function getEmailsGlobalInfo($emails)
+    {
         if (empty($emails)) {
             return $this->handleError('Empty emails list');
         }
@@ -929,7 +931,7 @@ class ApiClient implements ApiInterface
      *
      * @param null $limit
      * @param null $offset
-     * 
+     *
      * @return mixed
      */
     public function smtpListUnsubscribed($limit = null, $offset = null)
@@ -1068,7 +1070,7 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty email data');
         }
 
-        if(isset($email['html'])){
+        if (isset($email['html'])) {
             $email['html'] = base64_encode($email['html']);
         }
 
@@ -1414,7 +1416,7 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty book id');
         }
 
-        $requestResult = $this->sendRequest('/sms/numbers/info/'.$bookID.'/'.$phoneNumber);
+        $requestResult = $this->sendRequest('/sms/numbers/info/' . $bookID . '/' . $phoneNumber);
 
         return $this->handleResult($requestResult);
     }
@@ -1541,7 +1543,7 @@ class ApiClient implements ApiInterface
      */
     public function getSmsCampaignInfo($campaignID)
     {
-        $requestResult = $this->sendRequest('/sms/campaigns/info/'.$campaignID);
+        $requestResult = $this->sendRequest('/sms/campaigns/info/' . $campaignID);
 
         return $this->handleResult($requestResult);
     }
@@ -1554,7 +1556,7 @@ class ApiClient implements ApiInterface
      */
     public function cancelSmsCampaign($campaignID)
     {
-        $requestResult = $this->sendRequest('/sms/campaigns/cancel/'.$campaignID, 'PUT');
+        $requestResult = $this->sendRequest('/sms/campaigns/cancel/' . $campaignID, 'PUT');
 
         return $this->handleResult($requestResult);
     }
