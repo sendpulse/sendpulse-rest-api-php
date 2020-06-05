@@ -162,6 +162,8 @@ class ApiClient implements ApiInterface
             $retval->headers = $responseHeaders;
             $retval->ip = $ip;
             $retval->curlErrors = $curlErrors;
+            $retval->method = $method . ':' . $url;
+            $retval->timestamp = date('Y-m-d h:i:sP');
         }
 
         return $retval;
@@ -185,6 +187,8 @@ class ApiClient implements ApiInterface
             $data->data->headers = $data->headers;
             $data->data->curlErrors = $data->curlErrors;
             $data->data->ip = $data->ip;
+            $data->data->method = $data->method;
+            $data->data->timestamp = $data->timestamp;
         }
 
         return $data->data;
