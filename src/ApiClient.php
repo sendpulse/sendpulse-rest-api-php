@@ -138,14 +138,16 @@ class ApiClient implements ApiInterface
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 20);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 20);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 300);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 300);
 
         $response = curl_exec($curl);
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         $headerCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $responseBody = substr($response, $header_size);
         $responseHeaders = substr($response, 0, $header_size);
+        $ip = curl_getinfo($curl, CURLINFO_PRIMARY_IP);
+        $curlErrors = curl_error($curl);
 
         curl_close($curl);
 
@@ -158,6 +160,8 @@ class ApiClient implements ApiInterface
             $retval->data = json_decode($responseBody);
             $retval->http_code = $headerCode;
             $retval->headers = $responseHeaders;
+            $retval->ip = $ip;
+            $retval->curlErrors = $curlErrors;
         }
 
         return $retval;
@@ -179,6 +183,8 @@ class ApiClient implements ApiInterface
             $data->data->is_error = true;
             $data->data->http_code = $data->http_code;
             $data->data->headers = $data->headers;
+            $data->data->curlErrors = $data->curlErrors;
+            $data->data->ip = $data->ip;
         }
 
         return $data->data;
