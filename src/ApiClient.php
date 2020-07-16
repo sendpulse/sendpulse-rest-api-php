@@ -1611,9 +1611,9 @@ class ApiClient implements ApiInterface
      *
      * @return stdClass
      */
-    public function getTemplates()
+    public function getMyTemplates()
     {
-        $requestResult = $this->sendRequest('/templates', 'GET');
+        $requestResult = $this->sendRequest('templates?owner=me', 'GET');
 
         return $this->handleResult($requestResult);
     }
