@@ -1605,4 +1605,16 @@ class ApiClient implements ApiInterface
 
         return $this->handleResult($requestResult);
     }
+
+    /**
+     * Get list of account's templates
+     *
+     * @return stdClass
+     */
+    public function getTemplates()
+    {
+        $requestResult = $this->sendRequest('/templates', 'GET');
+
+        return $this->handleResult($requestResult);
+    }
 }
