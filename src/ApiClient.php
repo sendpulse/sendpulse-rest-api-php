@@ -26,6 +26,7 @@ class ApiClient implements ApiInterface
     private $token;
 
     private $refreshToken = 0;
+    private $retry = false;
 
     /**
      * @var null|TokenStorageInterface
@@ -1089,6 +1090,13 @@ class ApiClient implements ApiInterface
         );
 
         $requestResult = $this->sendRequest('smtp/emails', 'POST', $data);
+
+        if ($requestResult->http_code !== 200 && !$this->retry) {
+            $this->retry = true;
+            sleep(2);
+
+            $requestResult = $this->smtpSendMail($email);
+        }
 
         return $this->handleResult($requestResult);
     }
