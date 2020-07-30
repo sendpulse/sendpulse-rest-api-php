@@ -26,7 +26,7 @@ class ApiClient implements ApiInterface
     private $token;
 
     private $refreshToken = 0;
-    private $retry = false;
+    private $retryCount = 0;
 
     /**
      * @var null|TokenStorageInterface
@@ -155,6 +155,10 @@ class ApiClient implements ApiInterface
         if ($headerCode === 401 && $this->refreshToken === 0) {
             ++$this->refreshToken;
             $this->getToken();
+            $retval = $this->sendRequest($path, $method, $data);
+        } elseif($headerCode !== 200 && $this->retryCount === 0) {
+            ++$this->retryCount;
+            sleep(2);
             $retval = $this->sendRequest($path, $method, $data);
         } else {
             $retval = new stdClass();
@@ -1090,13 +1094,6 @@ class ApiClient implements ApiInterface
         );
 
         $requestResult = $this->sendRequest('smtp/emails', 'POST', $data);
-
-        if ($requestResult->http_code !== 200 && !$this->retry) {
-            $this->retry = true;
-            sleep(2);
-
-            $requestResult = $this->smtpSendMail($email);
-        }
 
         return $this->handleResult($requestResult);
     }
