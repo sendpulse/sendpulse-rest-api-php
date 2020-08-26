@@ -564,6 +564,7 @@ class ApiClient implements ApiInterface
      * @param string $attachments
      * @param string $type
      * @param bool $useTemplateId
+     * @param string $sendDate
      *
      * @return mixed
      */
@@ -576,7 +577,8 @@ class ApiClient implements ApiInterface
         $name = '',
         $attachments = '',
         $type = '',
-        $useTemplateId = false
+        $useTemplateId = false,
+        $sendDate = ''
     )
     {
         if (empty($senderName) || empty($senderEmail) || empty($subject) || empty($bodyOrTemplateId) || empty($bookId)) {
@@ -605,6 +607,10 @@ class ApiClient implements ApiInterface
             'attachments' => $attachments,
             'type' => $type,
         );
+
+        if(!empty($sendDate)){
+            $data['send_date'] = $sendDate;
+        }
 
         $requestResult = $this->sendRequest('campaigns', 'POST', $data);
 
