@@ -555,17 +555,17 @@ class ApiClient implements ApiInterface
     /**
      * Create new campaign
      *
-     * @param        $senderName
-     * @param        $senderEmail
-     * @param        $subject
-     * @param        $bodyOrTemplateId
-     * @param        $bookId
+     * @param $senderName
+     * @param $senderEmail
+     * @param $subject
+     * @param $bodyOrTemplateId
+     * @param $bookId
      * @param string $name
      * @param string $attachments
      * @param string $type
-     * @param bool $useTemplateId
+     * @param false $useTemplateId
      * @param string $sendDate
-     *
+     * @param int|null $segmentId
      * @return mixed
      */
     public function createCampaign(
@@ -578,7 +578,8 @@ class ApiClient implements ApiInterface
         $attachments = '',
         $type = '',
         $useTemplateId = false,
-        $sendDate = ''
+        $sendDate = '',
+        $segmentId = null
     )
     {
         if (empty($senderName) || empty($senderEmail) || empty($subject) || empty($bodyOrTemplateId) || empty($bookId)) {
@@ -608,8 +609,12 @@ class ApiClient implements ApiInterface
             'type' => $type,
         );
 
-        if(!empty($sendDate)){
+        if (!empty($sendDate)) {
             $data['send_date'] = $sendDate;
+        }
+
+        if (!empty($segmentId)) {
+            $data['segment_id'] = $segmentId;
         }
 
         $requestResult = $this->sendRequest('campaigns', 'POST', $data);
