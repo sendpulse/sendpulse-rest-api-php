@@ -56,7 +56,7 @@ class FileStorage implements TokenStorageInterface
     /**
      * @param  $key string
      * 
-     * @return void
+     * @return bool
      */
     public function delete($key) 
     {
