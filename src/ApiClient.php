@@ -563,7 +563,7 @@ class ApiClient implements ApiInterface
      * @param string $name
      * @param string $attachments
      * @param string $type
-     * @param false $useTemplateId
+     * @param bool $useTemplateId
      * @param string $sendDate
      * @param int|null $segmentId
      * @return mixed
