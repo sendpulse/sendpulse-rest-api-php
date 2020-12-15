@@ -1106,7 +1106,7 @@ class ApiClient implements ApiInterface
             $this->retry = true;
             sleep(2);
 
-            $requestResult = $this->smtpSendMail($email);
+            return $this->smtpSendMail($email);
         }
 
         return $this->handleResult($requestResult);
