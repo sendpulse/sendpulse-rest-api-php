@@ -561,11 +561,12 @@ class ApiClient implements ApiInterface
      * @param $bodyOrTemplateId
      * @param $bookId
      * @param string $name
-     * @param string $attachments
+     * @param array $attachments
      * @param string $type
      * @param bool $useTemplateId
      * @param string $sendDate
      * @param int|null $segmentId
+     * @param array $attachmentsBinary
      * @return mixed
      */
     public function createCampaign(
@@ -575,19 +576,16 @@ class ApiClient implements ApiInterface
         $bodyOrTemplateId,
         $bookId,
         $name = '',
-        $attachments = '',
+        $attachments = [],
         $type = '',
         $useTemplateId = false,
         $sendDate = '',
-        $segmentId = null
+        $segmentId = null,
+        $attachmentsBinary = []
     )
     {
         if (empty($senderName) || empty($senderEmail) || empty($subject) || empty($bodyOrTemplateId) || empty($bookId)) {
             return $this->handleError('Not all data.');
-        }
-
-        if (!empty($attachments)) {
-            $attachments = serialize($attachments);
         }
 
         if ($useTemplateId) {
@@ -605,9 +603,14 @@ class ApiClient implements ApiInterface
             $paramName => $paramValue,
             'list_id' => $bookId,
             'name' => $name,
-            'attachments' => $attachments,
             'type' => $type,
         );
+
+        if (!empty($attachments)) {
+            $data['attachments'] = $attachments;
+        } elseif (!empty($attachmentsBinary)) {
+            $data['attachments_binary'] = $attachmentsBinary;
+        }
 
         if (!empty($sendDate)) {
             $data['send_date'] = $sendDate;
