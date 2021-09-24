@@ -179,7 +179,7 @@ $variables = [
     'age' => 23
 ];
 
-$automationClient =  new Automation360($eventHash);
+$automationClient = new Automation360($eventHash);
 $result = $automationClient->sendEventToSendpulse($email, $phone, $variables);
 
 var_dump($result);
