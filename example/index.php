@@ -13,7 +13,6 @@
 
 use Sendpulse\RestApi\ApiClient;
 use Sendpulse\RestApi\Storage\FileStorage;
-use Sendpulse\RestApi\Automation360;
 
 define('API_USER_ID', '');
 define('API_SECRET', '');
@@ -166,20 +165,16 @@ var_dump($SPApiClient->getSmsCampaignCost($params));
 // Delete sms campaign
 var_dump($SPApiClient->deleteSmsCampaign(CAMPAIGN_ID));
 
+/*
+ * Automation360 methods
+ */
 
-// Send event
-$eventHash = 'EVENT_HASH';
-$email = 'email@domain.com';
-$phone = '380931112233';
+// Start event automation360
+$eventName = 'registration';
 $variables = [
-    'user_id' => 123123,
-    'event_date' => date('Y-m-d'),
-    'firstname' => 'Name',
-    'lastname' => 'Family',
-    'age' => 23
+    "email" => "test1@test1.com",
+    "phone" => "+123456789",
+    "var_1" => "var_1_value"
 ];
 
-$automationClient = new Automation360($eventHash);
-$result = $automationClient->sendEventToSendpulse($email, $phone, $variables);
-
-var_dump($result);
+var_dump($SPApiClient->startEventAutomation360($eventName,$variables));
