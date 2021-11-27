@@ -440,6 +440,29 @@ class ApiClient implements ApiInterface
     }
 
     /**
+     * Unsubscribe email addresses from book
+     *
+     * @param $bookID
+     * @param $emails
+     *
+     * @return stdClass
+     */
+    public function unsubscribeEmails($bookID, $emails)
+    {
+        if (empty($bookID) || empty($emails)) {
+            return $this->handleError('Empty book id or emails');
+        }
+
+        $data = array(
+            'emails' => serialize($emails),
+        );
+
+        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails/unsubscribe', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
      * Get information about email address from book
      *
      * @param $bookID

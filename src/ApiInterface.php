@@ -83,6 +83,14 @@ interface ApiInterface
     public function removeEmails($bookID, $emails);
 
     /**
+     * Unsubscribe email addresses from book
+     *
+     * @param $bookID
+     * @param $emails
+     */
+    public function unsubscribeEmails($bookID, $emails);
+
+    /**
      * Get information about email from book
      *
      * @param $bookID
