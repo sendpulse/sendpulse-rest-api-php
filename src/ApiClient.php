@@ -389,6 +389,24 @@ class ApiClient implements ApiInterface
     }
 
     /**
+     * Get amount of subscriptions for the book
+     *
+     * @param $bookID
+     *
+     * @return stdClass
+     */
+    public function bookCountSubscriptions($bookID)
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails/total');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
      * Add new emails to address book
      *
      * @param $bookID

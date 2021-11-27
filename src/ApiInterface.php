@@ -60,11 +60,20 @@ interface ApiInterface
     public function getBookVariables($id);
 
     /**
-     * Get list pf emails from book
+     * Get list email addresses from book
      *
-     * @param $id
+     * @param $id     Address book id.
+     * @param $limit
+     * @param $offset
      */
-    public function getEmailsFromBook($id);
+    public function getEmailsFromBook($id, $limit = null, $offset = null);
+
+    /**
+     * Get amount of subscriptions for the book
+     *
+     * @param $bookID
+     */
+    public function bookCountSubscriptions($bookID);
 
     /**
      * Add new emails to book
