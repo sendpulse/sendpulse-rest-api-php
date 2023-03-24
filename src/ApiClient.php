@@ -355,7 +355,7 @@ class ApiClient implements ApiInterface
             $data['variables'][] = ['name' => $name, 'value' => $val];
         }
 
-        $requestResult = $this->sendRequest('/addressbooks/' . $bookID . '/emails/variable', 'POST', $data);
+        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails/variable', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -928,7 +928,7 @@ class ApiClient implements ApiInterface
             'country' => $country,
         );
 
-        $requestResult = $this->sendRequest('/smtp/emails', 'GET', $data);
+        $requestResult = $this->sendRequest('smtp/emails', 'GET', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -946,7 +946,7 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty id');
         }
 
-        $requestResult = $this->sendRequest('/smtp/emails/' . $id);
+        $requestResult = $this->sendRequest('smtp/emails/' . $id);
 
         return $this->handleResult($requestResult);
     }
@@ -991,7 +991,7 @@ class ApiClient implements ApiInterface
             'emails' => serialize($emails),
         );
 
-        $requestResult = $this->sendRequest('/smtp/unsubscribe', 'POST', $data);
+        $requestResult = $this->sendRequest('smtp/unsubscribe', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1013,7 +1013,7 @@ class ApiClient implements ApiInterface
             'emails' => serialize($emails),
         );
 
-        $requestResult = $this->sendRequest('/smtp/unsubscribe', 'DELETE', $data);
+        $requestResult = $this->sendRequest('smtp/unsubscribe', 'DELETE', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1285,7 +1285,7 @@ class ApiClient implements ApiInterface
             }
         }
 
-        $requestResult = $this->sendRequest('/push/tasks', 'POST', $data);
+        $requestResult = $this->sendRequest('push/tasks', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1303,7 +1303,7 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty website id');
         }
 
-        $requestResult = $this->sendRequest('/push/websites/' . $websiteID . '/code');
+        $requestResult = $this->sendRequest('push/websites/' . $websiteID . '/code');
 
         return $this->handleResult($requestResult);
     }
@@ -1360,7 +1360,7 @@ class ApiClient implements ApiInterface
             'phones' => json_encode($phones)
         ];
 
-        $requestResult = $this->sendRequest('/sms/numbers', 'POST', $data);
+        $requestResult = $this->sendRequest('sms/numbers', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1383,7 +1383,7 @@ class ApiClient implements ApiInterface
             'phones' => json_encode($phonesWithVariables)
         ];
 
-        $requestResult = $this->sendRequest('/sms/numbers/variables', 'POST', $data);
+        $requestResult = $this->sendRequest('sms/numbers/variables', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1408,7 +1408,7 @@ class ApiClient implements ApiInterface
             'variables' => json_encode($variables)
         ];
 
-        $requestResult = $this->sendRequest('/sms/numbers', 'PUT', $data);
+        $requestResult = $this->sendRequest('sms/numbers', 'PUT', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1431,7 +1431,7 @@ class ApiClient implements ApiInterface
             'phones' => json_encode($phones)
         ];
 
-        $requestResult = $this->sendRequest('/sms/numbers', 'DELETE', $data);
+        $requestResult = $this->sendRequest('sms/numbers', 'DELETE', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1449,7 +1449,7 @@ class ApiClient implements ApiInterface
             return $this->handleError('Empty book id');
         }
 
-        $requestResult = $this->sendRequest('/sms/numbers/info/' . $bookID . '/' . $phoneNumber);
+        $requestResult = $this->sendRequest('sms/numbers/info/' . $bookID . '/' . $phoneNumber);
 
         return $this->handleResult($requestResult);
     }
@@ -1467,7 +1467,7 @@ class ApiClient implements ApiInterface
             'phones' => json_encode($phones)
         ];
 
-        $requestResult = $this->sendRequest('/sms/black_list', 'POST', $data);
+        $requestResult = $this->sendRequest('sms/black_list', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1484,7 +1484,7 @@ class ApiClient implements ApiInterface
             'phones' => json_encode($phones)
         ];
 
-        $requestResult = $this->sendRequest('/sms/black_list', 'DELETE', $data);
+        $requestResult = $this->sendRequest('sms/black_list', 'DELETE', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1496,7 +1496,7 @@ class ApiClient implements ApiInterface
      */
     public function getPhonesFromBlacklist()
     {
-        $requestResult = $this->sendRequest('/sms/black_list');
+        $requestResult = $this->sendRequest('sms/black_list');
 
         return $this->handleResult($requestResult);
     }
@@ -1525,7 +1525,7 @@ class ApiClient implements ApiInterface
             $data = array_merge($data, $additionalParams);
         }
 
-        $requestResult = $this->sendRequest('/sms/campaigns', 'POST', $data);
+        $requestResult = $this->sendRequest('sms/campaigns', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1550,7 +1550,7 @@ class ApiClient implements ApiInterface
             $data = array_merge($data, $additionalParams);
         }
 
-        $requestResult = $this->sendRequest('/sms/send', 'POST', $data);
+        $requestResult = $this->sendRequest('sms/send', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
@@ -1563,7 +1563,7 @@ class ApiClient implements ApiInterface
      */
     public function listSmsCampaigns(array $params = null)
     {
-        $requestResult = $this->sendRequest('/sms/campaigns/list', 'GET', $params);
+        $requestResult = $this->sendRequest('sms/campaigns/list', 'GET', $params);
 
         return $this->handleResult($requestResult);
     }
@@ -1576,7 +1576,7 @@ class ApiClient implements ApiInterface
      */
     public function getSmsCampaignInfo($campaignID)
     {
-        $requestResult = $this->sendRequest('/sms/campaigns/info/' . $campaignID);
+        $requestResult = $this->sendRequest('sms/campaigns/info/' . $campaignID);
 
         return $this->handleResult($requestResult);
     }
@@ -1589,7 +1589,7 @@ class ApiClient implements ApiInterface
      */
     public function cancelSmsCampaign($campaignID)
     {
-        $requestResult = $this->sendRequest('/sms/campaigns/cancel/' . $campaignID, 'PUT');
+        $requestResult = $this->sendRequest('sms/campaigns/cancel/' . $campaignID, 'PUT');
 
         return $this->handleResult($requestResult);
     }
@@ -1611,7 +1611,7 @@ class ApiClient implements ApiInterface
             $params = array_merge($params, $additionalParams);
         }
 
-        $requestResult = $this->sendRequest('/sms/campaigns/cost', 'GET', $params);
+        $requestResult = $this->sendRequest('sms/campaigns/cost', 'GET', $params);
 
         return $this->handleResult($requestResult);
     }
@@ -1624,7 +1624,7 @@ class ApiClient implements ApiInterface
      */
     public function deleteSmsCampaign($campaignID)
     {
-        $requestResult = $this->sendRequest('/sms/campaigns', 'DELETE', ['id' => $campaignID]);
+        $requestResult = $this->sendRequest('sms/campaigns', 'DELETE', ['id' => $campaignID]);
 
         return $this->handleResult($requestResult);
     }
