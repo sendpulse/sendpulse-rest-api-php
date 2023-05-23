@@ -389,6 +389,24 @@ class ApiClient implements ApiInterface
     }
 
     /**
+     * Get amount of subscriptions for the book
+     *
+     * @param $bookID
+     *
+     * @return stdClass
+     */
+    public function bookCountSubscriptions($bookID)
+    {
+        if (empty($bookID)) {
+            return $this->handleError('Empty book id');
+        }
+
+        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails/total');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
      * Add new emails to address book
      *
      * @param $bookID
@@ -435,6 +453,29 @@ class ApiClient implements ApiInterface
         );
 
         $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails', 'DELETE', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Unsubscribe email addresses from book
+     *
+     * @param $bookID
+     * @param $emails
+     *
+     * @return stdClass
+     */
+    public function unsubscribeEmails($bookID, $emails)
+    {
+        if (empty($bookID) || empty($emails)) {
+            return $this->handleError('Empty book id or emails');
+        }
+
+        $data = array(
+            'emails' => serialize($emails),
+        );
+
+        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails/unsubscribe', 'POST', $data);
 
         return $this->handleResult($requestResult);
     }
