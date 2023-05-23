@@ -19,6 +19,9 @@ use stdClass;
 class ApiClient implements ApiInterface
 {
 
+    const VIBER_MESSAGE_MARKETING = 2;
+    const VIBER_MESSAGE_TRANSACTIONAL = 3;
+
     private $apiUrl = 'https://api.sendpulse.com';
 
     private $userId;
@@ -1625,6 +1628,133 @@ class ApiClient implements ApiInterface
     public function deleteSmsCampaign($campaignID)
     {
         $requestResult = $this->sendRequest('sms/campaigns', 'DELETE', ['id' => $campaignID]);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Create a Viber Campaign
+     *
+     * @param $recipients
+     * @param array $params
+     * @param array $additionalParams
+     * @return stdClass
+     */
+    public function sendViberCampaign(array $recipients, array $params, array $additionalParams)
+    {
+        $data = [
+            'recipients' => $recipients,
+        ];
+
+        $data = array_merge($data, $params);
+
+        if ($additionalParams) {
+            $data = array_merge($data, $additionalParams);
+        }
+
+        $requestResult = $this->sendRequest('viber', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Editing Viber Campaign
+     *
+     * @param int $campaignID
+     * @param array $params
+     * @param array $additionalParams
+     * @return stdClass
+     */
+    public function editViberCampaign($campaignID, array $params, array $additionalParams)
+    {
+        $data = [
+            'main_task_id' => $campaignID,
+        ];
+
+        $data = array_merge($data, $params);
+
+        if ($additionalParams) {
+            $data = array_merge($data, $additionalParams);
+        }
+
+        $requestResult = $this->sendRequest('viber', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Retrieving a List of Campaigns
+     *
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return stdClass
+     */
+    public function listViberCampaigns($limit = null, $offset = null)
+    {
+        $data = array();
+        if (null !== $limit) {
+            $data['limit'] = $limit;
+        }
+        if (null !== $offset) {
+            $data['offset'] = $offset;
+        }
+
+        $requestResult = $this->sendRequest('viber/task', 'GET', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Retrieving Statistics on a Campaign
+     *
+     * @param int $id
+     * @return stdClass
+     */
+    public function getViberCampaignInfo($id)
+    {
+        if (empty($id)) {
+            return $this->handleError('Empty campaign id');
+        }
+
+        $requestResult = $this->sendRequest('viber/task/' . $id);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Retrieving a List of Sender Names
+     *
+     * @return stdClass
+     */
+    public function getViberSenders()
+    {
+        $requestResult = $this->sendRequest('viber/senders');
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Retrieving a Sender Name
+     *
+     * @param $senderID
+     * @return stdClass
+     */
+    public function getViberSenderInfo($senderID)
+    {
+        $requestResult = $this->sendRequest('viber/senders/'.$senderID);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Retreiving a List of Recipients of a Viber Campaign
+     *
+     * @param $campaignID
+     * @return stdClass
+     */
+    public function getViberCampaignRecipients($campaignID)
+    {
+        $requestResult = $this->sendRequest('viber/task/'.$campaignID.'/recipients');
 
         return $this->handleResult($requestResult);
     }
