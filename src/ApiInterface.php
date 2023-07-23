@@ -529,4 +529,22 @@ interface ApiInterface
      */
     public function deleteSmsCampaign($campaignID);
 
+    /**
+     * Verify a Single Email Address
+     *
+     * @param $email - Email address you need to verify
+     *
+     * @return stdClass
+     */
+    public function verifyASingleEmailAddress($email): stdClass;
+
+    /**
+     * Get Email Address Verification Results
+     *
+     * @param $email - Email address you verified
+     *
+     * @return stdClass
+     */
+    public function getEmailAddressVerificationResults($email): stdClass;
+
 }
