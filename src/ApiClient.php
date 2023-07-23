@@ -1628,4 +1628,42 @@ class ApiClient implements ApiInterface
 
         return $this->handleResult($requestResult);
     }
+
+    /**
+     * Verify a Single Email Address
+     *
+     * @param $email - Email address you need to verify
+     *
+     * @return stdClass
+     */
+    public function verifyASingleEmailAddress($email): stdClass
+    {
+        if (empty($email)) {
+            return $this->handleError('Empty email');
+        }
+
+        $data = ['email' => $email];
+        $requestResult = $this->sendRequest('verifier-service/send-single-to-verify', 'POST', $data);
+
+        return $this->handleResult($requestResult);
+    }
+
+    /**
+     * Get Email Address Verification Results
+     *
+     * @param $email - Email address you verified
+     *
+     * @return stdClass
+     */
+    public function getEmailAddressVerificationResults($email): stdClass
+    {
+        if (empty($email)) {
+            return $this->handleError('Empty email');
+        }
+
+        $data = ['email' => $email];
+        $requestResult = $this->sendRequest('verifier-service/get-single-result', 'GET', $data);
+
+        return $this->handleResult($requestResult);
+    }
 }
