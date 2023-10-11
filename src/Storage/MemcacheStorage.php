@@ -1,13 +1,9 @@
 <?php
 
-/**
- * Memcache storage
- * Class Session
- */
-
 namespace Sendpulse\RestApi\Storage;
 
 use Memcache;
+use Sendpulse\RestApi\Contracts\TokenStorageInterface;
 
 class MemcacheStorage implements TokenStorageInterface
 {
@@ -24,13 +20,11 @@ class MemcacheStorage implements TokenStorageInterface
     protected $keyTtl = 3600;
 
     /**
-     * Session constructor.
-     *
-     * @param      $host
-     * @param      $port
+     * @param string $host
+     * @param int $port
      * @param bool $persistent
      */
-    public function __construct($host, $port, $persistent = false)
+    public function __construct(string $host, int $port, bool $persistent = false)
     {
         $this->instance = new Memcache();
         if ($persistent) {
@@ -51,7 +45,7 @@ class MemcacheStorage implements TokenStorageInterface
     /**
      * @return int
      */
-    public function getKeyTtl()
+    public function getKeyTtl(): int
     {
         return $this->keyTtl;
     }
@@ -61,7 +55,7 @@ class MemcacheStorage implements TokenStorageInterface
      *
      * @return MemcacheStorage
      */
-    public function setKeyTtl($keyTtl)
+    public function setKeyTtl(int $keyTtl): MemcacheStorage
     {
         $this->keyTtl = $keyTtl;
 
@@ -69,28 +63,23 @@ class MemcacheStorage implements TokenStorageInterface
     }
 
     /**
-     * @param $key string
-     * @param $token
-     *
-     * @return void
+     * @param string $key
+     * @param string $token
+     * @return bool
      */
-    public function set($key, $token)
+    public function set(string $key, string $token): bool
     {
-        $this->instance->set($key, $token, false, $this->keyTtl);
+        return $this->instance->set($key, $token, false, $this->keyTtl);
     }
 
     /**
-     * @param $key string
-     *
-     * @return mixed
+     * @param string $key
+     * @return string|null
      */
-    public function get($key)
+    public function get(string $key): ?string
     {
         $token = $this->instance->get($key);
-        if (!empty($token)) {
-            return $token;
-        }
 
-        return null;
+        return empty($token) ? null : $token;
     }
 }

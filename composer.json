@@ -15,10 +15,16 @@
     {
       "name": "Alexey Moroz",
       "email": "a.moroz@sendpulse.com"
+    },
+    {
+      "name": "Evgeniy Bilovol",
+      "email": "e.bilovol@sendpulse.com"
     }
   ],
   "require": {
-    "php": ">=5.4.0"
+    "php": ">=7.1.0",
+    "ext-json": "*",
+    "ext-curl": "*"
   },
   "autoload": {
     "psr-4": {

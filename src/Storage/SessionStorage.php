@@ -1,36 +1,32 @@
 <?php
 
-/**
- * Session token storage
- * Class SessionStorage
- */
-
 namespace Sendpulse\RestApi\Storage;
+
+use Sendpulse\RestApi\Contracts\TokenStorageInterface;
 
 class SessionStorage implements TokenStorageInterface
 {
     /**
      * @param string $key
-     * @param        $token
+     * @param string $token
      *
      * @return void
      */
-    public function set($key, $token)
+    public function set(string $key, string $token): bool
     {
         $_SESSION[$key] = $token;
+
+        return true;
     }
 
     /**
-     * @param $key string
-     *
-     * @return mixed
+     * @param string $key
+     * @return string|null
      */
-    public function get($key)
+    public function get(string $key): ?string
     {
-        if (isset($_SESSION[$key]) && !empty($_SESSION[$key])) {
-            return $_SESSION[$key];
-        }
-
-        return null;
+        return empty($_SESSION[$key])
+            ? null
+            : (string)$_SESSION[$key];
     }
 }

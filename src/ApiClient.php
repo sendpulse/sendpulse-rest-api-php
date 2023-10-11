@@ -4,52 +4,66 @@
  * SendPulse REST API Client
  *
  * Documentation
- * https://login.sendpulse.com/manual/rest-api/
  * https://sendpulse.com/api
- *
  */
 
 namespace Sendpulse\RestApi;
 
-use Exception;
+use Sendpulse\RestApi\Contracts\ApiInterface;
+use Sendpulse\RestApi\Contracts\TokenStorageInterface;
 use Sendpulse\RestApi\Storage\FileStorage;
-use Sendpulse\RestApi\Storage\TokenStorageInterface;
-use stdClass;
 
+/**
+ * @link https://sendpulse.com/api
+ */
 class ApiClient implements ApiInterface
 {
 
+    /**
+     * @var string
+     */
     private $apiUrl = 'https://api.sendpulse.com';
 
+    /**
+     * @var string
+     */
     private $userId;
-    private $secret;
-    private $token;
-
-    private $refreshToken = 0;
-    private $retry = false;
 
     /**
-     * @var null|TokenStorageInterface
+     * @var string
+     */
+    private $secret;
+
+    /**
+     * @var string|null
+     */
+    private $token;
+
+    /**
+     * @var bool
+     */
+    private $refreshToken = false;
+
+    /**
+     * @var TokenStorageInterface|FileStorage|null
      */
     private $tokenStorage;
 
 
     /**
-     * Sendpulse API constructor
-     *
-     * @param                       $userId
-     * @param                       $secret
-     * @param TokenStorageInterface $tokenStorage
-     *
-     * @throws Exception
+     * ApiClient constructor
+     * @param string $userId
+     * @param string $secret
+     * @param TokenStorageInterface|null $tokenStorage
+     * @throws ApiClientException
      */
-    public function __construct($userId, $secret, TokenStorageInterface $tokenStorage = null)
+    public function __construct(string $userId, string $secret, TokenStorageInterface $tokenStorage = null)
     {
         if ($tokenStorage === null) {
             $tokenStorage = new FileStorage();
         }
         if (empty($userId) || empty($secret)) {
-            throw new Exception('Empty ID or SECRET');
+            throw new ApiClientException('Empty ID or SECRET');
         }
 
         $this->userId = $userId;
@@ -59,74 +73,79 @@ class ApiClient implements ApiInterface
 
         /** load token from storage */
         $this->token = $this->tokenStorage->get($hashName);
-
         if (empty($this->token) && !$this->getToken()) {
-            throw new Exception('Could not connect to api, check your ID and SECRET');
+            throw new ApiClientException('Could not connect to api, check your ID and SECRET');
         }
     }
 
     /**
      * Get token and store it
-     *
+     * @link https://sendpulse.com/integrations/api#auth
      * @return bool
+     * @throws ApiClientException
      */
-    private function getToken()
+    private function getToken(): bool
     {
-        $data = array(
+        $tokenResponse = $this->sendRequest('oauth/access_token', self::METHOD_POST, [
             'grant_type' => 'client_credentials',
             'client_id' => $this->userId,
             'client_secret' => $this->secret,
-        );
+        ], false);
 
-        $requestResult = $this->sendRequest('oauth/access_token', 'POST', $data, false);
-
-        if ($requestResult->http_code !== 200) {
+        if (empty($tokenResponse['access_token'])) {
             return false;
         }
 
-        $this->refreshToken = 0;
-        $this->token = $requestResult->data->access_token;
+        $this->refreshToken = false;
+        $this->token = $tokenResponse['access_token'];
 
         $hashName = md5($this->userId . '::' . $this->secret);
-        /** Save token to storage */
-        $this->tokenStorage->set($hashName, $this->token);
 
-        return true;
+        return $this->tokenStorage->set($hashName, $this->token);
     }
 
     /**
      * Form and send request to API service
-     *
-     * @param        $path
+     * @param string $path
      * @param string $method
      * @param array $data
      * @param bool $useToken
-     *
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
      */
-    protected function sendRequest($path, $method = 'GET', $data = array(), $useToken = true)
+    protected function sendRequest(string $path, string $method = self::METHOD_GET, array $data = [], bool $useToken = true): ?array
     {
         $url = $this->apiUrl . '/' . $path;
-        $method = strtoupper($method);
         $curl = curl_init();
 
+        $headers = [
+            'Accept: application/json',
+            'Content-Type: application/json',
+            'Expect:'
+        ];
+
         if ($useToken && !empty($this->token)) {
-            $headers = array('Authorization: Bearer ' . $this->token, 'Expect:');
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            $headers[] = 'Authorization: ' . self::TOKEN_TYPE_BEARER . ' ' . $this->token;
         }
 
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
         switch ($method) {
-            case 'POST':
+            case self::METHOD_POST:
                 curl_setopt($curl, CURLOPT_POST, count($data));
-                curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
                 break;
-            case 'PUT':
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
-                curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+            case self::METHOD_PUT:
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, self::METHOD_PUT);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
                 break;
-            case 'DELETE':
-                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+            case self::METHOD_PATCH:
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, self::METHOD_PATCH);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+                break;
+            case self::METHOD_DELETE:
+                curl_setopt($curl, CURLOPT_CUSTOMREQUEST, self::METHOD_DELETE);
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
                 break;
             default:
                 if (!empty($data)) {
@@ -143,148 +162,152 @@ class ApiClient implements ApiInterface
         curl_setopt($curl, CURLOPT_TIMEOUT, 300);
 
         $response = curl_exec($curl);
-        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-        $headerCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        $responseBody = substr($response, $header_size);
-        $responseHeaders = substr($response, 0, $header_size);
-        $ip = curl_getinfo($curl, CURLINFO_PRIMARY_IP);
+        $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $responseBody = json_decode(substr($response, $headerSize), true);
+        $responseHeaders = substr($response, 0, $headerSize);
         $curlErrors = curl_error($curl);
 
         curl_close($curl);
 
-        if ($headerCode === 401 && $this->refreshToken === 0) {
-            ++$this->refreshToken;
-            $this->getToken();
-            $retval = $this->sendRequest($path, $method, $data);
-        } else {
-            $retval = new stdClass();
-            $retval->data = json_decode($responseBody);
-            $retval->http_code = $headerCode;
-            $retval->headers = $responseHeaders;
-            $retval->ip = $ip;
-            $retval->curlErrors = $curlErrors;
-            $retval->method = $method . ':' . $url;
-            $retval->timestamp = date('Y-m-d h:i:sP');
+        if ($httpCode >= 400) {
+            if ($httpCode === 401 && !$this->refreshToken) {
+                $this->refreshToken = true;
+                $this->getToken();
+                $responseBody = $this->sendRequest($path, $method, $data);
+            } else {
+                throw new ApiClientException(
+                    'Request ' . $method . ' ' . $url . ' failed!',
+                    $httpCode,
+                    null,
+                    $responseBody,
+                    $responseHeaders,
+                    $curlErrors
+                );
+            }
         }
 
-        return $retval;
+        return empty($responseBody) ? null : $responseBody;
     }
 
     /**
-     * Process results
-     *
-     * @param $data
-     *
-     * @return stdClass
+     * Send GET request
+     * @param string $path
+     * @param array $data
+     * @param bool $useToken
+     * @return array|null
+     * @throws ApiClientException
      */
-    protected function handleResult($data)
+    public function get(string $path, array $data = [], bool $useToken = true): ?array
     {
-        if (empty($data->data)) {
-            $data->data = new stdClass();
-        }
-        if ($data->http_code !== 200) {
-            $data->data->is_error = true;
-            $data->data->http_code = $data->http_code;
-            $data->data->headers = $data->headers;
-            $data->data->curlErrors = $data->curlErrors;
-            $data->data->ip = $data->ip;
-            $data->data->method = $data->method;
-            $data->data->timestamp = $data->timestamp;
-        }
-
-        return $data->data;
+        return $this->sendRequest($path, self::METHOD_GET, $data, $useToken);
     }
 
     /**
-     * Process errors
-     *
-     * @param null $customMessage
-     *
-     * @return stdClass
+     * Send POST request
+     * @param string $path
+     * @param array $data
+     * @param bool $useToken
+     * @return array|null
+     * @throws ApiClientException
      */
-    protected function handleError($customMessage = null)
+    public function post(string $path, array $data = [], bool $useToken = true): ?array
     {
-        $message = new stdClass();
-        $message->is_error = true;
-        if (null !== $customMessage) {
-            $message->message = $customMessage;
-        }
-
-        return $message;
+        return $this->sendRequest($path, self::METHOD_POST, $data, $useToken);
     }
 
-
-    /*
-     * API interface implementation
+    /**
+     * Send PUT request
+     * @param string $path
+     * @param array $data
+     * @param bool $useToken
+     * @return array|null
+     * @throws ApiClientException
      */
+    public function put(string $path, array $data = [], bool $useToken = true): ?array
+    {
+        return $this->sendRequest($path, self::METHOD_PUT, $data, $useToken);
+    }
 
+    /**
+     * Send PATCH request
+     * @param string $path
+     * @param array $data
+     * @param bool $useToken
+     * @return array|null
+     * @throws ApiClientException
+     */
+    public function patch(string $path, array $data = [], bool $useToken = true): ?array
+    {
+        return $this->sendRequest($path, self::METHOD_PATCH, $data, $useToken);
+    }
+
+    /**
+     * Send DELETE request
+     * @param string $path
+     * @param array $data
+     * @param bool $useToken
+     * @return array|null
+     * @throws ApiClientException
+     */
+    public function delete(string $path, array $data = [], bool $useToken = true): ?array
+    {
+        return $this->sendRequest($path, self::METHOD_DELETE, $data, $useToken);
+    }
 
     /**
      * Create address book
-     *
-     * @param $bookName
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#create-list
+     * @param string $bookName
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function createAddressBook($bookName)
+    public function createAddressBook(string $bookName): ?array
     {
-        if (empty($bookName)) {
-            return $this->handleError('Empty book name');
-        }
-
-        $data = array('bookName' => $bookName);
-        $requestResult = $this->sendRequest('addressbooks', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('addressbooks', ['bookName' => $bookName]);
     }
 
     /**
      * Edit address book name
-     *
-     * @param $id
-     * @param $newName
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#edit-list
+     * @param int $id
+     * @param string $newName
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::put()
      */
-    public function editAddressBook($id, $newName)
+    public function editAddressBook(int $id, string $newName): ?array
     {
-        if (empty($newName) || empty($id)) {
-            return $this->handleError('Empty new name or book id');
-        }
-
-        $data = array('name' => $newName);
-        $requestResult = $this->sendRequest('addressbooks/' . $id, 'PUT', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->put('addressbooks/' . $id, ['name' => $newName]);
     }
 
     /**
      * Remove address book
-     *
-     * @param $id
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#delete-list
+     * @param int $id
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function removeAddressBook($id)
+    public function removeAddressBook(int $id): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $requestResult = $this->sendRequest('addressbooks/' . $id, 'DELETE');
-
-        return $this->handleResult($requestResult);
+        return $this->delete('addressbooks/' . $id);
     }
 
     /**
      * Get list of address books
-     *
-     * @param null $limit
-     * @param null $offset
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/bulk-email#lists-list
+     * @param int|null $limit
+     * @param int|null $offset
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function listAddressBooks($limit = null, $offset = null)
+    public function listAddressBooks(int $limit = null, int $offset = null): ?array
     {
         $data = array();
         if (null !== $limit) {
@@ -294,88 +317,72 @@ class ApiClient implements ApiInterface
             $data['offset'] = $offset;
         }
 
-        $requestResult = $this->sendRequest('addressbooks', 'GET', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->get('addressbooks', $data);
     }
 
     /**
      * Get information about book
-     *
-     * @param $id
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#list-info
+     * @param int $id
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getBookInfo($id)
+    public function getBookInfo(int $id): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $requestResult = $this->sendRequest('addressbooks/' . $id);
-
-        return $this->handleResult($requestResult);
+        return $this->get('addressbooks/' . $id);
     }
 
     /**
      * Get variables from book
-     *
-     * @param $id
-     *   Address book id.
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#variables
+     * @param int $id
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getBookVariables($id)
+    public function getBookVariables(int $id): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $requestResult = $this->sendRequest('addressbooks/' . $id . '/variables');
-
-        return $this->handleResult($requestResult);
+        return $this->get('addressbooks/' . $id . '/variables');
     }
 
     /**
-     * Change varible by user email
-     *
+     * Change variable by user email
+     * @link https://sendpulse.com/integrations/api/bulk-email#email-change-variable
      * @param int $bookID
      * @param string $email User email
      * @param array $vars User vars in [key=>value] format
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function updateEmailVariables(int $bookID, string $email, array $vars)
+    public function updateEmailVariables(int $bookID, string $email, array $vars): ?array
     {
-        if (empty($bookID)) {
-            return $this->handleError('Empty book id');
-        }
-
         $data = ['email' => $email, 'variables' => []];
         foreach ($vars as $name => $val) {
             $data['variables'][] = ['name' => $name, 'value' => $val];
         }
 
-        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails/variable', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('addressbooks/' . $bookID . '/emails/variable', $data);
     }
 
     /**
      * List email addresses from book
-     *
-     * @param $id
-     * @param $limit
-     * @param $offset
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#lists-emails
+     * @param int $id
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getEmailsFromBook($id, $limit = null, $offset = null)
+    public function getEmailsFromBook(int $id, int $limit = null, int $offset = null): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $data = array();
+        $data = [];
         if (null !== $limit) {
             $data['limit'] = $limit;
         }
@@ -383,183 +390,156 @@ class ApiClient implements ApiInterface
             $data['offset'] = $offset;
         }
 
-        $requestResult = $this->sendRequest('addressbooks/' . $id . '/emails', 'GET', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->get('addressbooks/' . $id . '/emails', $data);
     }
 
     /**
      * Add new emails to address book
-     *
-     * @param $bookID
-     * @param $emails
-     * @param $additionalParams
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#add-email
+     * @param int $bookID
+     * @param array $emails
+     * @param array $additionalParams
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function addEmails($bookID, $emails, $additionalParams = [])
+    public function addEmails(int $bookID, array $emails, array $additionalParams = []): ?array
     {
         if (empty($bookID) || empty($emails)) {
-            return $this->handleError('Empty book id or emails');
+            throw new ApiClientException('Empty book id or emails');
         }
 
-        $data = array(
-            'emails' => json_encode($emails),
-        );
+        $data = [
+            'emails' => $emails,
+        ];
 
         if ($additionalParams) {
             $data = array_merge($data, $additionalParams);
         }
 
-        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('addressbooks/' . $bookID . '/emails', $data);
     }
 
     /**
      * Remove email addresses from book
-     *
-     * @param $bookID
-     * @param $emails
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#delete-email
+     * @param int $bookID
+     * @param array $emails
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function removeEmails($bookID, $emails)
+    public function removeEmails(int $bookID, array $emails): ?array
     {
-        if (empty($bookID) || empty($emails)) {
-            return $this->handleError('Empty book id or emails');
-        }
-
-        $data = array(
-            'emails' => serialize($emails),
-        );
-
-        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails', 'DELETE', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->delete('addressbooks/' . $bookID . '/emails', [
+            'emails' => $emails
+        ]);
     }
 
     /**
      * Get information about email address from book
-     *
-     * @param $bookID
-     * @param $email
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#email-info
+     * @param int $bookID
+     * @param string $email
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getEmailInfo($bookID, $email)
+    public function getEmailInfo(int $bookID, string $email): ?array
     {
-        if (empty($bookID) || empty($email)) {
-            return $this->handleError('Empty book id or email');
-        }
-
-        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/emails/' . $email);
-
-        return $this->handleResult($requestResult);
+        return $this->get('addressbooks/' . $bookID . '/emails/' . $email);
     }
 
     /**
      * Get cost of campaign based on address book
-     *
-     * @param $bookID
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#campaign-cost
+     * @param int $bookID
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function campaignCost($bookID)
+    public function campaignCost(int $bookID): ?array
     {
-        if (empty($bookID)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $requestResult = $this->sendRequest('addressbooks/' . $bookID . '/cost');
-
-        return $this->handleResult($requestResult);
+        return $this->get('addressbooks/' . $bookID . '/cost');
     }
 
     /**
      * Get list of campaigns
-     *
-     * @param null $limit
-     * @param null $offset
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/bulk-email#campaigns-list
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function listCampaigns($limit = null, $offset = null)
+    public function listCampaigns(int $limit = null, int $offset = null): ?array
     {
-        $data = array();
+        $data = [];
         if (!empty($limit)) {
             $data['limit'] = $limit;
         }
         if (!empty($offset)) {
             $data['offset'] = $offset;
         }
-        $requestResult = $this->sendRequest('campaigns', 'GET', $data);
 
-        return $this->handleResult($requestResult);
+        return $this->get('campaigns', $data);
     }
 
     /**
      * Get information about campaign
-     *
-     * @param $id
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#campaign-info
+     * @param int $id
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getCampaignInfo($id)
+    public function getCampaignInfo(int $id): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty campaign id');
-        }
-
-        $requestResult = $this->sendRequest('campaigns/' . $id);
-
-        return $this->handleResult($requestResult);
+        return $this->get('campaigns/' . $id);
     }
 
     /**
      * Get campaign statistic by countries
-     *
-     * @param $id
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#stat-countries
+     * @param int $id
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function campaignStatByCountries($id)
+    public function campaignStatByCountries(int $id): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty campaign id');
-        }
-
-        $requestResult = $this->sendRequest('campaigns/' . $id . '/countries');
-
-        return $this->handleResult($requestResult);
+        return $this->get('campaigns/' . $id . '/countries');
     }
 
     /**
      * Get campaign statistic by referrals
-     *
-     * @param $id
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#stat-referral
+     * @param int $id
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function campaignStatByReferrals($id)
+    public function campaignStatByReferrals(int $id): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty campaign id');
-        }
-
-        $requestResult = $this->sendRequest('campaigns/' . $id . '/referrals');
-
-        return $this->handleResult($requestResult);
+        return $this->get('campaigns/' . $id . '/referrals');
     }
 
     /**
      * Create new campaign
-     *
-     * @param $senderName
-     * @param $senderEmail
-     * @param $subject
+     * @link https://sendpulse.com/integrations/api/bulk-email#create-campaign
+     * @param string $senderName
+     * @param string $senderEmail
+     * @param string $subject
      * @param $bodyOrTemplateId
-     * @param $bookId
+     * @param int $bookId
      * @param string $name
      * @param array $attachments
      * @param string $type
@@ -567,25 +547,28 @@ class ApiClient implements ApiInterface
      * @param string $sendDate
      * @param int|null $segmentId
      * @param array $attachmentsBinary
-     * @return mixed
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
     public function createCampaign(
-        $senderName,
-        $senderEmail,
-        $subject,
-        $bodyOrTemplateId,
-        $bookId,
-        $name = '',
-        $attachments = [],
-        $type = '',
-        $useTemplateId = false,
-        $sendDate = '',
-        $segmentId = null,
-        $attachmentsBinary = []
-    )
+        string $senderName,
+        string $senderEmail,
+        string $subject,
+               $bodyOrTemplateId,
+        int    $bookId,
+        string $name = '',
+        array  $attachments = [],
+        string $type = '',
+        bool   $useTemplateId = false,
+        string $sendDate = '',
+        int    $segmentId = null,
+        array  $attachmentsBinary = []
+    ): ?array
     {
         if (empty($senderName) || empty($senderEmail) || empty($subject) || empty($bodyOrTemplateId) || empty($bookId)) {
-            return $this->handleError('Not all data.');
+            throw new ApiClientException('Not all data.');
         }
 
         if ($useTemplateId) {
@@ -596,7 +579,7 @@ class ApiClient implements ApiInterface
             $paramValue = base64_encode($bodyOrTemplateId);
         }
 
-        $data = array(
+        $data = [
             'sender_name' => $senderName,
             'sender_email' => $senderEmail,
             'subject' => $subject,
@@ -604,7 +587,7 @@ class ApiClient implements ApiInterface
             'list_id' => $bookId,
             'name' => $name,
             'type' => $type,
-        );
+        ];
 
         if (!empty($attachments)) {
             $data['attachments'] = $attachments;
@@ -620,277 +603,225 @@ class ApiClient implements ApiInterface
             $data['segment_id'] = $segmentId;
         }
 
-        $requestResult = $this->sendRequest('campaigns', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('campaigns', $data);
     }
 
     /**
      * Cancel campaign
-     *
-     * @param $id
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#cancel-send
+     * @param int $id
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function cancelCampaign($id)
+    public function cancelCampaign(int $id): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty campaign id');
-        }
-
-        $requestResult = $this->sendRequest('campaigns/' . $id, 'DELETE');
-
-        return $this->handleResult($requestResult);
+        return $this->delete('campaigns/' . $id);
     }
 
     /**
      * List all senders
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/bulk-email#senders-list
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function listSenders()
+    public function listSenders(): ?array
     {
-        $requestResult = $this->sendRequest('senders');
-
-        return $this->handleResult($requestResult);
+        return $this->get('senders');
     }
 
     /**
      * List SMS senders
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/bulk-sms#get-senders
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function listSMSSenders()
+    public function listSMSSenders(): ?array
     {
-        $requestResult = $this->sendRequest('sms/senders');
-
-        return $this->handleResult($requestResult);
+        return $this->get('sms/senders');
     }
 
     /**
      * Add new sender
-     *
+     * @link https://sendpulse.com/integrations/api/bulk-email#add-sender
      * @param $senderName
      * @param $senderEmail
-     *
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function addSender($senderName, $senderEmail)
+    public function addSender($senderName, $senderEmail): ?array
     {
-        if (empty($senderName) || empty($senderEmail)) {
-            return $this->handleError('Empty sender name or email');
-        }
-
-        $data = array(
+        return $this->post('senders', [
             'email' => $senderEmail,
             'name' => $senderName,
-        );
-
-        $requestResult = $this->sendRequest('senders', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        ]);
     }
 
     /**
      * Remove sender
-     *
-     * @param $email
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#delete-sender
+     * @param string $email
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function removeSender($email)
+    public function removeSender(string $email): ?array
     {
-        if (empty($email)) {
-            return $this->handleError('Empty email');
-        }
-
-        $data = array(
-            'email' => $email,
-        );
-
-        $requestResult = $this->sendRequest('senders', 'DELETE', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->delete('senders', [
+            'email' => $email
+        ]);
     }
 
     /**
      * Activate sender using code
-     *
-     * @param $email
-     * @param $code
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#activate-sender
+     * @param string $email
+     * @param string $code
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function activateSender($email, $code)
+    public function activateSender(string $email, string $code): ?array
     {
-        if (empty($email) || empty($code)) {
-            return $this->handleError('Empty email or activation code');
-        }
-
-        $data = array(
+        return $this->post('senders/' . $email . '/code', [
             'code' => $code,
-        );
-
-        $requestResult = $this->sendRequest('senders/' . $email . '/code', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        ]);
     }
 
     /**
      * Request mail with activation code
-     *
-     * @param $email
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#code
+     * @param string $email
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getSenderActivationMail($email)
+    public function getSenderActivationMail(string $email): ?array
     {
-        if (empty($email)) {
-            return $this->handleError('Empty email');
-        }
-
-        $requestResult = $this->sendRequest('senders/' . $email . '/code');
-
-        return $this->handleResult($requestResult);
+        return $this->get('senders/' . $email . '/code');
     }
 
     /**
      * Get global information about email
-     *
-     * @param $email
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#email-info
+     * @param string $email
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getEmailGlobalInfo($email)
+    public function getEmailGlobalInfo(string $email): ?array
     {
-        if (empty($email)) {
-            return $this->handleError('Empty email');
-        }
-
-        $requestResult = $this->sendRequest('emails/' . $email);
-
-        return $this->handleResult($requestResult);
+        return $this->get('emails/' . $email);
     }
 
     /**
      * Get global information about list of emails
-     *
+     * @link https://sendpulse.com/integrations/api/bulk-email#emails_info
      * @param array $emails Emails list
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function getEmailsGlobalInfo($emails)
+    public function getEmailsGlobalInfo(array $emails): ?array
     {
-        if (empty($emails)) {
-            return $this->handleError('Empty emails list');
-        }
-
-        $requestResult = $this->sendRequest('emails', 'POST', $emails);
-
-        return $this->handleResult($requestResult);
+        return $this->post('emails', $emails);
     }
 
     /**
      * Remove email from all books
-     *
-     * @param $email
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#email-delete
+     * @param string $email
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function removeEmailFromAllBooks($email)
+    public function removeEmailFromAllBooks(string $email): ?array
     {
-        if (empty($email)) {
-            return $this->handleError('Empty email');
-        }
-
-        $requestResult = $this->sendRequest('emails/' . $email, 'DELETE');
-
-        return $this->handleResult($requestResult);
+        return $this->delete('emails/' . $email);
     }
 
     /**
      * Get email statistic by all campaigns
-     *
+     * @link https://sendpulse.com/integrations/api/bulk-email#email-stat
      * @param $email
-     *
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function emailStatByCampaigns($email)
+    public function emailStatByCampaigns($email): ?array
     {
-        if (empty($email)) {
-            return $this->handleError('Empty email');
-        }
-
-        $requestResult = $this->sendRequest('emails/' . $email . '/campaigns');
-
-        return $this->handleResult($requestResult);
+        return $this->get('emails/' . $email . '/campaigns');
     }
 
     /**
      * Get all emails from blacklist
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/bulk-email#view-blacklist
+     * @throws ApiClientException
+     * @see ApiClient::get()
+     * @deprecated
      */
-    public function getBlackList()
+    public function getBlackList(): ?array
     {
-        $requestResult = $this->sendRequest('blacklist');
-
-        return $this->handleResult($requestResult);
+        return $this->get('blacklist');
     }
 
     /**
      * Add email to blacklist
-     *
-     * @param        $emails - string with emails, separator - ,
+     * @link https://sendpulse.com/integrations/api/bulk-email#add-blacklist
+     * @param string $emails string with emails, separator - ,
      * @param string $comment
-     *
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function addToBlackList($emails, $comment = '')
+    public function addToBlackList(string $emails, string $comment = ''): ?array
     {
-        if (empty($emails)) {
-            return $this->handleError('Empty email');
-        }
-
-        $data = array(
+        return $this->post('blacklist', [
             'emails' => base64_encode($emails),
             'comment' => $comment,
-        );
-
-        $requestResult = $this->sendRequest('blacklist', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        ]);
     }
 
     /**
      * Remove emails from blacklist
-     *
-     * @param $emails - string with emails, separator - ,
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-email#delete-blacklist
+     * @param string $emails string with emails, separator - ,
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function removeFromBlackList($emails)
+    public function removeFromBlackList(string $emails): ?array
     {
-        if (empty($emails)) {
-            return $this->handleError('Empty email');
-        }
+        return $this->delete('blacklist', [
+            'emails' => base64_encode($emails)
+        ]);
 
-        $data = array(
-            'emails' => base64_encode($emails),
-        );
-
-        $requestResult = $this->sendRequest('blacklist', 'DELETE', $data);
-
-        return $this->handleResult($requestResult);
     }
 
     /**
      * Get balance
-     *
+     * @link https://sendpulse.com/integrations/api/bulk-email#get-balance
      * @param string $currency
-     *
-     * @return mixed
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getBalance($currency = '')
+    public function getBalance(string $currency = ''): ?array
     {
         $currency = strtoupper($currency);
         $url = 'balance';
@@ -898,14 +829,12 @@ class ApiClient implements ApiInterface
             $url .= '/' . strtoupper($currency);
         }
 
-        $requestResult = $this->sendRequest($url);
-
-        return $this->handleResult($requestResult);
+        return $this->get($url);
     }
 
     /**
      * SMTP: get list of emails
-     *
+     * @link https://sendpulse.com/integrations/api/smtp#get-emails-list-smtp
      * @param int $limit
      * @param int $offset
      * @param string $fromDate
@@ -913,12 +842,14 @@ class ApiClient implements ApiInterface
      * @param string $sender
      * @param string $recipient
      * @param string $country
-     *
-     * @return mixed
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function smtpListEmails($limit = 0, $offset = 0, $fromDate = '', $toDate = '', $sender = '', $recipient = '', $country = 'off')
+    public function smtpListEmails(int $limit = 0, int $offset = 0, string $fromDate = '', string $toDate = '', string $sender = '', string $recipient = '', string $country = 'off'): ?array
     {
-        $data = array(
+        return $this->get('smtp/emails', [
             'limit' => $limit,
             'offset' => $offset,
             'from' => $fromDate,
@@ -926,40 +857,34 @@ class ApiClient implements ApiInterface
             'sender' => $sender,
             'recipient' => $recipient,
             'country' => $country,
-        );
-
-        $requestResult = $this->sendRequest('smtp/emails', 'GET', $data);
-
-        return $this->handleResult($requestResult);
+        ]);
     }
 
     /**
      * Get information about email by id
-     *
+     * @link https://sendpulse.com/integrations/api/smtp#email-info-smtp
      * @param $id
-     *
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function smtpGetEmailInfoById($id)
+    public function smtpGetEmailInfoById($id): ?array
     {
-        if (empty($id)) {
-            return $this->handleError('Empty id');
-        }
-
-        $requestResult = $this->sendRequest('smtp/emails/' . $id);
-
-        return $this->handleResult($requestResult);
+        return $this->get('smtp/emails/' . $id);
     }
 
     /**
      * SMTP: get list of unsubscribed emails
-     *
-     * @param null $limit
-     * @param null $offset
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/smtp#unsubscribed
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function smtpListUnsubscribed($limit = null, $offset = null)
+    public function smtpListUnsubscribed(int $limit = null, int $offset = null): ?array
     {
         $data = array();
         if (null !== $limit) {
@@ -969,164 +894,89 @@ class ApiClient implements ApiInterface
             $data['offset'] = $offset;
         }
 
-        $requestResult = $this->sendRequest('smtp/unsubscribe', 'GET', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->get('smtp/unsubscribe', $data);
     }
 
     /**
      * SMTP: add emails to unsubscribe list
-     *
-     * @param $emails
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/smtp#unsubscribe-smtp
+     * @param array $emails
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function smtpUnsubscribeEmails($emails)
+    public function smtpUnsubscribeEmails(array $emails): ?array
     {
-        if (empty($emails)) {
-            return $this->handleError('Empty emails');
-        }
-
-        $data = array(
-            'emails' => serialize($emails),
-        );
-
-        $requestResult = $this->sendRequest('smtp/unsubscribe', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('smtp/unsubscribe', [
+            'emails' => $emails,
+        ]);
     }
 
     /**
      * SMTP: remove emails from unsubscribe list
-     *
+     * @link https://sendpulse.com/integrations/api/smtp#delete-smtp
      * @param $emails
-     *
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function smtpRemoveFromUnsubscribe($emails)
+    public function smtpRemoveFromUnsubscribe($emails): ?array
     {
-        if (empty($emails)) {
-            return $this->handleError('Empty emails');
-        }
+        return $this->delete('smtp/unsubscribe', [
+            'emails' => $emails
+        ]);
 
-        $data = array(
-            'emails' => serialize($emails),
-        );
-
-        $requestResult = $this->sendRequest('smtp/unsubscribe', 'DELETE', $data);
-
-        return $this->handleResult($requestResult);
     }
 
     /**
      * Get list of IP
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/smtp#ip-smtp
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function smtpListIP()
+    public function smtpListIP(): ?array
     {
-        $requestResult = $this->sendRequest('smtp/ips');
-
-        return $this->handleResult($requestResult);
-    }
-
-    /**
-     * SMTP: get list of allowed domains
-     *
-     * @return mixed
-     */
-    public function smtpListAllowedDomains()
-    {
-        $requestResult = $this->sendRequest('smtp/domains');
-
-        return $this->handleResult($requestResult);
-    }
-
-    /**
-     * SMTP: add new domain
-     *
-     * @param $email
-     *
-     * @return stdClass
-     */
-    public function smtpAddDomain($email)
-    {
-        if (empty($email)) {
-            return $this->handleError('Empty email');
-        }
-
-        $data = array(
-            'email' => $email,
-        );
-
-        $requestResult = $this->sendRequest('smtp/domains', 'POST', $data);
-
-        return $this->handleResult($requestResult);
-    }
-
-    /**
-     * SMTP: verify domain
-     *
-     * @param $email
-     *
-     * @return stdClass
-     */
-    public function smtpVerifyDomain($email)
-    {
-        if (empty($email)) {
-            return $this->handleError('Empty email');
-        }
-
-        $requestResult = $this->sendRequest('smtp/domains/' . $email);
-
-        return $this->handleResult($requestResult);
+        return $this->get('smtp/ips');
     }
 
     /**
      * SMTP: send mail
-     *
-     * @param $email
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/smtp#send-email-smtp
+     * @param array $email
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function smtpSendMail($email)
+    public function smtpSendMail(array $email): ?array
     {
-        if (empty($email)) {
-            return $this->handleError('Empty email data');
-        }
-
         $emailData = $email;
         if (isset($email['html'])) {
             $emailData['html'] = base64_encode($email['html']);
         }
 
-        $data = array(
-            'email' => serialize($emailData),
-        );
-
-        $requestResult = $this->sendRequest('smtp/emails', 'POST', $data);
-
-        if ($requestResult->http_code !== 200 && !$this->retry) {
-            $this->retry = true;
-            sleep(2);
-
-            return $this->smtpSendMail($email);
-        }
-
-        return $this->handleResult($requestResult);
+        return $this->post('smtp/emails', [
+            'email' => $emailData,
+        ]);
     }
 
     /**
      * Get list of push campaigns
-     *
-     * @param null $limit
-     * @param null $offset
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/web-push#get-push-list
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function pushListCampaigns($limit = null, $offset = null)
+    public function pushListCampaigns(int $limit = null, int $offset = null): ?array
     {
-        $data = array();
+        $data = [];
         if (null !== $limit) {
             $data['limit'] = $limit;
         }
@@ -1134,20 +984,20 @@ class ApiClient implements ApiInterface
             $data['offset'] = $offset;
         }
 
-        $requestResult = $this->sendRequest('push/tasks', 'GET', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/tasks', $data);
     }
 
     /**
      * Get list of websites
-     *
-     * @param null $limit
-     * @param null $offset
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/web-push#get-websites-list
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function pushListWebsites($limit = null, $offset = null)
+    public function pushListWebsites(int $limit = null, int $offset = null): ?array
     {
         $data = array();
         if (null !== $limit) {
@@ -1157,50 +1007,50 @@ class ApiClient implements ApiInterface
             $data['offset'] = $offset;
         }
 
-        $requestResult = $this->sendRequest('push/websites', 'GET', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/websites', $data);
     }
 
     /**
      * Get amount of websites
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/web-push#get-websites-number
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function pushCountWebsites()
+    public function pushCountWebsites(): ?array
     {
-        $requestResult = $this->sendRequest('push/websites/total');
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/websites/total');
     }
 
     /**
      * Get list of all variables for website
-     *
-     * @param $websiteId
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/web-push#get-variables-list
+     * @param int $websiteId
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function pushListWebsiteVariables($websiteId)
+    public function pushListWebsiteVariables(int $websiteId): ?array
     {
-        $requestResult = $this->sendRequest('push/websites/' . $websiteId . '/variables');
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/websites/' . $websiteId . '/variables');
     }
 
     /**
      * Get list of subscriptions for the website
-     *
-     * @param      $websiteID
-     *
-     * @param null $limit
-     * @param null $offset
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/web-push#get-subscribers-list
+     * @param int $websiteID
+     * @param int|null $limit
+     * @param int|null $offset
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function pushListWebsiteSubscriptions($websiteID, $limit = null, $offset = null)
+    public function pushListWebsiteSubscriptions(int $websiteID, int $limit = null, int $offset = null): ?array
     {
-        $data = array();
+        $data = [];
         if (null !== $limit) {
             $data['limit'] = $limit;
         }
@@ -1208,76 +1058,73 @@ class ApiClient implements ApiInterface
             $data['offset'] = $offset;
         }
 
-        $requestResult = $this->sendRequest('push/websites/' . $websiteID . '/subscriptions', 'GET', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/websites/' . $websiteID . '/subscriptions', $data);
     }
 
     /**
      * Get amount of subscriptions for the site
-     *
+     * @link https://sendpulse.com/integrations/api/web-push#get-subscribers-number
      * @param $websiteID
-     *
-     * @return mixed
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function pushCountWebsiteSubscriptions($websiteID)
+    public function pushCountWebsiteSubscriptions($websiteID): ?array
     {
-        $requestResult = $this->sendRequest('push/websites/' . $websiteID . '/subscriptions/total');
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/websites/' . $websiteID . '/subscriptions/total');
     }
 
     /**
      * Set state for subscription
-     *
-     * @param $subscriptionID
-     * @param $stateValue
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/web-push#activate-subscriber
+     * @param int $subscriptionID
+     * @param int $stateValue
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function pushSetSubscriptionState($subscriptionID, $stateValue)
+    public function pushSetSubscriptionState(int $subscriptionID, int $stateValue): ?array
     {
-        $data = array(
+        return $this->post('push/subscriptions/state', [
             'id' => $subscriptionID,
             'state' => $stateValue,
-        );
-
-        $requestResult = $this->sendRequest('push/subscriptions/state', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        ]);
     }
 
     /**
      * Get common website info
-     *
-     * @param $websiteId
-     *
-     * @return mixed
+     * @link https://sendpulse.com/integrations/api/web-push#site_info
+     * @param int $websiteId
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function pushGetWebsiteInfo($websiteId)
+    public function pushGetWebsiteInfo(int $websiteId): ?array
     {
-        $requestResult = $this->sendRequest('push/websites/info/' . $websiteId);
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/websites/info/' . $websiteId);
     }
-
 
     /**
      * Create new push campaign
-     *
-     * @param       $taskInfo
+     * @link https://sendpulse.com/integrations/api/web-push#create-push
+     * @param array $taskInfo
      * @param array $additionalParams
-     *
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function createPushTask($taskInfo, array $additionalParams = array())
+    public function createPushTask(array $taskInfo, array $additionalParams = []): ?array
     {
         $data = $taskInfo;
         if (!isset($data['ttl'])) {
             $data['ttl'] = 0;
         }
         if (empty($data['title']) || empty($data['website_id']) || empty($data['body'])) {
-            return $this->handleError('Not all data');
+            throw new ApiClientException('Not all data');
         }
         if ($additionalParams) {
             foreach ($additionalParams as $key => $val) {
@@ -1285,236 +1132,203 @@ class ApiClient implements ApiInterface
             }
         }
 
-        $requestResult = $this->sendRequest('push/tasks', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('push/tasks', $data);
     }
 
     /**
      * Get integration code for Push Notifications.
-     *
-     * @param $websiteID
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/web-push#get_js
+     * @param int $websiteID
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getPushIntegrationCode($websiteID)
+    public function getPushIntegrationCode(int $websiteID): ?array
     {
-        if (empty($websiteID)) {
-            return $this->handleError('Empty website id');
-        }
-
-        $requestResult = $this->sendRequest('push/websites/' . $websiteID . '/code');
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/websites/' . $websiteID . '/code');
     }
 
     /**
      * Get stats for push campaign
-     *
-     * @param $campaignID
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/web-push#statistics
+     * @param int $campaignID
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getPushCampaignStat($campaignID)
+    public function getPushCampaignStat(int $campaignID): ?array
     {
-        $requestResult = $this->sendRequest('push/tasks/' . $campaignID);
-
-        return $this->handleResult($requestResult);
+        return $this->get('push/tasks/' . $campaignID);
     }
 
     /**
      * @Author Maksym Dzhym m.jim@sendpulse.com
-     * @param $eventName
+     * @param string $eventName
      * @param array $variables
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function startEventAutomation360($eventName, array $variables)
+    public function startEventAutomation360(string $eventName, array $variables): ?array
     {
-        if (!$eventName) {
-            return $this->handleError('Event name is empty');
-        }
         if (!array_key_exists('email', $variables) && !array_key_exists('phone', $variables)) {
-            return $this->handleError('Email and phone is empty');
+            throw new ApiClientException('Email and phone is empty');
         }
 
-        $requestResult = $this->sendRequest('events/name/' . $eventName, 'POST', $variables);
-
-        return $this->handleResult($requestResult);
+        return $this->post('events/name/' . $eventName, $variables);
     }
 
     /**
      * Add phones to addressbook
-     *
-     * @param $bookID
+     * @link https://sendpulse.com/integrations/api/bulk-sms#add-telephone
+     * @param int $bookID
      * @param array $phones
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function addPhones($bookID, array $phones)
+    public function addPhones(int $bookID, array $phones): ?array
     {
-        if (empty($bookID)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $data = [
+        return $this->post('sms/numbers', [
             'addressBookId' => $bookID,
-            'phones' => json_encode($phones)
-        ];
-
-        $requestResult = $this->sendRequest('sms/numbers', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+            'phones' => $phones
+        ]);
     }
 
     /**
      * Add phones with variables to addressbook
-     *
-     * @param $bookID
-     * @param array $phones
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-sms#add-phone-variable
+     * @param int $bookID
+     * @param array $phonesWithVariables
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function addPhonesWithVariables($bookID, array $phonesWithVariables)
+    public function addPhonesWithVariables(int $bookID, array $phonesWithVariables): ?array
     {
-        if (empty($bookID)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $data = [
+        return $this->post('sms/numbers/variables', [
             'addressBookId' => $bookID,
-            'phones' => json_encode($phonesWithVariables)
-        ];
-
-        $requestResult = $this->sendRequest('sms/numbers/variables', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+            'phones' => $phonesWithVariables
+        ]);
     }
 
     /**
      * Update variables for phones
-     *
-     * @param $bookID
+     * @link https://sendpulse.com/integrations/api/bulk-sms#update-variable
+     * @param int $bookID
      * @param array $phones
      * @param array $variables
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::put()
      */
-    public function updatePhoneVaribales($bookID, array $phones, array $variables)
+    public function updatePhoneVaribales(int $bookID, array $phones, array $variables): ?array
     {
-        if (empty($bookID)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $data = [
+        return $this->put('sms/numbers', [
             'addressBookId' => $bookID,
-            'phones' => json_encode($phones),
-            'variables' => json_encode($variables)
-        ];
+            'phones' => $phones,
+            'variables' => $variables
+        ]);
 
-        $requestResult = $this->sendRequest('sms/numbers', 'PUT', $data);
-
-        return $this->handleResult($requestResult);
     }
 
     /**
      * Delete phones from book
-     *
-     * @param $bookID
+     * @link https://sendpulse.com/integrations/api/bulk-sms#delete-telephone
+     * @param int $bookID
      * @param array $phones
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function deletePhones($bookID, array $phones)
+    public function deletePhones(int $bookID, array $phones): ?array
     {
-        if (empty($bookID)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $data = [
+        return $this->delete('sms/numbers', [
             'addressBookId' => $bookID,
-            'phones' => json_encode($phones)
-        ];
-
-        $requestResult = $this->sendRequest('sms/numbers', 'DELETE', $data);
-
-        return $this->handleResult($requestResult);
+            'phones' => $phones
+        ]);
     }
 
     /**
      * get information about phone number
-     *
-     * @param $bookID
-     * @param $phoneNumber
-     * @return stdClass
+     * @info https://sendpulse.com/integrations/api/bulk-sms#retrieve-info-number
+     * @param int $bookID
+     * @param string $phoneNumber
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getPhoneInfo($bookID, $phoneNumber)
+    public function getPhoneInfo(int $bookID, string $phoneNumber): ?array
     {
-        if (empty($bookID)) {
-            return $this->handleError('Empty book id');
-        }
-
-        $requestResult = $this->sendRequest('sms/numbers/info/' . $bookID . '/' . $phoneNumber);
-
-        return $this->handleResult($requestResult);
+        return $this->get('sms/numbers/info/' . $bookID . '/' . $phoneNumber);
     }
 
     /**
      * Add phones to blacklist
-     *
-     * @param $bookID
+     * @link https://sendpulse.com/integrations/api/bulk-sms#add-to-blacklist
      * @param array $phones
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function addPhonesToBlacklist(array $phones)
+    public function addPhonesToBlacklist(array $phones): ?array
     {
-        $data = [
-            'phones' => json_encode($phones)
-        ];
-
-        $requestResult = $this->sendRequest('sms/black_list', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('sms/black_list', [
+            'phones' => $phones
+        ]);
     }
 
     /**
      * Delete phones from blacklist
-     *
+     * @link https://sendpulse.com/integrations/api/bulk-sms#delete-from-blacklist
      * @param array $phones
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function removePhonesFromBlacklist(array $phones)
+    public function removePhonesFromBlacklist(array $phones): ?array
     {
-        $data = [
-            'phones' => json_encode($phones)
-        ];
-
-        $requestResult = $this->sendRequest('sms/black_list', 'DELETE', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->delete('sms/black_list', [
+            'phones' => $phones
+        ]);
     }
 
     /**
      * Get list of phones from blacklist
-     *
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-sms#view-blacklist
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getPhonesFromBlacklist()
+    public function getPhonesFromBlacklist(): ?array
     {
-        $requestResult = $this->sendRequest('sms/black_list');
-
-        return $this->handleResult($requestResult);
+        return $this->get('sms/black_list');
     }
 
     /**
      * Create sms campaign based on phones in book
-     *
-     * @param $bookID
+     * @link https://sendpulse.com/integrations/api/bulk-sms#create-campaign
+     * @param int $bookID
      * @param array $params
      * @param array $additionalParams
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function sendSmsByBook($bookID, array $params, array $additionalParams = [])
+    public function sendSmsByBook(int $bookID, array $params, array $additionalParams = []): ?array
     {
-        if (empty($bookID)) {
-            return $this->handleError('Empty book id');
-        }
-
         $data = [
             'addressBookId' => $bookID
         ];
@@ -1525,23 +1339,24 @@ class ApiClient implements ApiInterface
             $data = array_merge($data, $additionalParams);
         }
 
-        $requestResult = $this->sendRequest('sms/campaigns', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('sms/campaigns', $data);
     }
 
     /**
      * Create sms campaign based on list
-     *
-     * @param $phones
+     * @link  https://sendpulse.com/integrations/api/bulk-sms#create-campaign-to-list
+     * @param array $phones
      * @param array $params
      * @param array $additionalParams
-     * @return stdClass
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::post()
      */
-    public function sendSmsByList(array $phones, array $params, array $additionalParams)
+    public function sendSmsByList(array $phones, array $params, array $additionalParams): ?array
     {
         $data = [
-            'phones' => json_encode($phones)
+            'phones' => $phones
         ];
 
         $data = array_merge($data, $params);
@@ -1550,82 +1365,87 @@ class ApiClient implements ApiInterface
             $data = array_merge($data, $additionalParams);
         }
 
-        $requestResult = $this->sendRequest('sms/send', 'POST', $data);
-
-        return $this->handleResult($requestResult);
+        return $this->post('sms/send', $data);
     }
 
     /**
      * List sms campaigns
-     *
-     * @param $params
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-sms#retrieve-campaign-by-date
+     * @param array $params
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function listSmsCampaigns(array $params = null)
+    public function listSmsCampaigns(array $params = []): ?array
     {
-        $requestResult = $this->sendRequest('sms/campaigns/list', 'GET', $params);
-
-        return $this->handleResult($requestResult);
+        return $this->get('sms/campaigns/list', $params);
     }
 
     /**
      * Get info about sms campaign
-     *
-     * @param $campaignID
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-sms#retrieve-campaign-info
+     * @param int $campaignID
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getSmsCampaignInfo($campaignID)
+    public function getSmsCampaignInfo(int $campaignID): ?array
     {
-        $requestResult = $this->sendRequest('sms/campaigns/info/' . $campaignID);
-
-        return $this->handleResult($requestResult);
+        return $this->get('sms/campaigns/info/' . $campaignID);
     }
 
     /**
      * Cancel SMS campaign
-     *
-     * @param $campaignID
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-sms#cancel-campaign
+     * @param int $campaignID
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::put()
      */
-    public function cancelSmsCampaign($campaignID)
+    public function cancelSmsCampaign(int $campaignID): ?array
     {
-        $requestResult = $this->sendRequest('sms/campaigns/cancel/' . $campaignID, 'PUT');
-
-        return $this->handleResult($requestResult);
+        return $this->put('sms/campaigns/cancel/' . $campaignID);
     }
 
     /**
      * Get SMS campaign cost based on book or simple list
-     *
+     * @link https://sendpulse.com/integrations/api/bulk-sms#cost
      * @param array $params
-     * @param array|null $additionalParams
-     * @return stdClass
+     * @param array $additionalParams
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::get()
      */
-    public function getSmsCampaignCost(array $params, array $additionalParams = null)
+    public function getSmsCampaignCost(array $params, array $additionalParams = []): ?array
     {
         if (!isset($params['addressBookId']) && !isset($params['phones'])) {
-            return $this->handleError('You mast pass phones list or addressbook ID');
+            throw new ApiClientException('You mast pass phones list or addressbook ID');
         }
 
         if ($additionalParams) {
             $params = array_merge($params, $additionalParams);
         }
 
-        $requestResult = $this->sendRequest('sms/campaigns/cost', 'GET', $params);
-
-        return $this->handleResult($requestResult);
+        return $this->get('sms/campaigns/cost', $params);
     }
 
     /**
      * Delete SMS campaign
-     *
-     * @param $campaignID
-     * @return stdClass
+     * @link https://sendpulse.com/integrations/api/bulk-sms#delete-campaign
+     * @param int $campaignID
+     * @return array|null
+     * @throws ApiClientException
+     * @deprecated
+     * @see ApiClient::delete()
      */
-    public function deleteSmsCampaign($campaignID)
+    public function deleteSmsCampaign(int $campaignID): ?array
     {
-        $requestResult = $this->sendRequest('sms/campaigns', 'DELETE', ['id' => $campaignID]);
-
-        return $this->handleResult($requestResult);
+        return $this->delete('sms/campaigns', ['id' => $campaignID]);
     }
+
+
 }
