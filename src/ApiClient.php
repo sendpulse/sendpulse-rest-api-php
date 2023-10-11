@@ -411,7 +411,7 @@ class ApiClient implements ApiInterface
         }
 
         $data = [
-            'emails' => json_encode($emails),
+            'emails' => $emails,
         ];
 
         if ($additionalParams) {
@@ -909,7 +909,7 @@ class ApiClient implements ApiInterface
     public function smtpUnsubscribeEmails(array $emails): ?array
     {
         return $this->post('smtp/unsubscribe', [
-            'emails' => serialize($emails),
+            'emails' => $emails,
         ]);
     }
 
@@ -925,7 +925,7 @@ class ApiClient implements ApiInterface
     public function smtpRemoveFromUnsubscribe($emails): ?array
     {
         return $this->delete('smtp/unsubscribe', [
-            'emails' => serialize($emails)
+            'emails' => $emails
         ]);
 
     }
@@ -1195,7 +1195,7 @@ class ApiClient implements ApiInterface
     {
         return $this->post('sms/numbers', [
             'addressBookId' => $bookID,
-            'phones' => json_encode($phones)
+            'phones' => $phones
         ]);
     }
 
@@ -1213,7 +1213,7 @@ class ApiClient implements ApiInterface
     {
         return $this->post('sms/numbers/variables', [
             'addressBookId' => $bookID,
-            'phones' => json_encode($phonesWithVariables)
+            'phones' => $phonesWithVariables
         ]);
     }
 
@@ -1232,8 +1232,8 @@ class ApiClient implements ApiInterface
     {
         return $this->put('sms/numbers', [
             'addressBookId' => $bookID,
-            'phones' => json_encode($phones),
-            'variables' => json_encode($variables)
+            'phones' => $phones,
+            'variables' => $variables
         ]);
 
     }
@@ -1252,7 +1252,7 @@ class ApiClient implements ApiInterface
     {
         return $this->delete('sms/numbers', [
             'addressBookId' => $bookID,
-            'phones' => json_encode($phones)
+            'phones' => $phones
         ]);
     }
 
@@ -1283,7 +1283,7 @@ class ApiClient implements ApiInterface
     public function addPhonesToBlacklist(array $phones): ?array
     {
         return $this->post('sms/black_list', [
-            'phones' => json_encode($phones)
+            'phones' => $phones
         ]);
     }
 
@@ -1299,7 +1299,7 @@ class ApiClient implements ApiInterface
     public function removePhonesFromBlacklist(array $phones): ?array
     {
         return $this->delete('sms/black_list', [
-            'phones' => json_encode($phones)
+            'phones' => $phones
         ]);
     }
 
@@ -1356,7 +1356,7 @@ class ApiClient implements ApiInterface
     public function sendSmsByList(array $phones, array $params, array $additionalParams): ?array
     {
         $data = [
-            'phones' => json_encode($phones)
+            'phones' => $phones
         ];
 
         $data = array_merge($data, $params);
