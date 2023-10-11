@@ -1,11 +1,8 @@
 <?php
 
-/**
- * File token storage
- * Class File
- */
-
 namespace Sendpulse\RestApi\Storage;
+
+use Sendpulse\RestApi\Contracts\TokenStorageInterface;
 
 class FileStorage implements TokenStorageInterface
 {
@@ -16,55 +13,45 @@ class FileStorage implements TokenStorageInterface
     protected $storageFolder = '';
 
     /**
-     * File constructor.
-     *
      * @param string $storageFolder
      */
-    public function __construct($storageFolder = '')
+    public function __construct(string $storageFolder = '')
     {
         $this->storageFolder = $storageFolder;
     }
 
     /**
-     * @param $key string
-     * @param $token
-     *
-     * @return void
+     * @param string $key
+     * @param string $token
+     * @return bool
      */
-    public function set($key, $token)
+    public function set(string $key, string $token): bool
     {
         $tokenFile = fopen($this->storageFolder . $key, 'wb');
         fwrite($tokenFile, $token);
-        fclose($tokenFile);
+
+        return fclose($tokenFile);
     }
 
     /**
-     * @param $key string
-     *
-     * @return mixed
+     * @param string $key
+     * @return string|null
      */
-    public function get($key)
+    public function get(string $key): ?string
     {
         $filePath = $this->storageFolder . $key;
-        if (file_exists($filePath)) {
-            return file_get_contents($filePath);
-        }
 
-        return null;
+        return file_exists($filePath) ? file_get_contents($filePath) : null;
     }
-    
+
     /**
-     * @param  $key string
-     * 
+     * @param string $key
      * @return bool
      */
-    public function delete($key) 
+    public function delete(string $key): bool
     {
         $filePath = $this->storageFolder . $key;
-        if (file_exists($filePath)) {
-            return unlink($filePath);
-        }
 
-        return false;
+        return file_exists($filePath) && unlink($filePath);
     }
 }

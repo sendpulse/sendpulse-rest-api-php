@@ -4,7 +4,6 @@
  * SendPulse REST API Usage Example
  *
  * Documentation
- * https://login.sendpulse.com/manual/rest-api/
  * https://sendpulse.com/api
  *
  * Settings
@@ -13,168 +12,296 @@
 
 use Sendpulse\RestApi\ApiClient;
 use Sendpulse\RestApi\Storage\FileStorage;
+use Sendpulse\RestApi\ApiClientException;
 
 define('API_USER_ID', '');
 define('API_SECRET', '');
 define('PATH_TO_ATTACH_FILE', __FILE__);
 
-$SPApiClient = new ApiClient(API_USER_ID, API_SECRET, new FileStorage());
-
-// Get Mailing Lists list example
-var_dump($SPApiClient->listAddressBooks());
-
-// Send mail using SMTP
-$email = array(
-    'html' => '<p>Hello!</p>',
-    'text' => 'text',
-    'subject' => 'Mail subject',
-    'from' => array(
-        'name' => 'John',
-        'email' => 'John@domain.com',
-    ),
-    'to' => array(
-        array(
-            'name' => 'Client',
-            'email' => 'client@domain.com',
-        ),
-    ),
-    'bcc' => array(
-        array(
-            'name' => 'Manager',
-            'email' => 'manager@domain.com',
-        ),
-    ),
-    'attachments' => array(
-        'file.txt' => file_get_contents(PATH_TO_ATTACH_FILE),
-    ),
-);
-var_dump($SPApiClient->smtpSendMail($email));
+try {
+    $apiClient = new ApiClient(API_USER_ID, API_SECRET, new FileStorage());
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
 
 
-/*
- * Example: create new push
+/**
+ * Catch error response
  */
-
-$task = array(
-    'title' => 'Hello!',
-    'body' => 'This is my first push message',
-    'website_id' => 1,
-    'ttl' => 20,
-    'stretch_time' => 10,
-);
-// This is optional
-$additionalParams = array(
-    'link' => 'http://yoursite.com',
-    'filter_browsers' => 'Chrome,Safari',
-    'filter_lang' => 'en',
-    'filter' => '{"variable_name":"some","operator":"or","conditions":[{"condition":"likewith","value":"a"},{"condition":"notequal","value":"b"}]}',
-);
-var_dump($SPApiClient->createPushTask($task, $additionalParams));
+try {
+    $errorResponse = $apiClient->get('addressbooks/404');
+    var_dump($errorResponse);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
 
 
-/*
- * SMS methods
+/**
+ * Get a List of Mailing Lists
+ * @link https://sendpulse.com/integrations/api/bulk-email#lists-list
  */
+try {
+    $addressBooks = $apiClient->get('addressbooks', [
+        'limit' => 100,
+        'offset' => 0
+    ]);
+
+    var_dump($addressBooks);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
 
 
-// Add phones to book
-var_dump($SPApiClient->addPhones(BOOK_ID, ['111111111111']));
-
-// Add phones with variables to book
-$data = [
-    '111111111111' => [
-        [
+/**
+ * Add Emails to a Mailing List
+ * @link https://sendpulse.com/integrations/api/bulk-email#add-email
+ */
+try {
+    $addEmailsResult = $apiClient->post('addressbooks/33333/emails', [
+        'emails' => [
             [
-                'name' => 'var_value',
-                'type' => 'string',
-                'value' => 'variable value',
+                'email' => 'test_email@test.com',
+                'variables' => [
+                    'phone' => '+123456789',
+                    'my_var' => 'my_var_value'
+                ]
+            ], [
+                'email' => 'email_test@test.com',
+                'variables' => [
+                    'phone' => '+987654321',
+                    'my_var' => 'my_var_value'
+                ]
             ]
         ]
-    ]
-];
-var_dump($SPApiClient->addPhonesWithVariables(BOOK_ID, $data));
+    ]);
 
-// Update variables
-$phones = ['111111111111'];
-$variables = [
-    [
-        'name' => 'var_value',
-        'type' => 'string',
-        'value' => 'new value',
-    ]
-];
-var_dump($SPApiClient->updatePhoneVaribales(BOOK_ID, $phones, $variables));
+    var_dump($addEmailsResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
 
-// Remove phones
-var_dump($SPApiClient->deletePhones(BOOK_ID, ['111111111111']));
 
-// Get phone info
-var_dump($SPApiClient->getPhoneInfo(BOOK_ID, '111111111111'));
-
-// Add phones to blacklist
-var_dump($SPApiClient->addPhonesToBlacklist(['111111111111']));
-
-// Remove phones from blacklist
-var_dump($SPApiClient->removePhonesFromBlacklist(['111111111111']));
-
-// List phones from blacklist
-var_dump($SPApiClient->getPhonesFromBlacklist());
-
-// Create SMS campaign by book
-$params = [
-    'sender' => 'testsender',
-    'body' => 'test'
-];
-$additionalParams = [
-    'transliterate' => 0
-];
-var_dump($SPApiClient->sendSmsByBook(BOOK_ID, $params, $additionalParams));
-
-// Create SMS campaign by phone list
-$phones = ['111111111111'];
-$params = [
-    'sender' => 'testsender',
-    'body' => 'test'
-];
-$additionalParams = [
-    'transliterate' => 0
-];
-var_dump($SPApiClient->sendSmsByList($phones, $params, $additionalParams));
-
-// List SMS campaigns
-$params = [ // optional params
-    'dateFrom' => '2018-01-31 00:00:00',
-    'dateTo' => '2018-10-31 23:59:59'
-];
-var_dump($SPApiClient->listSmsCampaigns($params));
-
-// Get information about SMS campaign
-var_dump($SPApiClient->getSmsCampaignInfo(CAMPAIGN_ID));
-
-// Cancel SMS campaign
-var_dump($SPApiClient->cancelSmsCampaign(CAMPAIGN_ID));
-
-// Calculate SMS campaign cost by book or phone list
-$params = [
-    'addressBookId' => BOOK_ID, // or 'phones' => ['111111111111']
-    'sender' => 'testsender',
-    'body' => 'test'
-];
-var_dump($SPApiClient->getSmsCampaignCost($params));
-
-// Delete sms campaign
-var_dump($SPApiClient->deleteSmsCampaign(CAMPAIGN_ID));
-
-/*
- * Automation360 methods
+/**
+ * SMTP: send mail
+ * @link https://sendpulse.com/integrations/api/smtp#send-email-smtp
  */
+try {
+    $smtpSendMailResult = $apiClient->post('smtp/emails', [
+        'email' => [
+            'html' => base64_encode('<p>Hello!</p>'),
+            'text' => 'text',
+            'subject' => 'Mail subject',
+            'from' => [
+                'name' => 'API package test',
+                'email' => 'from@test.com',
+            ],
+            'to' => [
+                [
+                    'name' => 'to',
+                    'email' => 'to@test.com',
+                ]
+            ],
+            'bcc' => [
+                [
+                    'name' => 'bcc',
+                    'email' => 'bcc@test.com',
+                ]
+            ],
+            'attachments_binary' => [
+                'attach_image.jpg' => base64_encode(file_get_contents('../storage/attach_image.jpg'))
+            ],
+        ]
+    ]);
 
-// Start event automation360
-$eventName = 'registration';
-$variables = [
-    "email" => "test1@test1.com",
-    "phone" => "+123456789",
-    "var_1" => "var_1_value"
-];
+    var_dump($smtpSendMailResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
 
-var_dump($SPApiClient->startEventAutomation360($eventName,$variables));
+/**
+ * Edit a Mailing List
+ * @link https://sendpulse.com/integrations/api/bulk-email#edit-list
+ */
+try {
+    $addEmailsResult = $apiClient->put('addressbooks/33333', [
+        'name' => "New Name"
+    ]);
+
+    var_dump($addEmailsResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
+
+/**
+ * Edit Scheduled Campaign
+ * @link https://sendpulse.com/integrations/api/bulk-email#edit-campaign
+ */
+try {
+    $editScheduledCampaignResult = $apiClient->patch('campaigns/333333', [
+        "name" => "My_API_campaign",
+        "sender_name" => "sender",
+        "sender_email" => "sender@test.com",
+        "subject" => "Hello customer",
+        "template_id" => 351594,
+        "send_date" => "2023-10-21 11:45:00"
+    ]);
+
+    var_dump($editScheduledCampaignResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
+
+/**
+ * Start A360 event
+ * @link https://login.sendpulse.com/emailservice/events/
+ */
+try {
+    $startEventResult = $apiClient->post('events/name/my_event_name', [
+        "email" => "test@test.com",
+        "phone" => "+123456789",
+        "products" => [
+            [
+                "id" => "id value",
+                "name" => "name value"
+            ]
+        ]
+    ]);
+
+    var_dump($startEventResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
+
+/**
+ * Delete Emails from a Mailing List
+ * @link https://sendpulse.com/integrations/api/bulk-email#delete-email
+ */
+try {
+    $removeEmailsResult = $apiClient->delete('addressbooks/33333/emails', [
+        'emails' => ['test@test.com']
+    ]);
+
+    var_dump($removeEmailsResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
+
+/**
+ * Send SMS
+ * @link https://sendpulse.com/integrations/api/bulk-sms#create-campaign-to-list
+ */
+try {
+    $smsSendResult = $apiClient->post('sms/send', [
+        "sender" => "my_sender",
+        "phones" => [
+            380683850429
+        ],
+        "body" => "api"
+    ]);
+
+    var_dump($smsSendResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
+
+/**
+ * Crm get pipelines
+ * @link https://sendpulse.com/integrations/api/crm#/Pipelines/get_pipelines
+ */
+try {
+    $crmPipelines = $apiClient->get('crm/v1/pipelines');
+
+    var_dump($crmPipelines);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
+
+/**
+ * Crm get contacts
+ * @link https://sendpulse.com/integrations/api/crm#/Contacts/post_contacts_get_list
+ */
+try {
+    $crmContacts = $apiClient->post('crm/v1/contacts/get-list');
+
+    var_dump($crmContacts);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}

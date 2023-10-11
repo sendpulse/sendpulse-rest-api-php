@@ -1,10 +1,23 @@
-# SendPulse REST client library
+SendPulse REST client library
+================
+
+[![License](http://poser.pugx.org/sendpulse/rest-api/license)](https://packagist.org/packages/sendpulse/rest-api)
+[![Total Downloads](http://poser.pugx.org/sendpulse/rest-api/downloads)](https://packagist.org/packages/sendpulse/rest-api)
+[![PHP Version Require](http://poser.pugx.org/sendpulse/rest-api/require/php)](https://packagist.org/packages/sendpulse/rest-api)
 
 A simple SendPulse REST client library and example for PHP.
 
 API Documentation [https://sendpulse.com/api](https://sendpulse.com/api)
 
-### Installing
+
+### Requirements
+
+- php: >=7.1.0
+- ext-json: *
+- ext-curl: *
+
+
+### Installation
 
 Via Composer:
 
@@ -12,7 +25,7 @@ Via Composer:
 composer require sendpulse/rest-api
 ```
 
-### Usage
+### Example
 
 ```php
 <?php
@@ -29,114 +42,170 @@ require 'vendor/autoload.php';
 
 use Sendpulse\RestApi\ApiClient;
 use Sendpulse\RestApi\Storage\FileStorage;
+use Sendpulse\RestApi\ApiClientException;
 
 // API credentials from https://login.sendpulse.com/settings/#api
 define('API_USER_ID', '');
 define('API_SECRET', '');
 define('PATH_TO_ATTACH_FILE', __FILE__);
 
-$SPApiClient = new ApiClient(API_USER_ID, API_SECRET, new FileStorage());
+$apiClient = new ApiClient(API_USER_ID, API_SECRET, new FileStorage());
+
 
 /*
- * Example: Get Mailing Lists
+ * Send GET request
+ * 
+ * Example: Get a List of Mailing Lists
  */
-var_dump($SPApiClient->listAddressBooks());
+try {
+    $addressBooks = $apiClient->get('addressbooks', [
+        'limit' => 100,
+        'offset' => 0
+    ]);
+
+    var_dump($addressBooks);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
 
 /*
+ * Send POST request 
+ * 
  * Example: Add new email to mailing lists
  */
- $bookID = 123;
- $emails = array(
-    array(
-        'email' => 'subscriber@example.com',
-        'variables' => array(
-            'phone' => '+12345678900',
-            'name' => 'User Name',
-        )
-    )
-);
- $additionalParams = array(
-   'confirmation' => 'force',
-   'sender_email' => 'sender@example.com',
-);
- // With confirmation
-var_dump($SPApiClient->addEmails($bookID, $emails, $additionalParams));
+try {
+    $addEmailsResult = $apiClient->post('addressbooks/33333/emails', [
+        'emails' => [
+            [
+                'email' => 'test_email@test.com',
+                'variables' => [
+                    'phone' => '+123456789',
+                    'my_var' => 'my_var_value'
+                ]
+            ], [
+                'email' => 'email_test@test.com',
+                'variables' => [
+                    'phone' => '+987654321',
+                    'my_var' => 'my_var_value'
+                ]
+            ]
+        ]
+    ]);
 
-// Without confirmation
-var_dump($SPApiClient->addEmails($bookID, $emails));
+    var_dump($addEmailsResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+ 
+ 
+/*
+ * Send PUT request 
+ * 
+ * Example: Edit a Mailing List
+ */
+try {
+    $addEmailsResult = $apiClient->put('addressbooks/33333', [
+        'name' => "New Name"
+    ]);
+
+    var_dump($addEmailsResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
 
 /*
- * Example: Send mail using SMTP
+ * Send PATCH request 
+ * 
+ * Example: Edit Scheduled Campaign
  */
-$email = array(
-    'html' => '<p>Hello!</p>',
-    'text' => 'Hello!',
-    'subject' => 'Mail subject',
-    'from' => array(
-        'name' => 'John',
-        'email' => 'sender@example.com',
-    ),
-    'to' => array(
-        array(
-            'name' => 'Subscriber Name',
-            'email' => 'subscriber@example.com',
-        ),
-    ),
-    'bcc' => array(
-        array(
-            'name' => 'Manager',
-            'email' => 'manager@example.com',
-        ),
-    ),
-    'attachments' => array(
-        'file.txt' => file_get_contents(PATH_TO_ATTACH_FILE),
-    ),
-);
-var_dump($SPApiClient->smtpSendMail($email));
+try {
+    $editScheduledCampaignResult = $apiClient->patch('campaigns/333333', [
+        "name" => "My_API_campaign",
+        "sender_name" => "sender",
+        "sender_email" => "sender@test.com",
+        "subject" => "Hello customer",
+        "template_id" => 351594,
+        "send_date" => "2023-10-21 11:45:00"
+    ]);
+
+    var_dump($editScheduledCampaignResult);
+} catch (\Sendpulse\RestApi\ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
 
 /*
- * Example: create new push
+ * Send DELETE request 
+ * 
+ * Example: Delete Emails from a Mailing List
  */
-$task = array(
-    'title' => 'Hello!',
-    'body' => 'This is my first push message',
-    'website_id' => 1,
-    'ttl' => 20,
-    'stretch_time' => 0,
-);
+try {
+    $removeEmailsResult = $apiClient->delete('addressbooks/33333/emails', [
+        'emails' => ['test@test.com']
+    ]);
 
-// This is optional
-$additionalParams = array(
-    'link' => 'http://yoursite.com',
-    'filter_browsers' => 'Chrome,Safari',
-    'filter_lang' => 'en',
-    'filter' => '{"variable_name":"some","operator":"or","conditions":[{"condition":"likewith","value":"a"},{"condition":"notequal","value":"b"}]}',
-);
-var_dump($SPApiClient->createPushTask($task, $additionalParams));
+    var_dump($removeEmailsResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
+/*
+ * Example: Start Automation360 event
+ */
+try {
+    $startEventResult = $apiClient->post('events/name/my_event_name', [
+        "email" => "test@test.com",
+        "phone" => "+123456789",
+        "products" => [
+            [
+                "id" => "id value",
+                "name" => "name value"
+            ]
+        ]
+    ]);
+
+    var_dump($startEventResult);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
 ```
 
-### Usage Automation360
-
-```php
-<?php
-
-require 'vendor/autoload.php';
-
-use Sendpulse\RestApi\Automation360;
-
-// https://login.sendpulse.com/emailservice/events/
-$eventHash = 'EVENT_HASH';
-$email = 'email@domain.com';
-$phone = '380931112233';
-$variables = [
-    'user_id' => 123123,
-    'event_date' => date('Y-m-d'),
-    'firstname' => 'Name',
-    'lastname' => 'Family',
-    'age' => 23
-];
-$automationClient =  new Automation360($eventHash);
-$result = $automationClient->sendEventToSendpulse($email, $phone, $variables);
-
-var_dump($result);
-```
