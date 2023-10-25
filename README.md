@@ -251,7 +251,7 @@ try {
  * Example: Whatsapp send a template message to the specified contact
  */
 try {
-    $crmCreateDeal = $apiClient->post('whatsapp/contacts/sendTemplateByPhone', [
+    $sendTemplateByPhoneResult = $apiClient->post('whatsapp/contacts/sendTemplateByPhone', [
         "bot_id" => "xxxxxxxxxxxxxxxxxxxxxxxx",
         "phone" => "380931112233",
         "template" => [
@@ -263,7 +263,7 @@ try {
         ]
     ]);
 
-    var_dump($crmCreateDeal);
+    var_dump($sendTemplateByPhoneResult);
 } catch (ApiClientException $e) {
     var_dump([
         'message' => $e->getMessage(),
