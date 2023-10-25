@@ -181,6 +181,7 @@ try {
     ]);
 }
 
+
 /*
  * Example: Start Automation360 event
  */
@@ -206,6 +207,73 @@ try {
         'headers' => $e->getHeaders()
     ]);
 }
+
+
+/**
+ * Example: Crm create a new deal
+ */
+try {
+    $crmCreateDeal = $apiClient->post('crm/v1/deals', [
+        "pipelineId" => 0,
+        "stepId" => 0,
+        "responsibleId" => 0,
+        "name" => "string",
+        "price" => 0,
+        "currency" => "string",
+        "sourceId" => 0,
+        "contact" => [
+            0
+        ],
+        "attributes" => [
+            [
+                "attributeId" => 0,
+                "value" => "string"
+            ]
+        ],
+        "attachments" => [
+            "https://link-to-file.com/file.jpg"
+        ]
+    ]);
+
+    var_dump($crmCreateDeal);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
+
+/**
+ * Example: Whatsapp send a template message to the specified contact
+ */
+try {
+    $crmCreateDeal = $apiClient->post('whatsapp/contacts/sendTemplateByPhone', [
+        "bot_id" => "xxxxxxxxxxxxxxxxxxxxxxxx",
+        "phone" => "380931112233",
+        "template" => [
+            "name" => "thanks_for_buying",
+            "language" => [
+                "code" => "en"
+            ],
+            "components" => []
+        ]
+    ]);
+
+    var_dump($crmCreateDeal);
+} catch (ApiClientException $e) {
+    var_dump([
+        'message' => $e->getMessage(),
+        'http_code' => $e->getCode(),
+        'response' => $e->getResponse(),
+        'curl_errors' => $e->getCurlErrors(),
+        'headers' => $e->getHeaders()
+    ]);
+}
+
 
 ```
 
