@@ -113,16 +113,16 @@ class ApiClient implements ApiInterface
      * @return array|null
      * @throws ApiClientException
      */
-    protected function sendRequest(string $path, string $method = self::METHOD_GET, array $data = [], bool $useToken = true): ?array
+    protected function sendRequest(string $path, string $method = self::METHOD_GET, array $data = [], bool $useToken = true, array $headers = []): ?array
     {
         $url = $this->apiUrl . '/' . $path;
         $curl = curl_init();
 
-        $headers = [
+        $headers = array_merge($headers, [
             'Accept: application/json',
             'Content-Type: application/json',
             'Expect:'
-        ];
+        ]);
 
         if ($useToken && !empty($this->token)) {
             $headers[] = 'Authorization: ' . self::TOKEN_TYPE_BEARER . ' ' . $this->token;
