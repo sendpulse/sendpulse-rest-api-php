@@ -31,15 +31,6 @@ composer require sendpulse/rest-api
 <?php
 require 'vendor/autoload.php';
 
-// Without Composer (and instead of "require 'vendor/autoload.php'"):
-// require("your-path/sendpulse-rest-api-php/src/Contracts/ApiInterface.php");
-// require("your-path/sendpulse-rest-api-php/src/ApiClient.php");
-// require("your-path/sendpulse-rest-api-php/src/Contracts/TokenStorageInterface.php");
-// require("your-path/sendpulse-rest-api-php/src/Storage/FileStorage.php");
-// require("your-path/sendpulse-rest-api-php/src/Storage/SessionStorage.php");
-// require("your-path/sendpulse-rest-api-php/src/Storage/MemcachedStorage.php");
-// require("your-path/sendpulse-rest-api-php/src/Storage/MemcacheStorage.php");
-
 use Sendpulse\RestApi\ApiClient;
 use Sendpulse\RestApi\Storage\FileStorage;
 use Sendpulse\RestApi\ApiClientException;
