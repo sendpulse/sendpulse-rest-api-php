@@ -57,7 +57,7 @@ class ApiClient implements ApiInterface
      * @param TokenStorageInterface|null $tokenStorage
      * @throws ApiClientException
      */
-    public function __construct(string $userId, string $secret, TokenStorageInterface $tokenStorage = null)
+    public function __construct(string $userId, string $secret, ?TokenStorageInterface $tokenStorage = null)
     {
         if ($tokenStorage === null) {
             $tokenStorage = new FileStorage();
@@ -307,7 +307,7 @@ class ApiClient implements ApiInterface
      * @deprecated
      * @see ApiClient::get()
      */
-    public function listAddressBooks(int $limit = null, int $offset = null): ?array
+    public function listAddressBooks(?int $limit = null, ?int $offset = null): ?array
     {
         $data = array();
         if (null !== $limit) {
@@ -380,7 +380,7 @@ class ApiClient implements ApiInterface
      * @deprecated
      * @see ApiClient::get()
      */
-    public function getEmailsFromBook(int $id, int $limit = null, int $offset = null): ?array
+    public function getEmailsFromBook(int $id, ?int $limit = null, ?int $offset = null): ?array
     {
         $data = [];
         if (null !== $limit) {
@@ -477,7 +477,7 @@ class ApiClient implements ApiInterface
      * @deprecated
      * @see ApiClient::get()
      */
-    public function listCampaigns(int $limit = null, int $offset = null): ?array
+    public function listCampaigns(?int $limit = null, ?int $offset = null): ?array
     {
         $data = [];
         if (!empty($limit)) {
@@ -563,7 +563,7 @@ class ApiClient implements ApiInterface
         string $type = '',
         bool   $useTemplateId = false,
         string $sendDate = '',
-        int    $segmentId = null,
+        ?int    $segmentId = null,
         array  $attachmentsBinary = []
     ): ?array
     {
@@ -884,7 +884,7 @@ class ApiClient implements ApiInterface
      * @deprecated
      * @see ApiClient::get()
      */
-    public function smtpListUnsubscribed(int $limit = null, int $offset = null): ?array
+    public function smtpListUnsubscribed(?int $limit = null, ?int $offset = null): ?array
     {
         $data = array();
         if (null !== $limit) {
@@ -974,7 +974,7 @@ class ApiClient implements ApiInterface
      * @deprecated
      * @see ApiClient::get()
      */
-    public function pushListCampaigns(int $limit = null, int $offset = null): ?array
+    public function pushListCampaigns(?int $limit = null, ?int $offset = null): ?array
     {
         $data = [];
         if (null !== $limit) {
@@ -997,7 +997,7 @@ class ApiClient implements ApiInterface
      * @deprecated
      * @see ApiClient::get()
      */
-    public function pushListWebsites(int $limit = null, int $offset = null): ?array
+    public function pushListWebsites(?int $limit = null, ?int $offset = null): ?array
     {
         $data = array();
         if (null !== $limit) {
@@ -1048,7 +1048,7 @@ class ApiClient implements ApiInterface
      * @deprecated
      * @see ApiClient::get()
      */
-    public function pushListWebsiteSubscriptions(int $websiteID, int $limit = null, int $offset = null): ?array
+    public function pushListWebsiteSubscriptions(int $websiteID, ?int $limit = null, ?int $offset = null): ?array
     {
         $data = [];
         if (null !== $limit) {
