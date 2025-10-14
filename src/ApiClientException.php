@@ -32,12 +32,12 @@ class ApiClientException extends Exception
      * @param string|null $curlErrors
      */
     public function __construct(
-        string    $message = "",
-        int       $code = 0,
-        Throwable $previous = null,
-        array     $responseBody = [],
-        string    $headers = null,
-        string    $curlErrors = null
+        string     $message = "",
+        int        $code = 0,
+        ?Throwable $previous = null,
+        array      $responseBody = [],
+        ?string    $headers = null,
+        ?string    $curlErrors = null
     )
     {
         $this->response = $responseBody;
