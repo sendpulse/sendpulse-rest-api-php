@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Sendpulse\RestApi\Generated\Operation\Crm;
+
+use Sendpulse\RestApi\Http\Request;
+
+final class UpdateDealComment
+{
+    public static function build(
+        int $dealId,
+        int $commentId,
+        array $body = [],
+    ): Request
+    {
+        $uri = str_replace('{commentId}', (string) $commentId, str_replace('{dealId}', (string) $dealId, '/deals/{dealId}/comments/{commentId}'));
+        $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
+
+        return new Request(
+            method:  'PUT',
+            uri:     $uri,
+            body:    $encodedBody,
+        );
+    }
+}

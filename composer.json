@@ -1,34 +1,54 @@
 {
   "name": "sendpulse/rest-api",
-  "description": "Sendpulse REST API client library",
-  "keywords": [
-    "sendpulse",
-    "rest",
-    "api"
-  ],
+  "description": "Official PHP SDK for the SendPulse REST API",
+  "type": "library",
   "license": "MIT",
-  "authors": [
-    {
-      "name": "Maksym Ustymenko",
-      "email": "m.ustymenko@sendpulse.com"
-    },
-    {
-      "name": "Alexey Moroz",
-      "email": "a.moroz@sendpulse.com"
-    },
-    {
-      "name": "Evgeniy Bilovol",
-      "email": "e.bilovol@sendpulse.com"
-    }
-  ],
+  "homepage": "https://sendpulse.com/integrations/api",
+  "keywords": ["sendpulse", "api", "rest", "sdk", "email", "sms", "crm", "chatbots"],
+  "support": {
+    "issues": "https://github.com/sendpulse/sendpulse-rest-api-php/issues",
+    "source": "https://github.com/sendpulse/sendpulse-rest-api-php"
+  },
   "require": {
-    "php": ">=7.1.0",
-    "ext-json": "*",
-    "ext-curl": "*"
+    "php": ">=8.3",
+    "ext-curl": "*",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "cebe/php-openapi": "^1.8",
+    "friendsofphp/php-cs-fixer": "^3.64",
+    "phpstan/phpstan": "^2.0",
+    "phpunit/phpunit": "^11.0",
+    "psr/http-client": "^1.0",
+    "psr/http-factory": "^1.1",
+    "psr/simple-cache": "^3.0"
+  },
+  "suggest": {
+    "psr/http-client": "To plug in your own PSR-18 HTTP client (Guzzle, Symfony) instead of the bundled curl transport",
+    "psr/simple-cache": "To use your own PSR-16 cache for token storage instead of the default file cache"
   },
   "autoload": {
     "psr-4": {
       "Sendpulse\\RestApi\\": "src/"
     }
-  }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Sendpulse\\RestApi\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "analyse": "phpstan analyse",
+    "cs": "php-cs-fixer fix --diff",
+    "cs:check": "php-cs-fixer fix --dry-run --diff"
+  },
+  "config": {
+    "sort-packages": true,
+    "platform": {
+      "php": "8.3.0"
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }
