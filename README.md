@@ -5,14 +5,16 @@ SendPulse REST client library
 [![Total Downloads](http://poser.pugx.org/sendpulse/rest-api/downloads)](https://packagist.org/packages/sendpulse/rest-api)
 [![PHP Version Require](http://poser.pugx.org/sendpulse/rest-api/require/php)](https://packagist.org/packages/sendpulse/rest-api)
 
-A simple SendPulse REST client library and example for PHP.
+Official PHP client for the [SendPulse REST API](https://sendpulse.com/integrations/api).
 
-API Documentation [https://sendpulse.com/api](https://sendpulse.com/api)
-
+- PHP **≥ 8.3**, zero runtime dependencies (`ext-curl`, `ext-json`)
+- PSR-18 HTTP client and PSR-16 cache adapters available as optional drop-ins
+- Typed models generated from OpenAPI specs; thin ergonomic service layer on top
+- PHPStan max · PSR-12 · 26 unit tests
 
 ### Requirements
 
-- php: >=7.1.0
+- php: >=8.3
 - ext-json: *
 - ext-curl: *
 
@@ -25,246 +27,188 @@ Via Composer:
 composer require sendpulse/rest-api
 ```
 
-### Example
+
+## Quick start
+
+### API key auth
 
 ```php
-<?php
-require 'vendor/autoload.php';
+use Sendpulse\RestApi\Client;
 
-use Sendpulse\RestApi\ApiClient;
-use Sendpulse\RestApi\Storage\FileStorage;
-use Sendpulse\RestApi\ApiClientException;
-
-// API credentials from https://login.sendpulse.com/settings/#api
-define('API_USER_ID', '');
-define('API_SECRET', '');
-define('PATH_TO_ATTACH_FILE', __FILE__);
-
-$apiClient = new ApiClient(API_USER_ID, API_SECRET, new FileStorage());
-
-
-/*
- * Send GET request
- * 
- * Example: Get a List of Mailing Lists
- */
-try {
-    $addressBooks = $apiClient->get('addressbooks', [
-        'limit' => 100,
-        'offset' => 0
-    ]);
-
-    var_dump($addressBooks);
-} catch (ApiClientException $e) {
-    var_dump([
-        'message' => $e->getMessage(),
-        'http_code' => $e->getCode(),
-        'response' => $e->getResponse(),
-        'curl_errors' => $e->getCurlErrors(),
-        'headers' => $e->getHeaders()
-    ]);
-}
-
-
-/*
- * Send POST request 
- * 
- * Example: Add new email to mailing lists
- */
-try {
-    $addEmailsResult = $apiClient->post('addressbooks/33333/emails', [
-        'emails' => [
-            [
-                'email' => 'test_email@test.com',
-                'variables' => [
-                    'phone' => '+123456789',
-                    'my_var' => 'my_var_value'
-                ]
-            ], [
-                'email' => 'email_test@test.com',
-                'variables' => [
-                    'phone' => '+987654321',
-                    'my_var' => 'my_var_value'
-                ]
-            ]
-        ]
-    ]);
-
-    var_dump($addEmailsResult);
-} catch (ApiClientException $e) {
-    var_dump([
-        'message' => $e->getMessage(),
-        'http_code' => $e->getCode(),
-        'response' => $e->getResponse(),
-        'curl_errors' => $e->getCurlErrors(),
-        'headers' => $e->getHeaders()
-    ]);
-}
- 
- 
-/*
- * Send PUT request 
- * 
- * Example: Edit a Mailing List
- */
-try {
-    $addEmailsResult = $apiClient->put('addressbooks/33333', [
-        'name' => "New Name"
-    ]);
-
-    var_dump($addEmailsResult);
-} catch (ApiClientException $e) {
-    var_dump([
-        'message' => $e->getMessage(),
-        'http_code' => $e->getCode(),
-        'response' => $e->getResponse(),
-        'curl_errors' => $e->getCurlErrors(),
-        'headers' => $e->getHeaders()
-    ]);
-}
-
-
-/*
- * Send PATCH request 
- * 
- * Example: Edit Scheduled Campaign
- */
-try {
-    $editScheduledCampaignResult = $apiClient->patch('campaigns/333333', [
-        "name" => "My_API_campaign",
-        "sender_name" => "sender",
-        "sender_email" => "sender@test.com",
-        "subject" => "Hello customer",
-        "template_id" => 351594,
-        "send_date" => "2023-10-21 11:45:00"
-    ]);
-
-    var_dump($editScheduledCampaignResult);
-} catch (\Sendpulse\RestApi\ApiClientException $e) {
-    var_dump([
-        'message' => $e->getMessage(),
-        'http_code' => $e->getCode(),
-        'response' => $e->getResponse(),
-        'curl_errors' => $e->getCurlErrors(),
-        'headers' => $e->getHeaders()
-    ]);
-}
-
-
-/*
- * Send DELETE request 
- * 
- * Example: Delete Emails from a Mailing List
- */
-try {
-    $removeEmailsResult = $apiClient->delete('addressbooks/33333/emails', [
-        'emails' => ['test@test.com']
-    ]);
-
-    var_dump($removeEmailsResult);
-} catch (ApiClientException $e) {
-    var_dump([
-        'message' => $e->getMessage(),
-        'http_code' => $e->getCode(),
-        'response' => $e->getResponse(),
-        'curl_errors' => $e->getCurlErrors(),
-        'headers' => $e->getHeaders()
-    ]);
-}
-
-
-/*
- * Example: Start Automation360 event
- */
-try {
-    $startEventResult = $apiClient->post('events/name/my_event_name', [
-        "email" => "test@test.com",
-        "phone" => "+123456789",
-        "products" => [
-            [
-                "id" => "id value",
-                "name" => "name value"
-            ]
-        ]
-    ]);
-
-    var_dump($startEventResult);
-} catch (ApiClientException $e) {
-    var_dump([
-        'message' => $e->getMessage(),
-        'http_code' => $e->getCode(),
-        'response' => $e->getResponse(),
-        'curl_errors' => $e->getCurlErrors(),
-        'headers' => $e->getHeaders()
-    ]);
-}
-
-
-/**
- * Example: Crm create a new deal
- */
-try {
-    $crmCreateDeal = $apiClient->post('crm/v1/deals', [
-        "pipelineId" => 0,
-        "stepId" => 0,
-        "responsibleId" => 0,
-        "name" => "string",
-        "price" => 0,
-        "currency" => "string",
-        "sourceId" => 0,
-        "contact" => [
-            0
-        ],
-        "attributes" => [
-            [
-                "attributeId" => 0,
-                "value" => "string"
-            ]
-        ],
-        "attachments" => [
-            "https://link-to-file.com/file.jpg"
-        ]
-    ]);
-
-    var_dump($crmCreateDeal);
-} catch (ApiClientException $e) {
-    var_dump([
-        'message' => $e->getMessage(),
-        'http_code' => $e->getCode(),
-        'response' => $e->getResponse(),
-        'curl_errors' => $e->getCurlErrors(),
-        'headers' => $e->getHeaders()
-    ]);
-}
-
-
-/**
- * Example: Whatsapp send a template message to the specified contact
- */
-try {
-    $sendTemplateByPhoneResult = $apiClient->post('whatsapp/contacts/sendTemplateByPhone', [
-        "bot_id" => "xxxxxxxxxxxxxxxxxxxxxxxx",
-        "phone" => "380931112233",
-        "template" => [
-            "name" => "thanks_for_buying",
-            "language" => [
-                "code" => "en"
-            ],
-            "components" => []
-        ]
-    ]);
-
-    var_dump($sendTemplateByPhoneResult);
-} catch (ApiClientException $e) {
-    var_dump([
-        'message' => $e->getMessage(),
-        'http_code' => $e->getCode(),
-        'response' => $e->getResponse(),
-        'curl_errors' => $e->getCurlErrors(),
-        'headers' => $e->getHeaders()
-    ]);
-}
-
-
+$client = new Client(apiKey: 'YOUR_API_KEY');
 ```
 
+### OAuth (client credentials)
+
+```php
+$client = new Client(
+    clientId:     'YOUR_CLIENT_ID',
+    clientSecret: 'YOUR_CLIENT_SECRET',
+);
+```
+
+Tokens are fetched automatically and stored on disk between requests.
+
+## Services
+
+| Method | Service |
+|---|---|
+| `$client->emailService()` | Bulk email campaigns and address books |
+| `$client->smtpService()` | Transactional SMTP emails |
+| `$client->smsService()` | SMS campaigns |
+| `$client->crmService()` | CRM contacts and deals |
+| `$client->chatbotService()` | Chatbot bots |
+
+## Email service
+
+```php
+$email = $client->emailService();
+
+// Campaigns
+$campaigns = $email->campaigns()->getCampaigns(limit: 50);  // CampaignSummary[]
+$campaign  = $email->campaigns()->getCampaignById(123);     // CampaignDetails
+
+// Mailing lists
+$lists = $email->mailingLists()->getMailingLists();         // array
+$list  = $email->mailingLists()->getMailingListById(456);   // array
+
+$email->mailingLists()->createMailingList(['name' => 'My list']);
+$email->mailingLists()->updateMailingList(456, ['name' => 'Renamed']);
+$email->mailingLists()->deleteMailingList(456);
+```
+
+## SMTP service
+
+```php
+$smtp = $client->smtpService();
+
+$emails = $smtp->emails()->getSmtpEmails(limit: 100, offset: 0);  // EmailRecord[]
+$email  = $smtp->emails()->getSmtpEmailInfo('message-id');         // EmailRecord
+
+$smtp->emails()->sendSmtpEmail([
+    'email' => [
+        'html'    => '<h1>Hello</h1>',
+        'text'    => 'Hello',
+        'subject' => 'Test',
+        'from'    => ['name' => 'Sender', 'email' => 'sender@example.com'],
+        'to'      => [['name' => 'Recipient', 'email' => 'user@example.com']],
+    ],
+]);
+```
+
+## SMS service
+
+```php
+$sms = $client->smsService();
+
+$campaigns = $sms->campaigns()->getSmsCampaigns();    // array
+$campaign  = $sms->campaigns()->getSmsCampaignInfo(789); // array
+```
+
+## CRM service
+
+```php
+$crm = $client->crmService();
+
+// Contacts
+$contacts = $crm->contacts()->getContactsList();                                    // Contact[]
+$contacts = $crm->contacts()->getContactListByEmail(['email' => 'alice@example.com']); // with filter
+$contact  = $crm->contacts()->getContactById(1);                                   // array
+
+// Deals
+$deals = $crm->deals()->getDealsList();                          // array
+$deals = $crm->deals()->getDealsList(['pipeline_id' => 5]);     // with filter
+$deal  = $crm->deals()->getDeal(10);                            // array
+```
+
+## Chatbot service
+
+```php
+$bots = $client->chatbotService()->bots()->getBots();  // array
+```
+
+## Error handling
+
+```php
+use Sendpulse\RestApi\Exception\AuthException;
+use Sendpulse\RestApi\Exception\RateLimitException;
+use Sendpulse\RestApi\Exception\ApiException;
+use Sendpulse\RestApi\Exception\NetworkException;
+use Sendpulse\RestApi\Exception\ProtocolException;
+
+try {
+    $campaigns = $client->emailService()->campaigns()->getCampaigns();
+} catch (AuthException $e) {
+    // 401 / 403 — check credentials
+} catch (RateLimitException $e) {
+    // 429 — back off and retry
+} catch (ApiException $e) {
+    echo $e->httpStatus; // 4xx / 5xx
+    echo $e->rawBody;
+} catch (ProtocolException $e) {
+    // response received but could not be parsed (malformed JSON from API)
+} catch (NetworkException $e) {
+    // curl / transport error
+}
+```
+
+## Configuration
+
+```php
+$client = new Client(
+    apiKey:         'key',
+    connectTimeout: 10,   // seconds, default
+    requestTimeout: 30,   // seconds, default
+);
+```
+
+## Custom HTTP client (PSR-18)
+
+```php
+use Sendpulse\RestApi\Http\Adapter\Psr18Adapter;
+
+$client = new Client(
+    apiKey:     'key',
+    httpClient: new Psr18Adapter(
+        client:         $yourPsr18Client,
+        requestFactory: $requestFactory,
+        streamFactory:  $streamFactory,
+    ),
+);
+```
+
+## Custom token storage
+
+```php
+use Sendpulse\RestApi\Token\Psr16TokenStorage;
+use Sendpulse\RestApi\Token\InMemoryTokenStorage;
+
+// PSR-16 cache (e.g. Symfony Cache, Laravel Cache)
+$storage = new Psr16TokenStorage($psr16Cache);
+
+// In-memory (tokens lost on process exit)
+$storage = new InMemoryTokenStorage();
+
+$client = new Client(
+    clientId:     'id',
+    clientSecret: 'secret',
+    tokenStorage: $storage,
+);
+```
+
+Default is `FileTokenStorage` (system temp directory or custom `cacheDir`).
+
+## Documentation
+
+| Topic | |
+|---|---|
+| Authentication & token storage | [docs/authentication.md](docs/authentication.md) |
+| Exception reference | [docs/exceptions.md](docs/exceptions.md) |
+| Testing | [docs/testing.md](docs/testing.md) |
+| Laravel integration | [docs/laravel.md](docs/laravel.md) |
+| Upgrading from 1.x | [docs/upgrading.md](docs/upgrading.md) |
+
+
+## License
+
+MIT

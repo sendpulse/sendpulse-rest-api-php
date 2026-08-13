@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Sendpulse\RestApi\Generated\Operation\Crm;
+
+use Sendpulse\RestApi\Http\Request;
+
+final class GetContactAttributes
+{
+    public static function build(): Request
+    {
+        $uri = '/contacts/attributes';
+
+        return new Request(
+            method:  'GET',
+            uri:     $uri,
+        );
+    }
+}

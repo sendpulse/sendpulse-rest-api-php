@@ -1,1 +1,10 @@
-.idea/
+/vendor/
+/codegen/openapi/
+/.idea/
+/.vscode/
+/.php-cs-fixer.cache
+/.phpunit.result.cache
+/.claude/
+/composer.lock
+*.log
+.DS_Store
