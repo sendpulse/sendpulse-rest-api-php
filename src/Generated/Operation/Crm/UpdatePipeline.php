@@ -13,7 +13,7 @@ final class UpdatePipeline
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{pipelineId}', (string) $pipelineId, '/pipelines/{pipelineId}');
+        $uri = str_replace('{pipelineId}', rawurlencode((string) $pipelineId), '/crm/v1/pipelines/{pipelineId}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

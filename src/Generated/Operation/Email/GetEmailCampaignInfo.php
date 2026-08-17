@@ -13,7 +13,7 @@ final class GetEmailCampaignInfo
         string $email,
     ): Request
     {
-        $uri = str_replace('{email}', (string) $email, str_replace('{id}', (string) $id, '/campaigns/{id}/email/{email}'));
+        $uri = str_replace('{email}', rawurlencode((string) $email), str_replace('{id}', rawurlencode((string) $id), '/campaigns/{id}/email/{email}'));
 
         return new Request(
             method:  'GET',

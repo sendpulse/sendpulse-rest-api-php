@@ -13,7 +13,7 @@ final class UpdateManagerSetting
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{settingId}', (string) $settingId, '/manager-settings/{settingId}');
+        $uri = str_replace('{settingId}', rawurlencode((string) $settingId), '/crm/v1/manager-settings/{settingId}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

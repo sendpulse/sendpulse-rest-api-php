@@ -13,7 +13,7 @@ final class DetachContactFromTask
         int $contactId,
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, str_replace('{taskId}', (string) $taskId, '/task-contacts/{taskId}/contact/{contactId}'));
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/task-contacts/{taskId}/contact/{contactId}'));
 
         return new Request(
             method:  'DELETE',

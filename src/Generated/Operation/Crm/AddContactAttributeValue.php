@@ -13,7 +13,7 @@ final class AddContactAttributeValue
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/attributes');
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/attributes');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

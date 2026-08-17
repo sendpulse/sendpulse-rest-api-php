@@ -12,7 +12,7 @@ final class DeleteWebhook
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/v2/email-service/webhook/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/v2/email-service/webhook/{id}');
 
         return new Request(
             method:  'DELETE',

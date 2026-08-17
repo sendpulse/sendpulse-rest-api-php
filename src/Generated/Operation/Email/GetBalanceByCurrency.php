@@ -12,7 +12,7 @@ final class GetBalanceByCurrency
         string $currency,
     ): Request
     {
-        $uri = str_replace('{currency}', (string) $currency, '/balance/{currency}');
+        $uri = str_replace('{currency}', rawurlencode((string) $currency), '/balance/{currency}');
 
         return new Request(
             method:  'GET',

@@ -13,7 +13,7 @@ final class UpdateContactTag
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{tagId}', (string) $tagId, '/contact-tags/{tagId}');
+        $uri = str_replace('{tagId}', rawurlencode((string) $tagId), '/crm/v1/contact-tags/{tagId}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

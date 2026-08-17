@@ -14,7 +14,7 @@ final class CreateCompanyMessenger
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{entityId}', (string) $entityId, str_replace('{entityType}', (string) $entityType, '/companies/{companyId}/messengers'));
+        $uri = str_replace('{entityId}', rawurlencode((string) $entityId), str_replace('{entityType}', rawurlencode((string) $entityType), '/crm/v1/companies/{companyId}/messengers'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -13,7 +13,7 @@ final class DetachTaskFromTask
         int $taskId,
     ): Request
     {
-        $uri = str_replace('{taskId}', (string) $taskId, str_replace('{taskHeadId}', (string) $taskHeadId, '/task-to-task/{taskHeadId}/task/{taskId}'));
+        $uri = str_replace('{taskId}', rawurlencode((string) $taskId), str_replace('{taskHeadId}', rawurlencode((string) $taskHeadId), '/crm/v1/task-to-task/{taskHeadId}/task/{taskId}'));
 
         return new Request(
             method:  'DELETE',

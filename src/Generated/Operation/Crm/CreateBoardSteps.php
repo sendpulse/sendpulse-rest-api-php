@@ -13,7 +13,7 @@ final class CreateBoardSteps
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{boardId}', (string) $boardId, '/boards/{boardId}/steps');
+        $uri = str_replace('{boardId}', rawurlencode((string) $boardId), '/crm/v1/boards/{boardId}/steps');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

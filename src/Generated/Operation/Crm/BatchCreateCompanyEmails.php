@@ -13,7 +13,7 @@ final class BatchCreateCompanyEmails
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{companyId}', (string) $companyId, '/companies/{companyId}/emails/batch');
+        $uri = str_replace('{companyId}', rawurlencode((string) $companyId), '/crm/v1/companies/{companyId}/emails/batch');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

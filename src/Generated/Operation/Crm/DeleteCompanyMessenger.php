@@ -14,7 +14,7 @@ final class DeleteCompanyMessenger
         int $messengerId,
     ): Request
     {
-        $uri = str_replace('{messengerId}', (string) $messengerId, str_replace('{entityId}', (string) $entityId, str_replace('{entityType}', (string) $entityType, '/companies/{companyId}/messengers/{messengerId}')));
+        $uri = str_replace('{messengerId}', rawurlencode((string) $messengerId), str_replace('{entityId}', rawurlencode((string) $entityId), str_replace('{entityType}', rawurlencode((string) $entityType), '/crm/v1/companies/{companyId}/messengers/{messengerId}')));
 
         return new Request(
             method:  'DELETE',

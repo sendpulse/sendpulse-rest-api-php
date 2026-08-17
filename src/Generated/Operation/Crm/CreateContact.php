@@ -12,7 +12,7 @@ final class CreateContact
         array $body = [],
     ): Request
     {
-        $uri = '/contacts/create';
+        $uri = '/crm/v1/contacts/create';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

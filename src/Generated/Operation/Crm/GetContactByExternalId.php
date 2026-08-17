@@ -12,7 +12,7 @@ final class GetContactByExternalId
         int $externalContactId,
     ): Request
     {
-        $uri = str_replace('{externalContactId}', (string) $externalContactId, '/contacts/external/{externalContactId}');
+        $uri = str_replace('{externalContactId}', rawurlencode((string) $externalContactId), '/crm/v1/contacts/external/{externalContactId}');
 
         return new Request(
             method:  'GET',

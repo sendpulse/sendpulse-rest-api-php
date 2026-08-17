@@ -13,7 +13,7 @@ final class DeletePipelineAttribute
         int $attributeId,
     ): Request
     {
-        $uri = str_replace('{attributeId}', (string) $attributeId, str_replace('{pipelineId}', (string) $pipelineId, '/pipelines/{pipelineId}/attributes/{attributeId}'));
+        $uri = str_replace('{attributeId}', rawurlencode((string) $attributeId), str_replace('{pipelineId}', rawurlencode((string) $pipelineId), '/crm/v1/pipelines/{pipelineId}/attributes/{attributeId}'));
 
         return new Request(
             method:  'DELETE',

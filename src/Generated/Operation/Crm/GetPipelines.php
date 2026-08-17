@@ -10,7 +10,7 @@ final class GetPipelines
 {
     public static function build(): Request
     {
-        $uri = '/pipelines';
+        $uri = '/crm/v1/pipelines';
 
         return new Request(
             method:  'GET',

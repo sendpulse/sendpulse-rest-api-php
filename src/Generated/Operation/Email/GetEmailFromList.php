@@ -13,7 +13,7 @@ final class GetEmailFromList
         string $email,
     ): Request
     {
-        $uri = str_replace('{email}', (string) $email, str_replace('{id}', (string) $id, '/addressbooks/{id}/emails/{email}'));
+        $uri = str_replace('{email}', rawurlencode((string) $email), str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/emails/{email}'));
 
         return new Request(
             method:  'GET',

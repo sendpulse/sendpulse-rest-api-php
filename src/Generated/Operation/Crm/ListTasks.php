@@ -12,7 +12,7 @@ final class ListTasks
         array $body = [],
     ): Request
     {
-        $uri = '/tasks/list';
+        $uri = '/crm/v1/tasks/list';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -12,7 +12,7 @@ final class DeleteMailingList
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}');
 
         return new Request(
             method:  'DELETE',

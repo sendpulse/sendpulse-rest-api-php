@@ -13,7 +13,7 @@ final class UpdateWebhook
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/v2/email-service/webhook/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/v2/email-service/webhook/{id}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

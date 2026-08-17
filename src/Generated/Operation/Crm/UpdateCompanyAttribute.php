@@ -13,7 +13,7 @@ final class UpdateCompanyAttribute
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{attributeId}', (string) $attributeId, '/companies/attributes/{attribute}');
+        $uri = str_replace('{attributeId}', rawurlencode((string) $attributeId), '/crm/v1/companies/attributes/{attribute}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

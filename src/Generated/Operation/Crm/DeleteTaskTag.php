@@ -12,7 +12,7 @@ final class DeleteTaskTag
         int $tagId,
     ): Request
     {
-        $uri = str_replace('{tagId}', (string) $tagId, '/task-tags/{tagId}');
+        $uri = str_replace('{tagId}', rawurlencode((string) $tagId), '/crm/v1/task-tags/{tagId}');
 
         return new Request(
             method:  'DELETE',

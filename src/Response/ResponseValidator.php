@@ -6,6 +6,7 @@ namespace Sendpulse\RestApi\Response;
 
 use Sendpulse\RestApi\Exception\ApiException;
 use Sendpulse\RestApi\Exception\AuthException;
+use Sendpulse\RestApi\Exception\ForbiddenException;
 use Sendpulse\RestApi\Exception\ProtocolException;
 use Sendpulse\RestApi\Exception\RateLimitException;
 use Sendpulse\RestApi\Http\Response;
@@ -21,8 +22,12 @@ final class ResponseValidator
             return $this->decode($response);
         }
 
-        if ($status === 401 || $status === 403) {
+        if ($status === 401) {
             throw new AuthException($status, $response->body);
+        }
+
+        if ($status === 403) {
+            throw new ForbiddenException($status, $response->body);
         }
 
         if ($status === 429) {
@@ -48,6 +53,10 @@ final class ResponseValidator
             );
         }
 
-        return is_array($data) ? $data : [];
+        if (!is_array($data)) {
+            throw new ProtocolException('Expected JSON object or array, got ' . gettype($data));
+        }
+
+        return $data;
     }
 }

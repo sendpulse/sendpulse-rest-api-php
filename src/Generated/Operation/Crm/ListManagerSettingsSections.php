@@ -10,7 +10,7 @@ final class ListManagerSettingsSections
 {
     public static function build(): Request
     {
-        $uri = '/manager-settings/sections';
+        $uri = '/crm/v1/manager-settings/sections';
 
         return new Request(
             method:  'GET',

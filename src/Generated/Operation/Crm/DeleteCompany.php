@@ -12,7 +12,7 @@ final class DeleteCompany
         int $companyId,
     ): Request
     {
-        $uri = str_replace('{companyId}', (string) $companyId, '/companies/{companyId}');
+        $uri = str_replace('{companyId}', rawurlencode((string) $companyId), '/crm/v1/companies/{companyId}');
 
         return new Request(
             method:  'DELETE',

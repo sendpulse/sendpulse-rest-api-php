@@ -1,17 +1,19 @@
 # Exception Reference
 
-All SDK exceptions extend `\RuntimeException` and are thrown only — never swallowed internally.
+All SDK exceptions implement `SendPulseExceptionInterface` and are thrown only — never swallowed internally.
 
 ## Hierarchy
 
 ```
-\RuntimeException
-├── Sendpulse\RestApi\Exception\SendPulseException  (abstract)
-│   ├── AuthException       — 401, 403
-│   ├── RateLimitException  — 429
-│   └── ApiException        — other 4xx, 5xx
-├── NetworkException        — transport / cURL failure
-└── ProtocolException       — response received but cannot be parsed
+Sendpulse\RestApi\Exception\SendPulseExceptionInterface  (marker interface)
+├── \RuntimeException
+│   ├── Sendpulse\RestApi\Exception\SendPulseException  (abstract)
+│   │   ├── AuthException       — 401
+│   │   ├── ForbiddenException  — 403
+│   │   ├── RateLimitException  — 429
+│   │   └── ApiException        — other 4xx, 5xx
+│   ├── NetworkException        — transport / cURL failure
+│   └── ProtocolException       — response received but cannot be parsed
 ```
 
 `SendPulseException` carries two public properties:
@@ -27,19 +29,37 @@ $e->rawBody;     // string — raw response body
 
 ## AuthException
 
-**When:** API returns `401` or `403`.
+**When:** API returns `401`.
 
 **Causes:**
 - Invalid or expired API key
 - Invalid OAuth credentials (`clientId` / `clientSecret`)
-- Insufficient permissions for the requested resource
 
 **What to do:** check your credentials. For OAuth, the SDK automatically retries once with a fresh token on `401` before throwing — so if you see this exception, the refresh also failed.
 
 ```php
 } catch (AuthException $e) {
-    echo $e->httpStatus; // 401 or 403
+    echo $e->httpStatus; // 401
     echo $e->rawBody;    // {"error": "..."}
+}
+```
+
+---
+
+## ForbiddenException
+
+**When:** API returns `403`.
+
+**Causes:**
+- Current tariff plan does not include the requested feature
+- Account-level permission restriction
+
+**What to do:** check your SendPulse subscription. Retrying will not help — this is not an authentication issue.
+
+```php
+} catch (ForbiddenException $e) {
+    echo $e->httpStatus; // 403
+    echo $e->rawBody;    // {"message": "Access denied! Please change your tariff plan"}
 }
 ```
 
@@ -125,6 +145,7 @@ Catch from most specific to least specific:
 
 ```php
 use Sendpulse\RestApi\Exception\AuthException;
+use Sendpulse\RestApi\Exception\ForbiddenException;
 use Sendpulse\RestApi\Exception\RateLimitException;
 use Sendpulse\RestApi\Exception\ApiException;
 use Sendpulse\RestApi\Exception\ProtocolException;
@@ -133,11 +154,13 @@ use Sendpulse\RestApi\Exception\NetworkException;
 try {
     $result = $client->smtpService()->emails()->sendSmtpEmail($payload);
 } catch (AuthException $e) {
-    // credentials problem — do not retry
+    // 401 — credentials problem, do not retry
+} catch (ForbiddenException $e) {
+    // 403 — tariff or permission restriction, do not retry
 } catch (RateLimitException $e) {
-    // slow down — retry after delay
+    // 429 — slow down, retry after delay
 } catch (ApiException $e) {
-    // API rejected the request — log and inspect $e->rawBody
+    // other 4xx / 5xx — log and inspect $e->rawBody
 } catch (ProtocolException $e) {
     // unexpected response format — log and alert
 } catch (NetworkException $e) {
@@ -148,15 +171,12 @@ try {
 To catch any SDK exception in one block:
 
 ```php
-use Sendpulse\RestApi\Exception\SendPulseException;
+use Sendpulse\RestApi\Exception\SendPulseExceptionInterface;
 
 try {
     // ...
-} catch (SendPulseException $e) {
-    // covers AuthException, RateLimitException, ApiException
-    log_error($e->httpStatus, $e->rawBody);
-} catch (\RuntimeException $e) {
-    // covers NetworkException and ProtocolException
+} catch (SendPulseExceptionInterface $e) {
+    // covers all six SDK exception classes
     log_error($e->getMessage());
 }
 ```

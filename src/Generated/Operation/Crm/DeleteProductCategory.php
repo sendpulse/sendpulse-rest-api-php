@@ -12,7 +12,7 @@ final class DeleteProductCategory
         float $categoryId,
     ): Request
     {
-        $uri = str_replace('{categoryId}', (string) $categoryId, '/products/categories/{categoryId}');
+        $uri = str_replace('{categoryId}', rawurlencode((string) $categoryId), '/crm/v1/products/categories/{categoryId}');
 
         return new Request(
             method:  'DELETE',

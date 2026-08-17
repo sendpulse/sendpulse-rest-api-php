@@ -13,7 +13,7 @@ final class CreateTaskAttributeValue
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{taskId}', (string) $taskId, '/tasks/{taskId}/attributes');
+        $uri = str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/tasks/{taskId}/attributes');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

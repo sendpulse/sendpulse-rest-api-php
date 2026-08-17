@@ -10,7 +10,7 @@ final class GetDealPayments
 {
     public static function build(): Request
     {
-        $uri = '/payments/deals/{dealId}';
+        $uri = '/crm/v1/payments/deals/{dealId}';
 
         return new Request(
             method:  'GET',

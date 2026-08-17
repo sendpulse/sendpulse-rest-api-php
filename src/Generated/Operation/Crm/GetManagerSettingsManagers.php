@@ -10,7 +10,7 @@ final class GetManagerSettingsManagers
 {
     public static function build(): Request
     {
-        $uri = '/manager-settings/managers';
+        $uri = '/crm/v1/manager-settings/managers';
 
         return new Request(
             method:  'GET',

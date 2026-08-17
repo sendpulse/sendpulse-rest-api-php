@@ -13,7 +13,7 @@ final class DeleteContactTagFromContact
         int $contactId,
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, str_replace('{tagId}', (string) $tagId, '/contact-tags/{tagId}/contact/{contactId}'));
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), str_replace('{tagId}', rawurlencode((string) $tagId), '/crm/v1/contact-tags/{tagId}/contact/{contactId}'));
 
         return new Request(
             method:  'DELETE',

@@ -13,7 +13,7 @@ final class RemoveContactMessenger
         int $messengerId,
     ): Request
     {
-        $uri = str_replace('{messengerId}', (string) $messengerId, str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/messengers/{messengerId}'));
+        $uri = str_replace('{messengerId}', rawurlencode((string) $messengerId), str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/messengers/{messengerId}'));
 
         return new Request(
             method:  'DELETE',

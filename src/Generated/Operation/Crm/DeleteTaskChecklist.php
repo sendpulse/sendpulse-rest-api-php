@@ -13,7 +13,7 @@ final class DeleteTaskChecklist
         int $checklistId,
     ): Request
     {
-        $uri = str_replace('{checklistId}', (string) $checklistId, str_replace('{taskId}', (string) $taskId, '/tasks/{taskId}/checklists/{checklistId}'));
+        $uri = str_replace('{checklistId}', rawurlencode((string) $checklistId), str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/tasks/{taskId}/checklists/{checklistId}'));
 
         return new Request(
             method:  'DELETE',

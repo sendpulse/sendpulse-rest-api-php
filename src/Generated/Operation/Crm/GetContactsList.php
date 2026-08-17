@@ -12,7 +12,7 @@ final class GetContactsList
         array $body = [],
     ): Request
     {
-        $uri = '/contacts/get-list';
+        $uri = '/crm/v1/contacts/get-list';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

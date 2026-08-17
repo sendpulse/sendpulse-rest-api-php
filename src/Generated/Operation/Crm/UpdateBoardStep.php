@@ -14,7 +14,7 @@ final class UpdateBoardStep
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{stepId}', (string) $stepId, str_replace('{boardId}', (string) $boardId, '/boards/{boardId}/steps/{stepId}'));
+        $uri = str_replace('{stepId}', rawurlencode((string) $stepId), str_replace('{boardId}', rawurlencode((string) $boardId), '/crm/v1/boards/{boardId}/steps/{stepId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -15,7 +15,7 @@ final class GetDialogs
         ?string $order = null,
     ): Request
     {
-        $uri = '/dialogs';
+        $uri = '/chatbots/dialogs';
         $query = array_filter([
             'size' => $size,
             'skip' => $skip,

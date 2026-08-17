@@ -10,7 +10,7 @@ final class GetProductCategories
 {
     public static function build(): Request
     {
-        $uri = '/products/categories';
+        $uri = '/crm/v1/products/categories';
 
         return new Request(
             method:  'GET',

@@ -12,7 +12,7 @@ final class GetEmailInfo
         string $email,
     ): Request
     {
-        $uri = str_replace('{email}', (string) $email, '/emails/{email}');
+        $uri = str_replace('{email}', rawurlencode((string) $email), '/emails/{email}');
 
         return new Request(
             method:  'GET',

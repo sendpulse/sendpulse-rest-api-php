@@ -12,7 +12,7 @@ final class DeleteAttachment
         int $attachmentId,
     ): Request
     {
-        $uri = str_replace('{attachmentId}', (string) $attachmentId, '/attachments/{attachmentId}');
+        $uri = str_replace('{attachmentId}', rawurlencode((string) $attachmentId), '/crm/v1/attachments/{attachmentId}');
 
         return new Request(
             method:  'DELETE',

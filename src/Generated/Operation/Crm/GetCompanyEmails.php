@@ -13,7 +13,7 @@ final class GetCompanyEmails
         int $entityId,
     ): Request
     {
-        $uri = str_replace('{entityId}', (string) $entityId, str_replace('{entityType}', (string) $entityType, '/companies/{companyId}/emails'));
+        $uri = str_replace('{entityId}', rawurlencode((string) $entityId), str_replace('{entityType}', rawurlencode((string) $entityType), '/crm/v1/companies/{companyId}/emails'));
 
         return new Request(
             method:  'GET',

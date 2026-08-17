@@ -12,7 +12,7 @@ final class CreateProductCategory
         array $body = [],
     ): Request
     {
-        $uri = '/products/categories';
+        $uri = '/crm/v1/products/categories';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

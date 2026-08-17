@@ -10,7 +10,7 @@ final class GetContactAttributes
 {
     public static function build(): Request
     {
-        $uri = '/contacts/attributes';
+        $uri = '/crm/v1/contacts/attributes';
 
         return new Request(
             method:  'GET',

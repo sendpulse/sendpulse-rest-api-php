@@ -14,7 +14,7 @@ final class GetTemplateById
         ?string $lang = null,
     ): Request
     {
-        $uri = str_replace('{template_id}', (string) $template_id, '/template/{template_id}');
+        $uri = str_replace('{template_id}', rawurlencode((string) $template_id), '/template/{template_id}');
         $query = array_filter([
             'owner' => $owner,
             'lang' => $lang,

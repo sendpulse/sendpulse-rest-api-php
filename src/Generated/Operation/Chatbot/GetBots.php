@@ -10,7 +10,7 @@ final class GetBots
 {
     public static function build(): Request
     {
-        $uri = '/bots';
+        $uri = '/chatbots/bots';
 
         return new Request(
             method:  'GET',

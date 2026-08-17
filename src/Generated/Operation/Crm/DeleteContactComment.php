@@ -13,7 +13,7 @@ final class DeleteContactComment
         int $commentId,
     ): Request
     {
-        $uri = str_replace('{commentId}', (string) $commentId, str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/comments/{commentId}'));
+        $uri = str_replace('{commentId}', rawurlencode((string) $commentId), str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/comments/{commentId}'));
 
         return new Request(
             method:  'DELETE',

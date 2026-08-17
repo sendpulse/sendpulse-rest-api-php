@@ -12,7 +12,7 @@ final class CreateDeal
         array $body = [],
     ): Request
     {
-        $uri = '/deals';
+        $uri = '/crm/v1/deals';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

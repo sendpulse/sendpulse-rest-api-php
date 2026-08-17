@@ -12,7 +12,7 @@ final class GetManagersBySection
         int $sectionId,
     ): Request
     {
-        $uri = str_replace('{sectionId}', (string) $sectionId, '/manager-settings/{sectionId}');
+        $uri = str_replace('{sectionId}', rawurlencode((string) $sectionId), '/crm/v1/manager-settings/{sectionId}');
 
         return new Request(
             method:  'GET',

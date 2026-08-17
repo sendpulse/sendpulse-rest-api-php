@@ -12,7 +12,7 @@ final class DeleteDeal
         int $dealId,
     ): Request
     {
-        $uri = str_replace('{dealId}', (string) $dealId, '/deals/{dealId}');
+        $uri = str_replace('{dealId}', rawurlencode((string) $dealId), '/crm/v1/deals/{dealId}');
 
         return new Request(
             method:  'DELETE',

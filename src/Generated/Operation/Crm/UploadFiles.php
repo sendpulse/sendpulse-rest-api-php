@@ -12,7 +12,7 @@ final class UploadFiles
         array $body = [],
     ): Request
     {
-        $uri = '/files/upload';
+        $uri = '/crm/v1/files/upload';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

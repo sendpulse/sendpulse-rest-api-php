@@ -14,7 +14,7 @@ final class UpdateCompanyEmail
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{emailId}', (string) $emailId, str_replace('{companyId}', (string) $companyId, '/companies/{companyId}/emails/{emailId}'));
+        $uri = str_replace('{emailId}', rawurlencode((string) $emailId), str_replace('{companyId}', rawurlencode((string) $companyId), '/crm/v1/companies/{companyId}/emails/{emailId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

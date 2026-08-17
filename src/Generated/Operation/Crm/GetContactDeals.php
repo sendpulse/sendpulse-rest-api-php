@@ -12,7 +12,7 @@ final class GetContactDeals
         int $contactId,
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/deals');
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/deals');
 
         return new Request(
             method:  'GET',

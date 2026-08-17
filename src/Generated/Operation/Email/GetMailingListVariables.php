@@ -12,7 +12,7 @@ final class GetMailingListVariables
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}/variables');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/variables');
 
         return new Request(
             method:  'GET',

@@ -13,7 +13,7 @@ final class DeleteEmailsFromMailingList
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}/emails');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/emails');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

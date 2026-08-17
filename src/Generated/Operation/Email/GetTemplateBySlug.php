@@ -14,7 +14,7 @@ final class GetTemplateBySlug
         ?string $lang = null,
     ): Request
     {
-        $uri = str_replace('{name_slug}', (string) $name_slug, '/template/slug/{name_slug}');
+        $uri = str_replace('{name_slug}', rawurlencode((string) $name_slug), '/template/slug/{name_slug}');
         $query = array_filter([
             'owner' => $owner,
             'lang' => $lang,

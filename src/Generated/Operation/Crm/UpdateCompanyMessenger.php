@@ -15,7 +15,7 @@ final class UpdateCompanyMessenger
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{messengerId}', (string) $messengerId, str_replace('{entityId}', (string) $entityId, str_replace('{entityType}', (string) $entityType, '/companies/{companyId}/messengers/{messengerId}')));
+        $uri = str_replace('{messengerId}', rawurlencode((string) $messengerId), str_replace('{entityId}', rawurlencode((string) $entityId), str_replace('{entityType}', rawurlencode((string) $entityType), '/crm/v1/companies/{companyId}/messengers/{messengerId}')));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

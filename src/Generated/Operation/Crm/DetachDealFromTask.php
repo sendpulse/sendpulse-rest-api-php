@@ -13,7 +13,7 @@ final class DetachDealFromTask
         int $dealId,
     ): Request
     {
-        $uri = str_replace('{dealId}', (string) $dealId, str_replace('{taskId}', (string) $taskId, '/task-deals/{taskId}/deal/{dealId}'));
+        $uri = str_replace('{dealId}', rawurlencode((string) $dealId), str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/task-deals/{taskId}/deal/{dealId}'));
 
         return new Request(
             method:  'DELETE',

@@ -12,7 +12,7 @@ final class GetTaskById
         int $taskId,
     ): Request
     {
-        $uri = str_replace('{taskId}', (string) $taskId, '/tasks/{taskId}');
+        $uri = str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/tasks/{taskId}');
 
         return new Request(
             method:  'GET',

@@ -14,7 +14,7 @@ final class ReorderChecklistItem
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{itemId}', (string) $itemId, str_replace('{checklistId}', (string) $checklistId, '/checklists/{checklistId}/items/{itemId}'));
+        $uri = str_replace('{itemId}', rawurlencode((string) $itemId), str_replace('{checklistId}', rawurlencode((string) $checklistId), '/crm/v1/checklists/{checklistId}/items/{itemId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -14,7 +14,7 @@ final class GetDealHistory
         string $toDate,
     ): Request
     {
-        $uri = str_replace('{dealId}', (string) $dealId, '/deals/{dealId}/history');
+        $uri = str_replace('{dealId}', rawurlencode((string) $dealId), '/crm/v1/deals/{dealId}/history');
         $query = array_filter([
             'fromDate' => $fromDate,
             'toDate' => $toDate,

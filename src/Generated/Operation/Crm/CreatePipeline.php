@@ -12,7 +12,7 @@ final class CreatePipeline
         array $body = [],
     ): Request
     {
-        $uri = '/pipelines';
+        $uri = '/crm/v1/pipelines';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -12,7 +12,7 @@ final class GetProductById
         float $productId,
     ): Request
     {
-        $uri = str_replace('{productId}', (string) $productId, '/products/{productId}');
+        $uri = str_replace('{productId}', rawurlencode((string) $productId), '/crm/v1/products/{productId}');
 
         return new Request(
             method:  'GET',

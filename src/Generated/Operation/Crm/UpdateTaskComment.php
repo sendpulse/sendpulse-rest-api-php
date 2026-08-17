@@ -14,7 +14,7 @@ final class UpdateTaskComment
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{commentId}', (string) $commentId, str_replace('{taskId}', (string) $taskId, '/tasks/{taskId}/comments/{commentId}'));
+        $uri = str_replace('{commentId}', rawurlencode((string) $commentId), str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/tasks/{taskId}/comments/{commentId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

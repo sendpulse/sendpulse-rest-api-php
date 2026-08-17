@@ -14,7 +14,7 @@ final class UpdateTaskAttributeValue
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{valueId}', (string) $valueId, str_replace('{attributeId}', (string) $attributeId, '/{boardId}/attributes/{attributeId}/values/{valueId}'));
+        $uri = str_replace('{valueId}', rawurlencode((string) $valueId), str_replace('{attributeId}', rawurlencode((string) $attributeId), '/crm/v1/{boardId}/attributes/{attributeId}/values/{valueId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

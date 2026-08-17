@@ -10,7 +10,7 @@ final class GetMessengerTypes
 {
     public static function build(): Request
     {
-        $uri = '/messenger-types';
+        $uri = '/crm/v1/messenger-types';
 
         return new Request(
             method:  'GET',

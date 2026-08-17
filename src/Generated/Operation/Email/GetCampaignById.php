@@ -12,7 +12,7 @@ final class GetCampaignById
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/campaigns/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/campaigns/{id}');
 
         return new Request(
             method:  'GET',

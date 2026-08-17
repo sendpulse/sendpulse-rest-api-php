@@ -13,7 +13,7 @@ final class UnsubscribeEmailsFromMailingList
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}/emails/unsubscribe');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/emails/unsubscribe');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -14,7 +14,7 @@ final class UpdatePipelineStep
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{stepId}', (string) $stepId, str_replace('{pipelineId}', (string) $pipelineId, '/pipelines/{pipelineId}/steps/{stepId}'));
+        $uri = str_replace('{stepId}', rawurlencode((string) $stepId), str_replace('{pipelineId}', rawurlencode((string) $pipelineId), '/crm/v1/pipelines/{pipelineId}/steps/{stepId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

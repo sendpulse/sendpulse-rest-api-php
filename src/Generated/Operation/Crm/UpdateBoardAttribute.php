@@ -14,7 +14,7 @@ final class UpdateBoardAttribute
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{attributeId}', (string) $attributeId, str_replace('{boardId}', (string) $boardId, '/boards/{boardId}/attributes/{attributeId}'));
+        $uri = str_replace('{attributeId}', rawurlencode((string) $attributeId), str_replace('{boardId}', rawurlencode((string) $boardId), '/crm/v1/boards/{boardId}/attributes/{attributeId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -12,7 +12,7 @@ final class GetCampaignReferralStats
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/campaigns/{id}/referrals');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/campaigns/{id}/referrals');
 
         return new Request(
             method:  'GET',

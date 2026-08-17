@@ -14,7 +14,7 @@ final class UpdateContactComment
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{commentId}', (string) $commentId, str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/comments/{commentId}'));
+        $uri = str_replace('{commentId}', rawurlencode((string) $commentId), str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/comments/{commentId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

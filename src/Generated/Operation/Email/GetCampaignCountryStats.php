@@ -12,7 +12,7 @@ final class GetCampaignCountryStats
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/campaigns/{id}/countries');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/campaigns/{id}/countries');
 
         return new Request(
             method:  'GET',

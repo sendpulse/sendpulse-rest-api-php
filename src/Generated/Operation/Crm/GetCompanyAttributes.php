@@ -10,7 +10,7 @@ final class GetCompanyAttributes
 {
     public static function build(): Request
     {
-        $uri = '/companies/attributes';
+        $uri = '/crm/v1/companies/attributes';
 
         return new Request(
             method:  'GET',

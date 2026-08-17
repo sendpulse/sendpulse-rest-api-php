@@ -12,7 +12,7 @@ final class GetProductsByContactDeals
         float $contactId,
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, '/products/contacts/{contactId}/deals');
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/products/contacts/{contactId}/deals');
 
         return new Request(
             method:  'GET',

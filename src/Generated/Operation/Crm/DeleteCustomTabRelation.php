@@ -13,7 +13,7 @@ final class DeleteCustomTabRelation
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{customTabId}', (string) $customTabId, '/custom-tab/{customTabId}/relation');
+        $uri = str_replace('{customTabId}', rawurlencode((string) $customTabId), '/crm/v1/custom-tab/{customTabId}/relation');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

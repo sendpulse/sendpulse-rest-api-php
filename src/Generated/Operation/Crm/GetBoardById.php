@@ -12,7 +12,7 @@ final class GetBoardById
         int $boardId,
     ): Request
     {
-        $uri = str_replace('{boardId}', (string) $boardId, '/boards/{boardId}');
+        $uri = str_replace('{boardId}', rawurlencode((string) $boardId), '/crm/v1/boards/{boardId}');
 
         return new Request(
             method:  'GET',

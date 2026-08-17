@@ -13,7 +13,7 @@ final class GetSmsNumberInfo
         string $phoneNumber,
     ): Request
     {
-        $uri = str_replace('{phoneNumber}', (string) $phoneNumber, str_replace('{addressBookId}', (string) $addressBookId, '/sms/numbers/info/{addressBookId}/{phoneNumber}'));
+        $uri = str_replace('{phoneNumber}', rawurlencode((string) $phoneNumber), str_replace('{addressBookId}', rawurlencode((string) $addressBookId), '/sms/numbers/info/{addressBookId}/{phoneNumber}'));
 
         return new Request(
             method:  'GET',

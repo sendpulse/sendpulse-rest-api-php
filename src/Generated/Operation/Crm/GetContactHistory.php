@@ -14,7 +14,7 @@ final class GetContactHistory
         string $toDate,
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/history');
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/history');
         $query = array_filter([
             'fromDate' => $fromDate,
             'toDate' => $toDate,

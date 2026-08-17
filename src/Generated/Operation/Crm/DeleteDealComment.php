@@ -13,7 +13,7 @@ final class DeleteDealComment
         int $commentId,
     ): Request
     {
-        $uri = str_replace('{commentId}', (string) $commentId, str_replace('{dealId}', (string) $dealId, '/deals/{dealId}/comments/{commentId}'));
+        $uri = str_replace('{commentId}', rawurlencode((string) $commentId), str_replace('{dealId}', rawurlencode((string) $dealId), '/crm/v1/deals/{dealId}/comments/{commentId}'));
 
         return new Request(
             method:  'DELETE',

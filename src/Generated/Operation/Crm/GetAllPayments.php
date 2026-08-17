@@ -10,7 +10,7 @@ final class GetAllPayments
 {
     public static function build(): Request
     {
-        $uri = '/payments/all';
+        $uri = '/crm/v1/payments/all';
 
         return new Request(
             method:  'GET',

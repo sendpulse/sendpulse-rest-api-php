@@ -13,7 +13,7 @@ final class DeleteContactEmail
         int $emailId,
     ): Request
     {
-        $uri = str_replace('{emailId}', (string) $emailId, str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/emails/{emailId}'));
+        $uri = str_replace('{emailId}', rawurlencode((string) $emailId), str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/emails/{emailId}'));
 
         return new Request(
             method:  'DELETE',
