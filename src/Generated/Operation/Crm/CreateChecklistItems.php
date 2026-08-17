@@ -13,7 +13,7 @@ final class CreateChecklistItems
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{checklistId}', (string) $checklistId, '/checklists/{checklistId}/items');
+        $uri = str_replace('{checklistId}', rawurlencode((string) $checklistId), '/crm/v1/checklists/{checklistId}/items');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

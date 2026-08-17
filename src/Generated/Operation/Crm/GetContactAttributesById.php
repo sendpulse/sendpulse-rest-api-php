@@ -12,7 +12,7 @@ final class GetContactAttributesById
         int $contactId,
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/attributes');
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/attributes');
 
         return new Request(
             method:  'GET',

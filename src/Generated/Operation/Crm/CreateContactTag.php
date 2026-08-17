@@ -12,7 +12,7 @@ final class CreateContactTag
         array $body = [],
     ): Request
     {
-        $uri = '/contact-tags';
+        $uri = '/crm/v1/contact-tags';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

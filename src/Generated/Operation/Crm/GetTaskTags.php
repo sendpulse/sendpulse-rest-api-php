@@ -10,7 +10,7 @@ final class GetTaskTags
 {
     public static function build(): Request
     {
-        $uri = '/task-tags';
+        $uri = '/crm/v1/task-tags';
 
         return new Request(
             method:  'GET',

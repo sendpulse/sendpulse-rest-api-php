@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Sendpulse\RestApi\Exception;
 
-final class ProtocolException extends \RuntimeException
+final class ProtocolException extends \RuntimeException implements SendPulseExceptionInterface
 {
     public function __construct(
         string $message = '',

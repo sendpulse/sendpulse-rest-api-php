@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Sendpulse\RestApi\Exception;
 
-abstract class SendPulseException extends \RuntimeException
+abstract class SendPulseException extends \RuntimeException implements SendPulseExceptionInterface
 {
     public function __construct(
         public readonly int $httpStatus,

@@ -7,6 +7,7 @@ namespace Sendpulse\RestApi\Tests\Unit\Response;
 use PHPUnit\Framework\TestCase;
 use Sendpulse\RestApi\Exception\ApiException;
 use Sendpulse\RestApi\Exception\AuthException;
+use Sendpulse\RestApi\Exception\ForbiddenException;
 use Sendpulse\RestApi\Exception\ProtocolException;
 use Sendpulse\RestApi\Exception\RateLimitException;
 use Sendpulse\RestApi\Http\Response;
@@ -35,11 +36,11 @@ final class ResponseValidatorTest extends TestCase
         self::assertSame([], $this->validator->validate($response));
     }
 
-    public function testReturnsEmptyArrayOnNonArrayJson(): void
+    public function testThrowsProtocolExceptionOnNonArrayJson(): void
     {
-        $response = new Response(200, [], '"just-a-string"');
+        $this->expectException(ProtocolException::class);
 
-        self::assertSame([], $this->validator->validate($response));
+        $this->validator->validate(new Response(200, [], '"just-a-string"'));
     }
 
     public function test401ThrowsAuthException(): void
@@ -49,9 +50,9 @@ final class ResponseValidatorTest extends TestCase
         $this->validator->validate(new Response(401, [], '{"error":"Unauthorized"}'));
     }
 
-    public function test403ThrowsAuthException(): void
+    public function test403ThrowsForbiddenException(): void
     {
-        $this->expectException(AuthException::class);
+        $this->expectException(ForbiddenException::class);
 
         $this->validator->validate(new Response(403, [], '{"error":"Forbidden"}'));
     }

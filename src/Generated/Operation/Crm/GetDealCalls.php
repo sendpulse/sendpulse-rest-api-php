@@ -13,7 +13,7 @@ final class GetDealCalls
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{dealId}', (string) $dealId, '/deals/{dealId}/get-calls');
+        $uri = str_replace('{dealId}', rawurlencode((string) $dealId), '/crm/v1/deals/{dealId}/get-calls');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

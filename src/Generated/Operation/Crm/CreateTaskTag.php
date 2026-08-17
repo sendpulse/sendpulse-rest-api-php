@@ -12,7 +12,7 @@ final class CreateTaskTag
         array $body = [],
     ): Request
     {
-        $uri = '/task-tags';
+        $uri = '/crm/v1/task-tags';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

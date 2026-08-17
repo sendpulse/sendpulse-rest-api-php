@@ -12,7 +12,7 @@ final class ListDealAttributesByPipeline
         int $pipelineId,
     ): Request
     {
-        $uri = str_replace('{pipelineId}', (string) $pipelineId, '/deals/attributes/{pipelineId}');
+        $uri = str_replace('{pipelineId}', rawurlencode((string) $pipelineId), '/crm/v1/deals/attributes/{pipelineId}');
 
         return new Request(
             method:  'GET',

@@ -12,7 +12,7 @@ final class CancelSmsCampaign
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/sms/campaigns/cancel/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/sms/campaigns/cancel/{id}');
 
         return new Request(
             method:  'PUT',

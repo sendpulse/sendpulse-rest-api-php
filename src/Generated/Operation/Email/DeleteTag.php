@@ -12,7 +12,7 @@ final class DeleteTag
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/tags/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/tags/{id}');
 
         return new Request(
             method:  'DELETE',

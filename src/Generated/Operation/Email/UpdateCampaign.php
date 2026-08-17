@@ -13,7 +13,7 @@ final class UpdateCampaign
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/campaigns/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/campaigns/{id}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

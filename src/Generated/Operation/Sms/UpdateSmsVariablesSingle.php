@@ -13,7 +13,7 @@ final class UpdateSmsVariablesSingle
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}/phones/variable');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/phones/variable');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

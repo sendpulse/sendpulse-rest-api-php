@@ -10,7 +10,7 @@ final class GetCustomTabs
 {
     public static function build(): Request
     {
-        $uri = '/custom-tab';
+        $uri = '/crm/v1/custom-tab';
 
         return new Request(
             method:  'GET',

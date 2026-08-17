@@ -12,7 +12,7 @@ final class ApprovePayment
         float $paymentId,
     ): Request
     {
-        $uri = str_replace('{paymentId}', (string) $paymentId, '/payments/{paymentId}/approve');
+        $uri = str_replace('{paymentId}', rawurlencode((string) $paymentId), '/crm/v1/payments/{paymentId}/approve');
 
         return new Request(
             method:  'POST',

@@ -13,7 +13,7 @@ final class CreatePipelineAttribute
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{pipelineId}', (string) $pipelineId, '/pipelines/{pipelineId}/attributes');
+        $uri = str_replace('{pipelineId}', rawurlencode((string) $pipelineId), '/crm/v1/pipelines/{pipelineId}/attributes');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -14,7 +14,7 @@ final class GetContactsByVariable
         string $searchValue,
     ): Request
     {
-        $uri = str_replace('{searchValue}', (string) $searchValue, str_replace('{variableName}', (string) $variableName, str_replace('{id}', (string) $id, '/addressbooks/{id}/variables/{variableName}/{searchValue}')));
+        $uri = str_replace('{searchValue}', rawurlencode((string) $searchValue), str_replace('{variableName}', rawurlencode((string) $variableName), str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/variables/{variableName}/{searchValue}')));
 
         return new Request(
             method:  'GET',

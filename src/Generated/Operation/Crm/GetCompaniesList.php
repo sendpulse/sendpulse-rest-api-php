@@ -12,7 +12,7 @@ final class GetCompaniesList
         array $body = [],
     ): Request
     {
-        $uri = '/companies/list';
+        $uri = '/crm/v1/companies/list';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

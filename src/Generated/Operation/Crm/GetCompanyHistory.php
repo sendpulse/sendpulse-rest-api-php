@@ -15,7 +15,7 @@ final class GetCompanyHistory
         ?int $offset = null,
     ): Request
     {
-        $uri = '/companies/{companyId}/history';
+        $uri = '/crm/v1/companies/{companyId}/history';
         $query = array_filter([
             'dateFrom' => $dateFrom,
             'dateTo' => $dateTo,

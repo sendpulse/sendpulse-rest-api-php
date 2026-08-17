@@ -12,7 +12,7 @@ final class GetCompanyPhones
         int $companyId,
     ): Request
     {
-        $uri = str_replace('{companyId}', (string) $companyId, '/companies/{companyId}/phones');
+        $uri = str_replace('{companyId}', rawurlencode((string) $companyId), '/crm/v1/companies/{companyId}/phones');
 
         return new Request(
             method:  'GET',

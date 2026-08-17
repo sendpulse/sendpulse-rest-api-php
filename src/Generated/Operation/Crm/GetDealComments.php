@@ -12,7 +12,7 @@ final class GetDealComments
         int $dealId,
     ): Request
     {
-        $uri = str_replace('{dealId}', (string) $dealId, '/deals/{dealId}/comments');
+        $uri = str_replace('{dealId}', rawurlencode((string) $dealId), '/crm/v1/deals/{dealId}/comments');
 
         return new Request(
             method:  'GET',

@@ -12,7 +12,7 @@ final class CreateCustomTab
         array $body = [],
     ): Request
     {
-        $uri = '/custom-tab';
+        $uri = '/crm/v1/custom-tab';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

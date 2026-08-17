@@ -12,7 +12,7 @@ final class GetTelephonyCalls
         array $body = [],
     ): Request
     {
-        $uri = '/telephony/calls/get-list';
+        $uri = '/crm/v1/telephony/calls/get-list';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

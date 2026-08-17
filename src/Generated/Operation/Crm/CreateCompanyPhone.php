@@ -13,7 +13,7 @@ final class CreateCompanyPhone
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{companyId}', (string) $companyId, '/companies/{companyId}/phones');
+        $uri = str_replace('{companyId}', rawurlencode((string) $companyId), '/crm/v1/companies/{companyId}/phones');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.1] — 2026-08-17
+
+### Fixed
+
+- **CRM and chatbot URL prefixes** — all CRM endpoints now correctly target `/crm/v1/*` and chatbot endpoints `/chatbots/*`; previously every call returned 404.
+- **Path parameter encoding** — path parameters are now percent-encoded via `rawurlencode()` in all generated operations; values containing `#`, `?`, `/` or `+` no longer corrupt the request URI.
+- **`ForbiddenException` added** — HTTP 403 (tariff or permission restriction) is now thrown as `ForbiddenException` instead of `AuthException`; the two can be caught and handled independently.
+- **`SendPulseExceptionInterface` added** — `NetworkException` and `ProtocolException` now implement this marker interface alongside the `SendPulseException` hierarchy; a single `catch (SendPulseExceptionInterface $e)` block covers all six SDK exception classes.
+- **Non-array JSON response** — `ResponseValidator` now throws `ProtocolException` when the API returns a JSON primitive (`true`, a number, a string) instead of silently returning `[]`.
+
+---
+
 ## [3.0.0] — 2026-08-06
 
 Complete rewrite. See [docs/upgrading.md](docs/upgrading.md) for the migration guide.

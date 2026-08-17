@@ -13,7 +13,7 @@ final class BatchStoreContactAttributeValues
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/attributes/batch');
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/attributes/batch');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

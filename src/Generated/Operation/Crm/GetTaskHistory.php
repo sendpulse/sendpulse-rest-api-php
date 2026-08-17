@@ -14,7 +14,7 @@ final class GetTaskHistory
         string $toDate,
     ): Request
     {
-        $uri = str_replace('{taskId}', (string) $taskId, '/tasks/{taskId}/history');
+        $uri = str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/tasks/{taskId}/history');
         $query = array_filter([
             'fromDate' => $fromDate,
             'toDate' => $toDate,

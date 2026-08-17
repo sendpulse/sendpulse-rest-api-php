@@ -14,7 +14,7 @@ final class ChangeTaskStepOrder
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{stepId}', (string) $stepId, str_replace('{taskId}', (string) $taskId, '/tasks/{taskId}/steps/{stepId}/order'));
+        $uri = str_replace('{stepId}', rawurlencode((string) $stepId), str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/tasks/{taskId}/steps/{stepId}/order'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

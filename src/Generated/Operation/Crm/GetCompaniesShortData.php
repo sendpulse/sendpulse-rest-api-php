@@ -12,7 +12,7 @@ final class GetCompaniesShortData
         array $body = [],
     ): Request
     {
-        $uri = '/companies/short-data';
+        $uri = '/crm/v1/companies/short-data';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

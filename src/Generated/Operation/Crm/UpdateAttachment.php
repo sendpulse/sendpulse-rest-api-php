@@ -13,7 +13,7 @@ final class UpdateAttachment
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{attachmentId}', (string) $attachmentId, '/attachments/{attachmentId}');
+        $uri = str_replace('{attachmentId}', rawurlencode((string) $attachmentId), '/crm/v1/attachments/{attachmentId}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

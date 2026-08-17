@@ -12,7 +12,7 @@ final class GetTaskChecklists
         int $taskId,
     ): Request
     {
-        $uri = str_replace('{taskId}', (string) $taskId, '/tasks/{taskId}/checklists');
+        $uri = str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/tasks/{taskId}/checklists');
 
         return new Request(
             method:  'GET',

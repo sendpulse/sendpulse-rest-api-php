@@ -12,7 +12,7 @@ final class AddSmtpDomain
         string $domain,
     ): Request
     {
-        $uri = str_replace('{domain}', (string) $domain, '/v2/email-service/smtp/sender_domains/{domain}');
+        $uri = str_replace('{domain}', rawurlencode((string) $domain), '/v2/email-service/smtp/sender_domains/{domain}');
 
         return new Request(
             method:  'POST',

@@ -14,7 +14,7 @@ final class UpdateContactEmail
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{emailId}', (string) $emailId, str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/emails/{emailId}'));
+        $uri = str_replace('{emailId}', rawurlencode((string) $emailId), str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/emails/{emailId}'));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -12,7 +12,7 @@ final class GetPipelineSteps
         int $pipelineId,
     ): Request
     {
-        $uri = str_replace('{pipelineId}', (string) $pipelineId, '/pipelines/{pipelineId}/steps');
+        $uri = str_replace('{pipelineId}', rawurlencode((string) $pipelineId), '/crm/v1/pipelines/{pipelineId}/steps');
 
         return new Request(
             method:  'GET',

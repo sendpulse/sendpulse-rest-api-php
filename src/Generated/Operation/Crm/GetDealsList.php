@@ -12,7 +12,7 @@ final class GetDealsList
         array $body = [],
     ): Request
     {
-        $uri = '/deals/get-list';
+        $uri = '/crm/v1/deals/get-list';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

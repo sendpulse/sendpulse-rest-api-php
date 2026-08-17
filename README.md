@@ -131,6 +131,7 @@ $bots = $client->chatbotService()->bots()->getBots();  // array
 
 ```php
 use Sendpulse\RestApi\Exception\AuthException;
+use Sendpulse\RestApi\Exception\ForbiddenException;
 use Sendpulse\RestApi\Exception\RateLimitException;
 use Sendpulse\RestApi\Exception\ApiException;
 use Sendpulse\RestApi\Exception\NetworkException;
@@ -139,11 +140,13 @@ use Sendpulse\RestApi\Exception\ProtocolException;
 try {
     $campaigns = $client->emailService()->campaigns()->getCampaigns();
 } catch (AuthException $e) {
-    // 401 / 403 — check credentials
+    // 401 — invalid or expired credentials
+} catch (ForbiddenException $e) {
+    // 403 — tariff or permission restriction
 } catch (RateLimitException $e) {
     // 429 — back off and retry
 } catch (ApiException $e) {
-    echo $e->httpStatus; // 4xx / 5xx
+    echo $e->httpStatus; // other 4xx / 5xx
     echo $e->rawBody;
 } catch (ProtocolException $e) {
     // response received but could not be parsed (malformed JSON from API)

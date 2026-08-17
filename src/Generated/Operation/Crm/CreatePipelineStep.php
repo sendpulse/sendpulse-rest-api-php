@@ -13,7 +13,7 @@ final class CreatePipelineStep
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{pipelineId}', (string) $pipelineId, '/pipelines/{pipelineId}/steps');
+        $uri = str_replace('{pipelineId}', rawurlencode((string) $pipelineId), '/crm/v1/pipelines/{pipelineId}/steps');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

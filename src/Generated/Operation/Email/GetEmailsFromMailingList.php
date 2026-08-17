@@ -17,7 +17,7 @@ final class GetEmailsFromMailingList
         ?bool $not_active = null,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}/emails');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/emails');
         $query = array_filter([
             'limit' => $limit,
             'offset' => $offset,

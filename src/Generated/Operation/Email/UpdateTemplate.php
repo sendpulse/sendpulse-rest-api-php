@@ -13,7 +13,7 @@ final class UpdateTemplate
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/template/edit/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/template/edit/{id}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

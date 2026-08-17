@@ -10,7 +10,7 @@ final class GetBoards
 {
     public static function build(): Request
     {
-        $uri = '/boards';
+        $uri = '/crm/v1/boards';
 
         return new Request(
             method:  'GET',

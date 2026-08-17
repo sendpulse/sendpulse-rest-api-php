@@ -13,7 +13,7 @@ final class UpdateProductSections
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{productId}', (string) $productId, '/products/{productId}/sections');
+        $uri = str_replace('{productId}', rawurlencode((string) $productId), '/crm/v1/products/{productId}/sections');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

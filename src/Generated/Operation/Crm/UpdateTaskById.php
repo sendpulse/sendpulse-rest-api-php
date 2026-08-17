@@ -13,7 +13,7 @@ final class UpdateTaskById
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{taskId}', (string) $taskId, '/tasks/{taskId}');
+        $uri = str_replace('{taskId}', rawurlencode((string) $taskId), '/crm/v1/tasks/{taskId}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

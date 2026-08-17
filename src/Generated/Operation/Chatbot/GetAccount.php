@@ -10,7 +10,7 @@ final class GetAccount
 {
     public static function build(): Request
     {
-        $uri = '/account';
+        $uri = '/chatbots/account';
 
         return new Request(
             method:  'GET',

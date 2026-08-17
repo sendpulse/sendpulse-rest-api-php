@@ -12,7 +12,7 @@ final class CreateTask
         array $body = [],
     ): Request
     {
-        $uri = '/tasks';
+        $uri = '/crm/v1/tasks';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

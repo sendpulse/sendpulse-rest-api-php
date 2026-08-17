@@ -10,7 +10,7 @@ final class GetUsers
 {
     public static function build(): Request
     {
-        $uri = '/users';
+        $uri = '/crm/v1/users';
 
         return new Request(
             method:  'GET',

@@ -14,7 +14,7 @@ final class GetCampaignsByList
         ?int $offset = null,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}/campaigns');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/campaigns');
         $query = array_filter([
             'limit' => $limit,
             'offset' => $offset,

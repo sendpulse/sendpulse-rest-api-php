@@ -12,7 +12,7 @@ final class GetCompanyMessengers
         int $companyId,
     ): Request
     {
-        $uri = str_replace('{companyId}', (string) $companyId, '/companies/{companyId}/messengers');
+        $uri = str_replace('{companyId}', rawurlencode((string) $companyId), '/crm/v1/companies/{companyId}/messengers');
 
         return new Request(
             method:  'GET',

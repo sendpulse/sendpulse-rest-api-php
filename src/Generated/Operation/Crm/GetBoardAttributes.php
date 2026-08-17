@@ -12,7 +12,7 @@ final class GetBoardAttributes
         int $boardId,
     ): Request
     {
-        $uri = str_replace('{boardId}', (string) $boardId, '/boards/{boardId}/attributes');
+        $uri = str_replace('{boardId}', rawurlencode((string) $boardId), '/crm/v1/boards/{boardId}/attributes');
 
         return new Request(
             method:  'GET',

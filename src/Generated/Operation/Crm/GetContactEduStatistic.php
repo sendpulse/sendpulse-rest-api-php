@@ -12,7 +12,7 @@ final class GetContactEduStatistic
         int $contactId,
     ): Request
     {
-        $uri = str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/edu-statistic');
+        $uri = str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/edu-statistic');
 
         return new Request(
             method:  'GET',

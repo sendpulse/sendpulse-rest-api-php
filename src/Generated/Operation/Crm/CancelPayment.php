@@ -12,7 +12,7 @@ final class CancelPayment
         float $paymentId,
     ): Request
     {
-        $uri = str_replace('{paymentId}', (string) $paymentId, '/payments/{paymentId}/cancel');
+        $uri = str_replace('{paymentId}', rawurlencode((string) $paymentId), '/crm/v1/payments/{paymentId}/cancel');
 
         return new Request(
             method:  'POST',

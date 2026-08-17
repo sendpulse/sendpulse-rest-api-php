@@ -13,7 +13,7 @@ final class UpdateDealById
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{dealId}', (string) $dealId, '/deals/{dealId}');
+        $uri = str_replace('{dealId}', rawurlencode((string) $dealId), '/crm/v1/deals/{dealId}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

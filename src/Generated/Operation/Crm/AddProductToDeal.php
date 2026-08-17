@@ -12,7 +12,7 @@ final class AddProductToDeal
         array $body = [],
     ): Request
     {
-        $uri = '/products/deals';
+        $uri = '/crm/v1/products/deals';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

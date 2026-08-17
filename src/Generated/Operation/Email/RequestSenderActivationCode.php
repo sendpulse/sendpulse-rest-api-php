@@ -12,7 +12,7 @@ final class RequestSenderActivationCode
         string $email,
     ): Request
     {
-        $uri = str_replace('{email}', (string) $email, '/senders/{email}/code');
+        $uri = str_replace('{email}', rawurlencode((string) $email), '/senders/{email}/code');
 
         return new Request(
             method:  'GET',

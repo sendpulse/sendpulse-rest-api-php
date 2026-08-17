@@ -12,7 +12,7 @@ final class CreateManagerSettings
         array $body = [],
     ): Request
     {
-        $uri = '/manager-settings';
+        $uri = '/crm/v1/manager-settings';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

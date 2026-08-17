@@ -13,7 +13,7 @@ final class ActivateSender
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{email}', (string) $email, '/senders/{email}/code');
+        $uri = str_replace('{email}', rawurlencode((string) $email), '/senders/{email}/code');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

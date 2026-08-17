@@ -13,7 +13,7 @@ final class GetEmailsTotalCount
         ?bool $active = null,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}/emails/total');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/emails/total');
         $query = array_filter([
             'active' => $active,
         ], fn($v) => $v !== null);

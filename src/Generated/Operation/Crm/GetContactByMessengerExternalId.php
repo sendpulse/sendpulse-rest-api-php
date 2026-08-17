@@ -12,7 +12,7 @@ final class GetContactByMessengerExternalId
         string $messengerContactId,
     ): Request
     {
-        $uri = str_replace('{messengerContactId}', (string) $messengerContactId, '/contacts/messenger-external/{messengerContactId}');
+        $uri = str_replace('{messengerContactId}', rawurlencode((string) $messengerContactId), '/crm/v1/contacts/messenger-external/{messengerContactId}');
 
         return new Request(
             method:  'GET',

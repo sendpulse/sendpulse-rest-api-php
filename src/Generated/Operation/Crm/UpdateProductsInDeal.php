@@ -13,7 +13,7 @@ final class UpdateProductsInDeal
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{headId}', (string) $headId, '/products/deals/{headId}');
+        $uri = str_replace('{headId}', rawurlencode((string) $headId), '/crm/v1/products/deals/{headId}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

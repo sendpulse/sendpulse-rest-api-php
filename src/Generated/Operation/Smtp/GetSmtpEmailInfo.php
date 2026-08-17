@@ -12,7 +12,7 @@ final class GetSmtpEmailInfo
         string $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/smtp/emails/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/smtp/emails/{id}');
 
         return new Request(
             method:  'GET',

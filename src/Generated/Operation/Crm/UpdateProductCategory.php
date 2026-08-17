@@ -13,7 +13,7 @@ final class UpdateProductCategory
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{categoryId}', (string) $categoryId, '/products/categories/{categoryId}');
+        $uri = str_replace('{categoryId}', rawurlencode((string) $categoryId), '/crm/v1/products/categories/{categoryId}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

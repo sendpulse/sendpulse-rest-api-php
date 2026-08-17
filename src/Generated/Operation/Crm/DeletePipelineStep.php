@@ -13,7 +13,7 @@ final class DeletePipelineStep
         int $stepId,
     ): Request
     {
-        $uri = str_replace('{stepId}', (string) $stepId, str_replace('{pipelineId}', (string) $pipelineId, '/pipelines/{pipelineId}/steps/{stepId}'));
+        $uri = str_replace('{stepId}', rawurlencode((string) $stepId), str_replace('{pipelineId}', rawurlencode((string) $pipelineId), '/crm/v1/pipelines/{pipelineId}/steps/{stepId}'));
 
         return new Request(
             method:  'DELETE',

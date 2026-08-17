@@ -13,7 +13,7 @@ final class GetCategoryProduct
         float $categoryId,
     ): Request
     {
-        $uri = str_replace('{categoryId}', (string) $categoryId, str_replace('{productId}', (string) $productId, '/products/categories/{categoryId}/{productId}'));
+        $uri = str_replace('{categoryId}', rawurlencode((string) $categoryId), str_replace('{productId}', rawurlencode((string) $productId), '/crm/v1/products/categories/{categoryId}/{productId}'));
 
         return new Request(
             method:  'GET',

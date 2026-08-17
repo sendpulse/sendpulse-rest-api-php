@@ -12,7 +12,7 @@ final class CreateBoard
         array $body = [],
     ): Request
     {
-        $uri = '/boards';
+        $uri = '/crm/v1/boards';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

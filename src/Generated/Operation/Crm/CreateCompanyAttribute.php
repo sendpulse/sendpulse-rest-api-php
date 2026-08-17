@@ -12,7 +12,7 @@ final class CreateCompanyAttribute
         array $body = [],
     ): Request
     {
-        $uri = '/companies/attributes';
+        $uri = '/crm/v1/companies/attributes';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

@@ -13,7 +13,7 @@ final class DeleteContactAttributeValue
         int $attributeId,
     ): Request
     {
-        $uri = str_replace('{attributeId}', (string) $attributeId, str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/attributes/{attributeId}'));
+        $uri = str_replace('{attributeId}', rawurlencode((string) $attributeId), str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/attributes/{attributeId}'));
 
         return new Request(
             method:  'DELETE',

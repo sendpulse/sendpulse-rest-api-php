@@ -12,7 +12,7 @@ final class CreateAttachmentsBatch
         array $body = [],
     ): Request
     {
-        $uri = '/attachments/batch';
+        $uri = '/crm/v1/attachments/batch';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

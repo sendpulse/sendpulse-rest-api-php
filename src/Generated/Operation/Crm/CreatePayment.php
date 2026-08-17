@@ -12,7 +12,7 @@ final class CreatePayment
         array $body = [],
     ): Request
     {
-        $uri = '/payments';
+        $uri = '/crm/v1/payments';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

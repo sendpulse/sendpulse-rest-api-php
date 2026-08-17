@@ -12,7 +12,7 @@ final class GetEmailCampaignStats
         string $email,
     ): Request
     {
-        $uri = str_replace('{email}', (string) $email, '/emails/{email}/campaigns');
+        $uri = str_replace('{email}', rawurlencode((string) $email), '/emails/{email}/campaigns');
 
         return new Request(
             method:  'GET',

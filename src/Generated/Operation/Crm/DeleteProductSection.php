@@ -13,7 +13,7 @@ final class DeleteProductSection
         float $sectionId,
     ): Request
     {
-        $uri = str_replace('{sectionId}', (string) $sectionId, str_replace('{productId}', (string) $productId, '/products/{productId}/sections/{sectionId}'));
+        $uri = str_replace('{sectionId}', rawurlencode((string) $sectionId), str_replace('{productId}', rawurlencode((string) $productId), '/crm/v1/products/{productId}/sections/{sectionId}'));
 
         return new Request(
             method:  'DELETE',

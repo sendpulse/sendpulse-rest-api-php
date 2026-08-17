@@ -13,7 +13,7 @@ final class ListContactTags
         ?string $search = null,
     ): Request
     {
-        $uri = '/contact-tags';
+        $uri = '/crm/v1/contact-tags';
         $query = array_filter([
             'name' => $name,
             'search' => $search,

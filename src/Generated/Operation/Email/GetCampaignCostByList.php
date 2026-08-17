@@ -12,7 +12,7 @@ final class GetCampaignCostByList
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/addressbooks/{id}/cost');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/addressbooks/{id}/cost');
 
         return new Request(
             method:  'GET',

@@ -13,7 +13,7 @@ final class DeleteContactCompanyRelation
         int $companyId,
     ): Request
     {
-        $uri = str_replace('{companyId}', (string) $companyId, str_replace('{contactId}', (string) $contactId, '/contacts/{contactId}/relation/{companyId}'));
+        $uri = str_replace('{companyId}', rawurlencode((string) $companyId), str_replace('{contactId}', rawurlencode((string) $contactId), '/crm/v1/contacts/{contactId}/relation/{companyId}'));
 
         return new Request(
             method:  'DELETE',

@@ -13,7 +13,7 @@ final class UpdateTag
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/tags/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/tags/{id}');
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

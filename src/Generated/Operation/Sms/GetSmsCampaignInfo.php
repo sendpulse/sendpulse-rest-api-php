@@ -12,7 +12,7 @@ final class GetSmsCampaignInfo
         int $id,
     ): Request
     {
-        $uri = str_replace('{id}', (string) $id, '/sms/campaigns/info/{id}');
+        $uri = str_replace('{id}', rawurlencode((string) $id), '/sms/campaigns/info/{id}');
 
         return new Request(
             method:  'GET',

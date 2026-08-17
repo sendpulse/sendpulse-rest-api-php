@@ -12,7 +12,7 @@ final class GetProductsByFilter
         array $body = [],
     ): Request
     {
-        $uri = '/products/all';
+        $uri = '/crm/v1/products/all';
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

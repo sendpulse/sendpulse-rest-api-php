@@ -15,7 +15,7 @@ final class UpdateCompanyPhone
         array $body = [],
     ): Request
     {
-        $uri = str_replace('{phoneId}', (string) $phoneId, str_replace('{entityId}', (string) $entityId, str_replace('{entityType}', (string) $entityType, '/companies/{companyId}/phones/{phoneId}')));
+        $uri = str_replace('{phoneId}', rawurlencode((string) $phoneId), str_replace('{entityId}', rawurlencode((string) $entityId), str_replace('{entityType}', rawurlencode((string) $entityType), '/crm/v1/companies/{companyId}/phones/{phoneId}')));
         $encodedBody = $body ? json_encode($body, JSON_THROW_ON_ERROR) : null;
 
         return new Request(

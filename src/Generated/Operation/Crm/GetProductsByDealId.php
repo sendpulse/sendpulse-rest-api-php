@@ -12,7 +12,7 @@ final class GetProductsByDealId
         float $dealId,
     ): Request
     {
-        $uri = str_replace('{dealId}', (string) $dealId, '/products/deals/{dealId}');
+        $uri = str_replace('{dealId}', rawurlencode((string) $dealId), '/crm/v1/products/deals/{dealId}');
 
         return new Request(
             method:  'GET',

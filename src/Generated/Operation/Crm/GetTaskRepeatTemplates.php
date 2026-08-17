@@ -10,7 +10,7 @@ final class GetTaskRepeatTemplates
 {
     public static function build(): Request
     {
-        $uri = '/tasks-repeat/templates';
+        $uri = '/crm/v1/tasks-repeat/templates';
 
         return new Request(
             method:  'GET',
