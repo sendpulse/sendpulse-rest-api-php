@@ -93,7 +93,7 @@ class CampaignController extends Controller
 
     public function index()
     {
-        $campaigns = $this->sendpulse->emailService()->campaigns()->getCampaigns(limit: 20);
+        $campaigns = $this->sendpulse->email->campaigns->getCampaigns(['limit' => 20]);
 
         return view('campaigns.index', compact('campaigns'));
     }
@@ -104,7 +104,7 @@ Or resolve from the container:
 
 ```php
 $client = app(Client::class);
-$campaigns = $client->emailService()->campaigns()->getCampaigns();
+$campaigns = $client->email->campaigns->getCampaigns();
 ```
 
 ## Token Storage
@@ -156,7 +156,7 @@ use Sendpulse\RestApi\Exception\ProtocolException;
 use Sendpulse\RestApi\Exception\RateLimitException;
 
 try {
-    $result = $this->sendpulse->smtpService()->emails()->sendSmtpEmail($payload);
+    $result = $this->sendpulse->smtp->emails->sendSmtpEmail($payload);
 } catch (AuthException $e) {
     // 401 / 403 — check SENDPULSE_CLIENT_ID and SENDPULSE_CLIENT_SECRET
     report($e);
@@ -193,7 +193,7 @@ class SendTransactionalEmail implements ShouldQueue
 
     public function handle(Client $sendpulse): void
     {
-        $sendpulse->smtpService()->emails()->sendSmtpEmail($this->payload);
+        $sendpulse->smtp->emails->sendSmtpEmail($this->payload);
     }
 }
 

@@ -2,7 +2,62 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] — 2026-11-11
+
+Thin-client rewrite. Typed DTO models and per-service facades are replaced by a
+generated **operation map** with a **chained call surface**, backed by a single
+lightweight transport.
+
+### Added
+
+- **Chained endpoint surface** — call any mapped endpoint as
+  `$client->{service}->{resource}->{operation}([...])`, e.g.
+  `$client->email->campaigns->getCampaigns(['limit' => 10])`. One associative
+  array per call: path and declared query params are routed automatically, any
+  other key goes to the JSON body. Hyphenated services (`file-manager`,
+  `live-chat`, `viber-chatbot`, `web-push`) via `$client->{'file-manager'}->...`.
+- **19 services** generated from the OpenAPI specs (email, smtp, sms, crm,
+  chatbots, a360, edu, facebook, file-manager, instagram, live-chat, popups,
+  telegram, tiktok, verifier, viber, viber-chatbot, web-push, whatsapp).
+- **IDE stubs** (`resources/ide/stubs.php`) and an AI-facing catalog
+  (`llms.txt`), giving autocomplete over every service, resource, operation and
+  its parameters.
+- **Raw requests** — `get()`/`post()`/`put()`/`patch()`/`delete()` helpers over
+  the `request()`/`send()` transport for any endpoint outside the map.
+
+### BC Breaks
+
+- **Service facades removed** — `emailService()`, `smtpService()`, `smsService()`,
+  `crmService()`, `chatbotService()` are gone; use the chained surface or raw
+  requests.
+- **Typed response models removed** — every call returns the decoded JSON as an
+  `array<mixed>` instead of DTOs.
+
+### Changed
+
+- `Client` exposes `get()`, `post()`, `put()`, `patch()`, `delete()` over the
+  `request()`/`send()` transport. Array bodies are JSON-encoded; `get()` array
+  params become the query string.
+
+### Removed
+
+- `src/Generated/*` (typed services, resources, models) and
+  `Service\AbstractService`.
+- `cebe/php-openapi` dev dependency (OpenAPI generation moved out of the repo).
+
+### Carried over from 3.0.x (now withdrawn)
+
+- `ForbiddenException` for HTTP 403 — distinct from `AuthException`.
+- `SendPulseExceptionInterface` marker across all six SDK exceptions.
+- Percent-encoded path parameters (`rawurlencode`).
+- `ResponseValidator` throws `ProtocolException` on a non-array JSON primitive.
+
+---
+
 ## [3.0.1] — 2026-08-17
+
+> **Withdrawn** — released in error and removed from Packagist. Upgrade to 4.0.0;
+> the fixes below are carried over there.
 
 ### Fixed
 
@@ -15,6 +70,8 @@ All notable changes to this project will be documented in this file.
 ---
 
 ## [3.0.0] — 2026-08-06
+
+> **Withdrawn** — released in error and removed from Packagist. Upgrade to 4.0.0.
 
 Complete rewrite. See [docs/upgrading.md](docs/upgrading.md) for the migration guide.
 

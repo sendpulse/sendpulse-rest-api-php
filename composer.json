@@ -3,6 +3,20 @@
   "description": "Official PHP SDK for the SendPulse REST API",
   "type": "library",
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Maksym Ustymenko",
+      "email": "m.ustymenko@sendpulse.com"
+    },
+    {
+      "name": "Alexey Moroz",
+      "email": "a.moroz@sendpulse.com"
+    },
+    {
+      "name": "Evgeniy Bilovol",
+      "email": "e.bilovol@sendpulse.com"
+    }
+  ],
   "homepage": "https://sendpulse.com/integrations/api",
   "keywords": ["sendpulse", "api", "rest", "sdk", "email", "sms", "crm", "chatbots"],
   "support": {
@@ -15,7 +29,6 @@
     "ext-json": "*"
   },
   "require-dev": {
-    "cebe/php-openapi": "^1.8",
     "friendsofphp/php-cs-fixer": "^3.64",
     "phpstan/phpstan": "^2.0",
     "phpunit/phpunit": "^11.0",

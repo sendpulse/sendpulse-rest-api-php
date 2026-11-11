@@ -152,7 +152,7 @@ use Sendpulse\RestApi\Exception\ProtocolException;
 use Sendpulse\RestApi\Exception\NetworkException;
 
 try {
-    $result = $client->smtpService()->emails()->sendSmtpEmail($payload);
+    $result = $client->smtp->emails->sendSmtpEmail($payload);
 } catch (AuthException $e) {
     // 401 — credentials problem, do not retry
 } catch (ForbiddenException $e) {

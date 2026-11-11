@@ -2,5 +2,5 @@ parameters:
     level: max
     paths:
         - src
-    excludePaths:
-        - src/Generated
+    scanFiles:
+        - resources/ide/stubs.php

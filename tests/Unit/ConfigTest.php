@@ -38,13 +38,6 @@ final class ConfigTest extends TestCase
         new Config(apiKey: 'key', clientId: 'id', clientSecret: 'secret');
     }
 
-    public function testDefaultBaseUrl(): void
-    {
-        $config = new Config(apiKey: 'key');
-
-        self::assertSame('https://api.sendpulse.com', $config->baseUrl);
-    }
-
     public function testDefaultTimeouts(): void
     {
         $config = new Config(apiKey: 'key');

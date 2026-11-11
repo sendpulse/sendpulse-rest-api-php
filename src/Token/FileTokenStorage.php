@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Sendpulse\RestApi\Token;
 
-
 final class FileTokenStorage implements TokenStorage
 {
     private readonly string $dir;

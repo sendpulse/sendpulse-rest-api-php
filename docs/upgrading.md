@@ -16,7 +16,7 @@ $client = new Sendpulse\RestApi\Client(clientId: $clientId, clientSecret: $clien
 // or API key
 $client = new Sendpulse\RestApi\Client(apiKey: $apiKey);
 
-$client->emailService()->campaigns()->getCampaigns();
+$client->email->campaigns->getCampaigns();
 ```
 
 ## Token storage
