@@ -29,14 +29,32 @@ $client = new Client(
 //     requestTimeout: 15,
 // );
 
+// ── Calling endpoints ─────────────────────────────────────────────────────────
+// Mapped endpoints are reachable as a chain, with IDE autocomplete for the
+// service, the resource, the operation and its parameters:
+//
+//   $client->{service}->{resource}->{operation}([ ...params ])
+//
+// You pass one associative array. Path params ({id}) and declared query params
+// are routed automatically; any other key goes to the JSON body. Every call
+// returns the decoded JSON response as an array, or throws on error.
+//
+// Not in the map? Call any path directly:
+//   $client->get('/path', ['q' => 1]);  // also post / put / patch / delete
+//   $client->request('GET', '/path');   // or send(new \Sendpulse\RestApi\Http\Request(...))
+//
+// Hyphenated services (file-manager, live-chat, viber-chatbot, web-push) cannot
+// use the -> arrow directly — wrap the service name in braces:
+//   $client->{'file-manager'}->directory->getDirectoryTree([]);
+
 // ── list campaigns ────────────────────────────────────────────────────────────
 try {
-    $campaigns = $client->emailService()->campaigns()->getCampaigns(limit: 10);
+    $campaigns = $client->email->campaigns->getCampaigns(['limit' => 10]);
 
     echo 'Campaigns (' . count($campaigns) . '):' . PHP_EOL;
 
     foreach ($campaigns as $campaign) {
-        echo '  [' . $campaign->id . '] ' . $campaign->name . PHP_EOL;
+        echo '  [' . $campaign['id'] . '] ' . $campaign['name'] . PHP_EOL;
     }
 } catch (AuthException $e) {
     // 401 or 403 — invalid key or token
@@ -61,5 +79,18 @@ try {
 }
 
 // ── fetch a single campaign by ID ─────────────────────────────────────────────
-// $campaign = $client->emailService()->campaigns()->getCampaignById(12345);
-// echo $campaign->name;
+// $campaign = $client->email->campaigns->getCampaignById(['id' => 12345]);
+// echo $campaign['name'];
+
+// ── a CRM deal by ID ──────────────────────────────────────────────────────────
+// $deal = $client->crm->deals->getDeal(['dealId' => 42]);
+
+// ── send a transactional email via SMTP ───────────────────────────────────────
+// $result = $client->smtp->emails->sendSmtpEmail([
+//     'email' => [
+//         'subject' => 'Hello',
+//         'from'    => ['name' => 'Me', 'email' => 'me@example.com'],
+//         'to'      => [['name' => 'You', 'email' => 'you@example.com']],
+//         'html'    => base64_encode('<p>Hi!</p>'),
+//     ],
+// ]);

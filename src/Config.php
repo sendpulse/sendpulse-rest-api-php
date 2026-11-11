@@ -9,11 +9,9 @@ use Sendpulse\RestApi\Token\TokenStorage;
 
 final readonly class Config
 {
-    public const DEFAULT_BASE_URL        = 'https://api.sendpulse.com';
     public const DEFAULT_CONNECT_TIMEOUT = 10;
     public const DEFAULT_REQUEST_TIMEOUT = 30;
 
-    public string $baseUrl;
     public int $connectTimeout;
     public int $requestTimeout;
 
@@ -29,7 +27,6 @@ final readonly class Config
     ) {
         $this->validate();
 
-        $this->baseUrl        = self::DEFAULT_BASE_URL;
         $this->connectTimeout = $connectTimeout ?? self::DEFAULT_CONNECT_TIMEOUT;
         $this->requestTimeout = $requestTimeout ?? self::DEFAULT_REQUEST_TIMEOUT;
     }
@@ -48,7 +45,6 @@ final readonly class Config
             'apiKey'          => $this->apiKey !== null ? '***' : null,
             'clientId'        => $this->clientId !== null ? '***' : null,
             'clientSecret'    => $this->clientSecret !== null ? '***' : null,
-            'baseUrl'         => $this->baseUrl,
             'connectTimeout'  => $this->connectTimeout,
             'requestTimeout'  => $this->requestTimeout,
             'cacheDir'        => $this->cacheDir,

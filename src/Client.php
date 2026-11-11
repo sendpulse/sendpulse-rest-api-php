@@ -12,25 +12,26 @@ use Sendpulse\RestApi\Http\CurlHttpClient;
 use Sendpulse\RestApi\Http\HttpClient;
 use Sendpulse\RestApi\Http\Request;
 use Sendpulse\RestApi\Response\ResponseValidator;
-use Sendpulse\RestApi\Generated\Service\ChatbotService;
-use Sendpulse\RestApi\Generated\Service\CrmService;
-use Sendpulse\RestApi\Generated\Service\EmailService;
-use Sendpulse\RestApi\Generated\Service\SmsService;
-use Sendpulse\RestApi\Generated\Service\SmtpService;
 use Sendpulse\RestApi\Token\FileTokenStorage;
 
+/**
+ * @property-read \Sendpulse\RestApi\Stub\Email   $email
+ * @property-read \Sendpulse\RestApi\Stub\Sms     $sms
+ * @property-read \Sendpulse\RestApi\Stub\Smtp    $smtp
+ * @property-read \Sendpulse\RestApi\Stub\Crm     $crm
+ * @property-read \Sendpulse\RestApi\Stub\Chatbot $chatbot
+ */
 final class Client
 {
+    private const BASE_URL = 'https://api.sendpulse.com';
+
+    /** @var array<string, array{method: string, path: string, params?: array<string, string>}>|null */
+    private static ?array $operationsCache = null;
+
     private readonly Config $config;
     private readonly HttpClient $http;
     private readonly Authentication $auth;
     private readonly ResponseValidator $validator;
-
-    private ?EmailService   $email   = null;
-    private ?SmtpService    $smtp    = null;
-    private ?SmsService     $sms     = null;
-    private ?CrmService     $crm     = null;
-    private ?ChatbotService $chatbot = null;
 
     public function __construct(
         ?string $apiKey = null,
@@ -61,29 +62,151 @@ final class Client
         $this->validator = new ResponseValidator();
     }
 
-    public function emailService(): EmailService
+    /**
+     * Entry point for the chained operation surface: $client->crm->deals->get([...]).
+     */
+    public function __get(string $name): Resource
     {
-        return $this->email ??= new EmailService($this);
+        return new Resource($this, $name);
     }
 
-    public function smtpService(): SmtpService
+    /**
+     * Dispatch a mapped operation by its dotted key.
+     *
+     * @param array<string, mixed> $params
+     * @return array<mixed>
+     */
+    public function callOperation(string $key, array $params = []): array
     {
-        return $this->smtp ??= new SmtpService($this);
+        $operations = self::operations();
+
+        if (!isset($operations[$key])) {
+            throw new \InvalidArgumentException("Unknown operation: {$key}");
+        }
+
+        $op     = $operations[$key];
+        $path   = $op['path'];
+        $method = $op['method'];
+        $query  = [];
+        $body   = [];
+
+        foreach ($op['params'] ?? [] as $name => $type) {
+            $inPath   = str_contains($path, '{' . $name . '}');
+            $required = $inPath || str_ends_with($type, '!');
+
+            if (!array_key_exists($name, $params)) {
+                if ($required) {
+                    throw new \InvalidArgumentException("Missing required parameter '{$name}' for {$key}");
+                }
+
+                continue;
+            }
+
+            $value = $params[$name];
+
+            if ($inPath) {
+                if (!is_scalar($value)) {
+                    throw new \InvalidArgumentException("Path parameter '{$name}' for {$key} must be scalar");
+                }
+
+                $path = str_replace('{' . $name . '}', rawurlencode((string) $value), $path);
+            } elseif ($method === 'GET') {
+                $query[$name] = $value;
+            } else {
+                $body[$name] = $value;
+            }
+        }
+
+        // Pass undeclared params through untouched (query for GET, body otherwise).
+        foreach ($params as $name => $value) {
+            if (isset($op['params'][$name])) {
+                continue;
+            }
+
+            if ($method === 'GET') {
+                $query[$name] = $value;
+            } else {
+                $body[$name] = $value;
+            }
+        }
+
+        return match ($method) {
+            'GET'    => $this->get($path, $query),
+            'POST'   => $this->post($path, $body),
+            'PUT'    => $this->put($path, $body),
+            'PATCH'  => $this->patch($path, $body),
+            'DELETE' => $this->delete($path, $body),
+            default  => throw new \InvalidArgumentException("Unsupported method '{$method}' for {$key}"),
+        };
     }
 
-    public function smsService(): SmsService
+    /**
+     * GET request. Array params are appended to the URI as a query string.
+     *
+     * @param array<string, mixed> $query
+     * @param array<string, string> $headers
+     * @return array<mixed>
+     */
+    public function get(string $path, array $query = [], array $headers = []): array
     {
-        return $this->sms ??= new SmsService($this);
+        if ($query !== []) {
+            $path .= (str_contains($path, '?') ? '&' : '?') . http_build_query($query);
+        }
+
+        return $this->request('GET', $path, null, $headers);
     }
 
-    public function crmService(): CrmService
+    /**
+     * @param array<mixed> $body
+     * @param array<string, string> $headers
+     * @return array<mixed>
+     * @throws \JsonException
+     */
+    public function post(string $path, array $body = [], array $headers = []): array
     {
-        return $this->crm ??= new CrmService($this);
+        return $this->request('POST', $path, $this->encodeBody($body), $headers);
     }
 
-    public function chatbotService(): ChatbotService
+    /**
+     * @param array<mixed> $body
+     * @param array<string, string> $headers
+     * @return array<mixed>
+     * @throws \JsonException
+     */
+    public function put(string $path, array $body = [], array $headers = []): array
     {
-        return $this->chatbot ??= new ChatbotService($this);
+        return $this->request('PUT', $path, $this->encodeBody($body), $headers);
+    }
+
+    /**
+     * @param array<mixed> $body
+     * @param array<string, string> $headers
+     * @return array<mixed>
+     * @throws \JsonException
+     */
+    public function patch(string $path, array $body = [], array $headers = []): array
+    {
+        return $this->request('PATCH', $path, $this->encodeBody($body), $headers);
+    }
+
+    /**
+     * @param array<mixed> $body
+     * @param array<string, string> $headers
+     * @return array<mixed>
+     * @throws \JsonException
+     */
+    public function delete(string $path, array $body = [], array $headers = []): array
+    {
+        return $this->request('DELETE', $path, $this->encodeBody($body), $headers);
+    }
+
+    /**
+     * @param array<mixed> $body
+     * @throws \JsonException
+     */
+    private function encodeBody(array $body): ?string
+    {
+        return $body !== [] ? json_encode($body, JSON_THROW_ON_ERROR) : null;
     }
 
     /**
@@ -91,14 +214,11 @@ final class Client
      */
     public function send(Request $request): array
     {
-        $prepared = $this->prepare($request);
-        $authed   = $this->withAuth($prepared);
-        $response = $this->http->send($authed);
+        $response = $this->http->send($this->build($request));
 
         if ($response->statusCode === 401 && $this->auth->supportsRefresh()) {
             $this->auth->invalidate();
-            $authed   = $this->withAuth($prepared);
-            $response = $this->http->send($authed);
+            $response = $this->http->send($this->build($request));
         }
 
         return $this->validator->validate($response);
@@ -118,27 +238,33 @@ final class Client
         ));
     }
 
-    private function prepare(Request $request): Request
+    /**
+     * @return array<string, array{method: string, path: string, params?: array<string, string>}>
+     */
+    private static function operations(): array
     {
-        return new Request(
-            method:  $request->method,
-            uri:     $this->config->baseUrl . '/' . ltrim($request->uri, '/'),
-            headers: array_merge([
-                'Content-Type' => 'application/json',
-                'Accept'       => 'application/json',
-            ], $request->headers),
-            body:    $request->body,
-        );
+        if (self::$operationsCache === null) {
+            /** @var array<string, array{method: string, path: string, params?: array<string, string>}> $map */
+            $map = require __DIR__ . '/../resources/operations.php';
+            self::$operationsCache = $map;
+        }
+
+        return self::$operationsCache;
     }
 
-    private function withAuth(Request $request): Request
+    private function build(Request $request): Request
     {
         return new Request(
             method:  $request->method,
-            uri:     $request->uri,
-            headers: array_merge($request->headers, [
-                'Authorization' => $this->auth->getAuthorizationHeader(),
-            ]),
+            uri:     self::BASE_URL . '/' . ltrim($request->uri, '/'),
+            headers: array_merge(
+                [
+                    'Content-Type' => 'application/json',
+                    'Accept'       => 'application/json',
+                ],
+                $request->headers,
+                ['Authorization' => $this->auth->getAuthorizationHeader()],
+            ),
             body:    $request->body,
         );
     }
@@ -156,7 +282,7 @@ final class Client
             httpClient:    $this->http,
             clientId:      $this->config->clientId ?? '',
             clientSecret:  $this->config->clientSecret ?? '',
-            baseUrl:       $this->config->baseUrl,
+            baseUrl:       self::BASE_URL,
             storage:       $storage,
         );
 

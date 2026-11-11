@@ -2,7 +2,7 @@
 
 ## Testing your own code that uses the SDK
 
-The recommended approach is to **not mock `Client` at all** — instead, substitute the HTTP transport layer with a fake. This way your tests exercise real SDK logic (request building, response parsing, model hydration) without making network calls.
+The recommended approach is to **not mock `Client` at all** — instead, substitute the HTTP transport layer with a fake. This way your tests exercise real SDK logic (request building, auth, response parsing) without making network calls.
 
 ### FakeHttpClient
 
@@ -52,24 +52,24 @@ final class CampaignServiceTest extends TestCase
         $this->client = new Client(apiKey: 'test', httpClient: $this->http);
     }
 
-    public function testGetCampaignsReturnsMappedModels(): void
+    public function testGetCampaignsReturnsDecodedArray(): void
     {
         $this->http->queue(new Response(200, [], json_encode([
             ['id' => 42, 'name' => 'Black Friday'],
         ])));
 
-        $campaigns = $this->client->emailService()->campaigns()->getCampaigns();
+        $campaigns = $this->client->email->campaigns->getCampaigns();
 
         self::assertCount(1, $campaigns);
-        self::assertSame(42, $campaigns[0]->id);
-        self::assertSame('Black Friday', $campaigns[0]->name);
+        self::assertSame(42, $campaigns[0]['id']);
+        self::assertSame('Black Friday', $campaigns[0]['name']);
     }
 
     public function testGetCampaignsBuildsCorrectRequest(): void
     {
         $this->http->queue(new Response(200, [], '[]'));
 
-        $this->client->emailService()->campaigns()->getCampaigns(limit: 50, offset: 10);
+        $this->client->email->campaigns->getCampaigns(['limit' => 50, 'offset' => 10]);
 
         $request = $this->http->lastRequest();
         self::assertStringContainsString('limit=50', $request->uri);
@@ -102,7 +102,7 @@ public function testHandlesAuthError(): void
 
     $this->expectException(AuthException::class);
 
-    $this->client->emailService()->campaigns()->getCampaigns();
+    $this->client->email->campaigns->getCampaigns();
 }
 ```
 
@@ -115,7 +115,7 @@ public function testHandlesRateLimit(): void
 
     $this->expectException(RateLimitException::class);
 
-    $this->client->smtpService()->emails()->sendSmtpEmail([]);
+    $this->client->smtp->emails->sendSmtpEmail([]);
 }
 ```
 

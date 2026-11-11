@@ -8,9 +8,11 @@ SendPulse REST client library
 Official PHP client for the [SendPulse REST API](https://sendpulse.com/integrations/api).
 
 - PHP **≥ 8.3**, zero runtime dependencies (`ext-curl`, `ext-json`)
+- Thin transport: OAuth / API-key auth, automatic token refresh, typed exceptions
+- **Chained endpoint surface** with IDE autocomplete — `$client->crm->deals->getDeal([...])`
+- Raw `get/post/...` fallback for any endpoint
 - PSR-18 HTTP client and PSR-16 cache adapters available as optional drop-ins
-- Typed models generated from OpenAPI specs; thin ergonomic service layer on top
-- PHPStan max · PSR-12 · 26 unit tests
+- Ships `llms.txt` for AI coding assistants · PHPStan max · PSR-12
 
 ### Requirements
 
@@ -18,15 +20,11 @@ Official PHP client for the [SendPulse REST API](https://sendpulse.com/integrati
 - ext-json: *
 - ext-curl: *
 
-
 ### Installation
-
-Via Composer:
 
 ```bash
 composer require sendpulse/rest-api
 ```
-
 
 ## Quick start
 
@@ -47,85 +45,72 @@ $client = new Client(
 );
 ```
 
-Tokens are fetched automatically and stored on disk between requests.
+Tokens are fetched automatically and stored on disk between requests. A `401` is
+retried once with a freshly minted token.
 
-## Services
+## Calling endpoints
 
-| Method | Service |
-|---|---|
-| `$client->emailService()` | Bulk email campaigns and address books |
-| `$client->smtpService()` | Transactional SMTP emails |
-| `$client->smsService()` | SMS campaigns |
-| `$client->crmService()` | CRM contacts and deals |
-| `$client->chatbotService()` | Chatbot bots |
+### Chained surface
 
-## Email service
+Mapped endpoints are reachable as a chain — `service → resource → operation` —
+with IDE autocomplete for every segment and the parameter keys:
 
 ```php
-$email = $client->emailService();
+$campaigns = $client->email->campaigns->getCampaigns(['limit' => 10]);
+$campaign  = $client->email->campaigns->getCampaignById(['id' => 12345]);
 
-// Campaigns
-$campaigns = $email->campaigns()->getCampaigns(limit: 50);  // CampaignSummary[]
-$campaign  = $email->campaigns()->getCampaignById(123);     // CampaignDetails
+$deal = $client->crm->deals->getDeal(['dealId' => 42]);
 
-// Mailing lists
-$lists = $email->mailingLists()->getMailingLists();         // array
-$list  = $email->mailingLists()->getMailingListById(456);   // array
-
-$email->mailingLists()->createMailingList(['name' => 'My list']);
-$email->mailingLists()->updateMailingList(456, ['name' => 'Renamed']);
-$email->mailingLists()->deleteMailingList(456);
-```
-
-## SMTP service
-
-```php
-$smtp = $client->smtpService();
-
-$emails = $smtp->emails()->getSmtpEmails(limit: 100, offset: 0);  // EmailRecord[]
-$email  = $smtp->emails()->getSmtpEmailInfo('message-id');         // EmailRecord
-
-$smtp->emails()->sendSmtpEmail([
+$client->smtp->emails->sendSmtpEmail([
     'email' => [
-        'html'    => '<h1>Hello</h1>',
-        'text'    => 'Hello',
-        'subject' => 'Test',
-        'from'    => ['name' => 'Sender', 'email' => 'sender@example.com'],
-        'to'      => [['name' => 'Recipient', 'email' => 'user@example.com']],
+        'subject' => 'Hello',
+        'from'    => ['name' => 'Me', 'email' => 'me@example.com'],
+        'to'      => [['name' => 'You', 'email' => 'you@example.com']],
+        'html'    => base64_encode('<p>Hi!</p>'),
     ],
 ]);
 ```
 
-## SMS service
+You pass **one associative array**. Path params (`{id}`) and declared query
+params are routed automatically; **any other key goes to the JSON body** (for a
+`GET` it becomes a query param). Every call returns the decoded JSON response as
+an array (empty body → `[]`), or throws one of the exceptions below.
+
+> **Hyphenated services** (`file-manager`, `live-chat`, `viber-chatbot`,
+> `web-push`) cannot use the `->` arrow directly — wrap the service name in
+> braces: `$client->{'file-manager'}->directory->getDirectoryTree([])`.
+
+The full list of chains, paths and parameters lives in
+[`resources/operations/`](resources/operations) and is mirrored in
+[`llms.txt`](llms.txt).
+
+### Raw requests
+
+For any endpoint not in the map — or when you want full control — call a path
+directly:
 
 ```php
-$sms = $client->smsService();
+$client->get('/campaigns', ['limit' => 10]);          // also query params
+$client->post('/smtp/emails', ['email' => [/* ... */]]); // put / patch / delete too
 
-$campaigns = $sms->campaigns()->getSmsCampaigns();    // array
-$campaign  = $sms->campaigns()->getSmsCampaignInfo(789); // array
+// lowest level:
+$client->request('GET', '/campaigns');
+$client->send(new \Sendpulse\RestApi\Http\Request(method: 'GET', uri: '/campaigns'));
 ```
 
-## CRM service
+## IDE autocomplete
 
-```php
-$crm = $client->crmService();
+The chained surface is powered by generated stub definitions in
+[`resources/ide/stubs.php`](resources/ide/stubs.php):
 
-// Contacts
-$contacts = $crm->contacts()->getContactsList();                                    // Contact[]
-$contacts = $crm->contacts()->getContactListByEmail(['email' => 'alice@example.com']); // with filter
-$contact  = $crm->contacts()->getContactById(1);                                   // array
+- **PhpStorm / VS Code** index them automatically — no setup.
+- **PHPStan** users: register them (they add no runtime cost) —
 
-// Deals
-$deals = $crm->deals()->getDealsList();                          // array
-$deals = $crm->deals()->getDealsList(['pipeline_id' => 5]);     // with filter
-$deal  = $crm->deals()->getDeal(10);                            // array
-```
-
-## Chatbot service
-
-```php
-$bots = $client->chatbotService()->bots()->getBots();  // array
-```
+  ```neon
+  parameters:
+      scanFiles:
+          - vendor/sendpulse/rest-api/resources/ide/stubs.php
+  ```
 
 ## Error handling
 
@@ -138,7 +123,7 @@ use Sendpulse\RestApi\Exception\NetworkException;
 use Sendpulse\RestApi\Exception\ProtocolException;
 
 try {
-    $campaigns = $client->emailService()->campaigns()->getCampaigns();
+    $campaigns = $client->email->campaigns->getCampaigns();
 } catch (AuthException $e) {
     // 401 — invalid or expired credentials
 } catch (ForbiddenException $e) {
@@ -154,6 +139,9 @@ try {
     // curl / transport error
 }
 ```
+
+All six implement `Sendpulse\RestApi\Exception\SendPulseExceptionInterface`, so a
+single `catch (SendPulseExceptionInterface $e)` covers every SDK error.
 
 ## Configuration
 
@@ -209,8 +197,8 @@ Default is `FileTokenStorage` (system temp directory or custom `cacheDir`).
 | Exception reference | [docs/exceptions.md](docs/exceptions.md) |
 | Testing | [docs/testing.md](docs/testing.md) |
 | Laravel integration | [docs/laravel.md](docs/laravel.md) |
-| Upgrading from 1.x | [docs/upgrading.md](docs/upgrading.md) |
-
+| Upgrading | [docs/upgrading.md](docs/upgrading.md) |
+| AI assistants | [llms.txt](llms.txt) |
 
 ## License
 

@@ -1,0 +1,878 @@
+# SendPulse PHP SDK
+
+Official thin PHP client for the SendPulse REST API. PHP >= 8.3, zero runtime
+dependencies (ext-curl, ext-json). Returns decoded JSON as arrays; throws typed
+exceptions on failure.
+
+## Install
+
+    composer require sendpulse/rest-api
+
+## Authenticate
+
+    use Sendpulse\RestApi\Client;
+
+    $client = new Client(apiKey: 'KEY');                           // static API key
+    $client = new Client(clientId: 'ID', clientSecret: 'SECRET');  // OAuth, token auto-managed
+
+## Two ways to call
+
+1. Chained (mapped endpoints) — $client->{service}->{resource}->{operation}([...params]):
+
+       $client->crm->deals->getDeal(['dealId' => 5]);
+       $client->smtp->emails->sendSmtpEmail(['email' => ['subject' => 'Hi', /* ... */]]);
+
+2. Raw (any path, for endpoints not in the map):
+
+       $client->get('/path', ['q' => 1]);
+       $client->post('/path', ['field' => 'value']);   // also put / patch / delete
+       $client->request('GET', '/path');               // or send(new Request(...))
+
+## Calling convention (chained)
+
+- One associative array argument.
+- Path params (shown as {name}) and declared query params are routed automatically;
+  any other key goes to the JSON body (for GET it becomes a query param).
+- A trailing "!" in the catalog marks a required parameter.
+- Returns the decoded JSON response as an array (empty body -> []).
+
+## Errors
+
+All implement Sendpulse\RestApi\Exception\SendPulseExceptionInterface:
+
+- AuthException (401), ForbiddenException (403), RateLimitException (429),
+  ApiException (other 4xx/5xx), NetworkException (transport), ProtocolException (bad JSON).
+- AuthException / ForbiddenException / RateLimitException / ApiException expose ->httpStatus and ->rawBody.
+
+## Endpoints (793)
+
+### a360
+a360.autoresponders.autorespondersConversions — GET /a360/autoresponders/{id}/conversions  —  id:int!
+a360.autoresponders.autorespondersConversionsGroupStatFiltered — GET /a360/autoresponders/{id}/conversions/group-stat-filtered  —  id:int!
+a360.autoresponders.autorespondersGroupStatFiltered — GET /a360/autoresponders/{id}/group-stat-filtered  —  id:int!
+a360.autoresponders.autorespondersIndex — GET /a360/autoresponders/{id}  —  id:int!
+a360.autoresponders.autorespondersList — GET /a360/autoresponders/list
+a360.autoresponders.autorespondersTotalStats — GET /a360/autoresponders/{id}/total-stats  —  id:int! flow_type:string deleted:string
+a360.autorespondersConversions.autorespondersConversionsAll — GET /a360/autoresponders/{id}/conversions/list/all  —  id:int!
+a360.autorespondersConversions.autorespondersConversionsGoal — GET /a360/autoresponders/{id}/conversions/list/goal/{goalId}  —  id:int! goalId:int!
+a360.autorespondersConversions.autorespondersConversionsGoals — GET /a360/autoresponders/{id}/conversions/list/goal  —  id:int!
+a360.autorespondersConversions.autorespondersConversionsMainTrigger — GET /a360/autoresponders/{id}/conversions/list/maintrigger  —  id:int!
+a360.autorespondersConversions.conversionsAllGroupStatFiltered — GET /a360/autoresponders/{id}/conversions/list/all/group-stat-filtered  —  id:int!
+a360.autorespondersConversions.conversionsGoalGroupStatFiltered — GET /a360/autoresponders/{id}/conversions/list/goal/{goalId}/group-stat-filtered  —  id:int! goalId:int!
+a360.autorespondersConversions.conversionsGoalsGroupStatFiltered — GET /a360/autoresponders/{id}/conversions/list/goals/group-stat-filtered  —  id:int!
+a360.autorespondersConversions.conversionsMainTriggerGroupStatFiltered — GET /a360/autoresponders/{id}/conversions/list/maintrigger/group-stat-filtered  —  id:int!
+a360.events.eventsDeleteLog — POST /a360/events/delete-log
+a360.statsAction.statsActionGroupStat — GET /a360/stats/action/{elementId}/group-stat  —  elementId:string!
+a360.statsAction.statsActionGroupStatFiltered — GET /a360/stats/action/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsCondition.statsTriggerGroupStat — GET /a360/stats/trigger/{elementId}/group-stat  —  elementId:string!
+a360.statsCondition.statsTriggerGroupStatFiltered — GET /a360/stats/trigger/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsEmail.statsEmailAddresses — GET /a360/stats/email/{elementId}/addresses  —  elementId:string!
+a360.statsEmail.statsEmailGroupStat — GET /a360/stats/email/{elementId}/group-stat  —  emails[]:array sent_date_from:string sent_date_to:string elementId:string!
+a360.statsEmail.statsEmailGroupStatFiltered — GET /a360/stats/email/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsFilter.statsFilterGroupStat — GET /a360/stats/filter/{elementId}/group-stat  —  elementId:string!
+a360.statsFilter.statsFilterGroupStatFiltered — GET /a360/stats/filter/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsFlowOperator.statsFlowOperatorAddresses — GET /a360/stats/flow-operator/{elementId}/addresses  —  sortField:string sortDirection:string elementId:string!
+a360.statsGoal.statsGoalGroupStat — GET /a360/stats/goal/{elementId}/group-stat  —  elementId:string!
+a360.statsGoal.statsGoalGroupStatFiltered — GET /a360/stats/goal/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsMainTrigger.statsMainTriggerAddresses — GET /a360/stats/main-trigger/{elementId}/addresses  —  elementId:string!
+a360.statsMainTrigger.statsMainTriggerGroupStat — GET /a360/stats/main-trigger/{elementId}/group-stat  —  elementId:string!
+a360.statsMainTrigger.statsMainTriggerGroupStatFiltered — GET /a360/stats/main-trigger/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsMessenger.statsMessengerAddresses — GET /a360/stats/messenger/{elementId}/addresses  —  elementId:string!
+a360.statsMessenger.statsMessengerGroupStat — GET /a360/stats/messenger/{elementId}/group-stat  —  elementId:string!
+a360.statsMessenger.statsMessengerGroupStatFiltered — GET /a360/stats/messenger/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsPause.statsPauseAddresses — GET /a360/stats/pause/{elementId}/addresses  —  limit:int! sortField:string elementId:string!
+a360.statsPause.statsPauseGroupStat — GET /a360/stats/pause/{elementId}/group-stat  —  elementId:string!
+a360.statsPause.statsPauseGroupStatFiltered — GET /a360/stats/pause/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsPush.statsPushAddresses — GET /a360/stats/push/{elementId}/addresses  —  elementId:string!
+a360.statsPush.statsPushGroupStat — GET /a360/stats/push/{elementId}/group-stat  —  elementId:string!
+a360.statsPush.statsPushGroupStatFiltered — GET /a360/stats/push/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsSMS.statsSmsAddresses — GET /a360/stats/sms/{elementId}/addresses  —  elementId:string!
+a360.statsSMS.statsSmsGroupStat — GET /a360/stats/sms/{elementId}/group-stat  —  elementId:string!
+a360.statsSMS.statsSmsGroupStatFiltered — GET /a360/stats/sms/{elementId}/group-stat-filtered  —  elementId:string!
+a360.statsViber.statsViberAddresses — GET /a360/stats/viber/{elementId}/addresses  —  elementId:string!
+a360.statsViber.statsViberGroupStat — GET /a360/stats/viber/{elementId}/group-stat  —  elementId:string!
+a360.statsViber.statsViberGroupStatFiltered — GET /a360/stats/viber/{elementId}/group-stat-filtered  —  elementId:string!
+
+### chatbot
+chatbot.account.getAccount — GET /chatbots/account
+chatbot.bots.getBots — GET /chatbots/bots
+chatbot.dialogLabels.assignDialogLabels — POST /chatbots/dialog-labels/assign
+chatbot.dialogLabels.createDialogLabel — POST /chatbots/dialog-labels
+chatbot.dialogLabels.deleteDialogLabel — DELETE /chatbots/dialog-labels/{dialog_label}  —  dialog_label:string!
+chatbot.dialogLabels.getDialogLabels — GET /chatbots/dialog-labels
+chatbot.dialogLabels.updateDialogLabel — PUT /chatbots/dialog-labels/{dialog_label}  —  dialog_label:string!
+chatbot.dialogs.filterDialogs — POST /chatbots/dialogs
+chatbot.dialogs.getDialogs — GET /chatbots/dialogs  —  search_after:string
+chatbot.operatorGroups.addOperatorGroupMembers — POST /chatbots/operator-groups/{operator_group}/members  —  operator_group:string!
+chatbot.operatorGroups.createOperatorGroup — POST /chatbots/operator-groups
+chatbot.operatorGroups.deleteOperatorGroup — DELETE /chatbots/operator-groups/{operator_group}  —  operator_group:string!
+chatbot.operatorGroups.deleteOperatorGroupMember — DELETE /chatbots/operator-groups/{operator_group}/members/{operator_group_member}  —  operator_group:string! operator_group_member:string!
+chatbot.operatorGroups.getOperatorGroupMembers — GET /chatbots/operator-groups/{operator_group}/members  —  operator_group:string!
+chatbot.operatorGroups.getOperatorGroups — GET /chatbots/operator-groups
+chatbot.operatorGroups.updateOperatorGroup — PUT /chatbots/operator-groups/{operator_group}  —  operator_group:string!
+chatbot.operators.getOperatorCurrentStatistics — POST /chatbots/operators/{operator}/statistics/current  —  operator:int!
+chatbot.operators.getOperatorPeriodStatistics — GET /chatbots/operators/{operator}/statistics/period  —  operator:int! from:string to:string
+chatbot.operators.getOperators — GET /chatbots/operators
+
+### crm
+crm.attachments.batchCreateAttachments — POST /crm/v1/attachments/batch
+crm.attachments.createAttachment — POST /crm/v1/attachments
+crm.attachments.deleteAttachment — DELETE /crm/v1/attachments/{attachmentId}  —  attachmentId:string!
+crm.attachments.updateAttachment — PUT /crm/v1/attachments/{attachmentId}  —  attachmentId:string!
+crm.attachments.uploadFiles — POST /crm/v1/files/upload
+crm.boards.createBoard — POST /crm/v1/boards
+crm.boards.createBoardAttribute — POST /crm/v1/boards/{boardId}/attributes  —  boardId:string!
+crm.boards.createBoardStep — POST /crm/v1/boards/{boardId}/steps  —  boardId:string!
+crm.boards.getBoard — GET /crm/v1/boards/{boardId}  —  boardId:string!
+crm.boards.listBoardAttributes — GET /crm/v1/boards/{boardId}/attributes  —  boardId:string!
+crm.boards.listBoards — GET /crm/v1/boards
+crm.boards.updateBoard — PUT /crm/v1/boards/{boardId}  —  boardId:string!
+crm.boards.updateBoardAttribute — PUT /crm/v1/boards/{boardId}/attributes/{attributeId}  —  boardId:string! attributeId:string!
+crm.boards.updateBoardStep — PUT /crm/v1/boards/{boardId}/steps/{stepId}  —  boardId:string! stepId:string!
+crm.comments.createCompanyComment — POST /crm/v1/companies/{companyId}/comments  —  companyId:string!
+crm.comments.createContactComment — POST /crm/v1/contacts/{contactId}/comments  —  contactId:string!
+crm.comments.createDealComment — POST /crm/v1/deals/{dealId}/comments  —  dealId:string!
+crm.comments.createTaskComment — POST /crm/v1/tasks/{taskId}/comments  —  taskId:string!
+crm.comments.deleteCompanyComment — DELETE /crm/v1/companies/{companyId}/comments/{commentId}  —  companyId:string! commentId:string!
+crm.comments.deleteContactComment — DELETE /crm/v1/contacts/{contactId}/comments/{commentId}  —  contactId:string! commentId:string!
+crm.comments.deleteDealComment — DELETE /crm/v1/deals/{dealId}/comments/{commentId}  —  dealId:string! commentId:string!
+crm.comments.deleteTaskComment — DELETE /crm/v1/tasks/{taskId}/comments/{commentId}  —  taskId:string! commentId:string!
+crm.comments.listCompanyComments — GET /crm/v1/companies/{companyId}/comments  —  message:string limit:int offset:int companyId:string!
+crm.comments.listContactComments — GET /crm/v1/contacts/{contactId}/comments  —  message:string limit:int offset:int contactId:string!
+crm.comments.listDealComments — GET /crm/v1/deals/{dealId}/comments  —  message:string limit:int offset:int dealId:string!
+crm.comments.listTaskComments — GET /crm/v1/tasks/{taskId}/comments  —  message:string limit:int offset:int taskId:string!
+crm.comments.updateCompanyComment — PUT /crm/v1/companies/{companyId}/comments/{commentId}  —  companyId:string! commentId:string!
+crm.comments.updateContactComment — PUT /crm/v1/contacts/{contactId}/comments/{commentId}  —  contactId:string! commentId:string!
+crm.comments.updateDealComment — PUT /crm/v1/deals/{dealId}/comments/{commentId}  —  dealId:string! commentId:string!
+crm.comments.updateTaskComment — PUT /crm/v1/tasks/{taskId}/comments/{commentId}  —  taskId:string! commentId:string!
+crm.companies.batchDeleteCompanies — DELETE /crm/v1/companies/batch-delete
+crm.companies.createCompany — POST /crm/v1/companies
+crm.companies.deleteCompany — DELETE /crm/v1/companies/{companyId}  —  companyId:string!
+crm.companies.getCompany — GET /crm/v1/companies/{companyId}  —  companyId:string!
+crm.companies.getCompanyHistory — GET /crm/v1/companies/{companyId}/history  —  dateFrom:string dateTo:string limit:int offset:int companyId:string!
+crm.companies.searchCompanies — POST /crm/v1/companies/list
+crm.companies.searchCompaniesShort — POST /crm/v1/companies/short-data
+crm.companies.updateCompany — PUT /crm/v1/companies/{companyId}  —  companyId:string!
+crm.companyAttributes.batchSetCompanyAttributeValues — POST /crm/v1/companies/{companyId}/attributes/batch  —  companyId:string!
+crm.companyAttributes.createCompanyAttribute — POST /crm/v1/companies/attributes
+crm.companyAttributes.deleteCompanyAttribute — DELETE /crm/v1/companies/attributes/{attributeId}  —  attributeId:string!
+crm.companyAttributes.deleteCompanyAttributeValue — DELETE /crm/v1/companies/{companyId}/attributes/{attributeId}  —  companyId:string! attributeId:string!
+crm.companyAttributes.listCompanyAttributeValues — GET /crm/v1/companies/{companyId}/attributes  —  companyId:string!
+crm.companyAttributes.listCompanyAttributes — GET /crm/v1/companies/attributes
+crm.companyAttributes.setCompanyAttributeValue — POST /crm/v1/companies/{companyId}/attributes  —  companyId:string!
+crm.companyAttributes.updateCompanyAttribute — PUT /crm/v1/companies/attributes/{attributeId}  —  attributeId:string!
+crm.companyAttributes.updateCompanyAttributeValue — PUT /crm/v1/companies/{companyId}/attributes/{attributeId}  —  companyId:string! attributeId:string!
+crm.companyChannels.addCompanyEmail — POST /crm/v1/companies/{companyId}/emails  —  companyId:string!
+crm.companyChannels.addCompanyMessenger — POST /crm/v1/companies/{companyId}/messengers  —  companyId:string!
+crm.companyChannels.addCompanyPhone — POST /crm/v1/companies/{companyId}/phones  —  companyId:string!
+crm.companyChannels.batchAddCompanyEmails — POST /crm/v1/companies/{companyId}/emails/batch  —  companyId:string!
+crm.companyChannels.batchAddCompanyMessengers — POST /crm/v1/companies/{companyId}/messengers/batch  —  companyId:string!
+crm.companyChannels.batchAddCompanyPhones — POST /crm/v1/companies/{companyId}/phones/batch  —  companyId:string!
+crm.companyChannels.deleteCompanyEmail — DELETE /crm/v1/companies/{companyId}/emails/{emailId}  —  companyId:string! emailId:string!
+crm.companyChannels.deleteCompanyMessenger — DELETE /crm/v1/companies/{companyId}/messengers/{messengerId}  —  companyId:string! messengerId:string!
+crm.companyChannels.deleteCompanyPhone — DELETE /crm/v1/companies/{companyId}/phones/{phoneId}  —  companyId:string! phoneId:string!
+crm.companyChannels.listCompanyEmails — GET /crm/v1/companies/{companyId}/emails  —  email:string limit:int offset:int companyId:string!
+crm.companyChannels.listCompanyMessengers — GET /crm/v1/companies/{companyId}/messengers  —  companyId:string!
+crm.companyChannels.listCompanyPhones — GET /crm/v1/companies/{companyId}/phones  —  companyId:string!
+crm.companyChannels.updateCompanyEmail — PUT /crm/v1/companies/{companyId}/emails/{emailId}  —  companyId:string! emailId:string!
+crm.companyChannels.updateCompanyMessenger — PUT /crm/v1/companies/{companyId}/messengers/{messengerId}  —  companyId:string! messengerId:string!
+crm.companyChannels.updateCompanyPhone — PUT /crm/v1/companies/{companyId}/phones/{phoneId}  —  companyId:string! phoneId:string!
+crm.contactAttributes.batchSetContactAttributeValues — POST /crm/v1/contacts/{contactId}/attributes/batch  —  contactId:string!
+crm.contactAttributes.createContactAttribute — POST /crm/v1/contacts/attributes
+crm.contactAttributes.deleteContactAttribute — DELETE /crm/v1/contacts/attributes/{attributeId}  —  attributeId:string!
+crm.contactAttributes.deleteContactAttributeValue — DELETE /crm/v1/contacts/{contactId}/attributes/{attributeId}  —  contactId:string! attributeId:string!
+crm.contactAttributes.listContactAttributeValues — GET /crm/v1/contacts/{contactId}/attributes  —  contactId:string!
+crm.contactAttributes.listContactAttributes — GET /crm/v1/contacts/attributes
+crm.contactAttributes.setContactAttributeValue — POST /crm/v1/contacts/{contactId}/attributes  —  contactId:string!
+crm.contactAttributes.updateContactAttribute — PUT /crm/v1/contacts/attributes/{attributeId}  —  attributeId:string!
+crm.contactAttributes.updateContactAttributeValue — PUT /crm/v1/contacts/{contactId}/attributes/{attributeId}  —  contactId:string! attributeId:string!
+crm.contactChannels.addContactEmails — POST /crm/v1/contacts/{contactId}/emails  —  contactId:string!
+crm.contactChannels.addContactMessenger — POST /crm/v1/contacts/{contactId}/messengers  —  contactId:string!
+crm.contactChannels.addContactPhone — POST /crm/v1/contacts/{contactId}/phones  —  contactId:string!
+crm.contactChannels.deleteContactEmail — DELETE /crm/v1/contacts/{contactId}/emails/{emailId}  —  contactId:string! emailId:string!
+crm.contactChannels.deleteContactMessenger — DELETE /crm/v1/contacts/{contactId}/messengers/{messengerId}  —  contactId:string! messengerId:string!
+crm.contactChannels.deleteContactPhone — DELETE /crm/v1/contacts/{contactId}/phones/{phoneId}  —  contactId:string! phoneId:string!
+crm.contactChannels.updateContactEmail — PUT /crm/v1/contacts/{contactId}/emails/{emailId}  —  contactId:string! emailId:string!
+crm.contactChannels.updateContactMessenger — PUT /crm/v1/contacts/{contactId}/messengers/{messengerId}  —  contactId:string! messengerId:string!
+crm.contactChannels.updateContactPhone — PUT /crm/v1/contacts/{contactId}/phones/{phoneId}  —  contactId:string! phoneId:string!
+crm.contacts.attachContactToCompany — POST /crm/v1/contacts/{contactId}/relation/{companyId}  —  contactId:string! companyId:string!
+crm.contacts.createContact — POST /crm/v1/contacts/create
+crm.contacts.deleteContact — DELETE /crm/v1/contacts/{contactId}  —  contactId:string!
+crm.contacts.detachContactFromCompany — DELETE /crm/v1/contacts/{contactId}/relation/{companyId}  —  contactId:string! companyId:string!
+crm.contacts.getContact — GET /crm/v1/contacts/{contactId}  —  contactId:string!
+crm.contacts.getContactByExternalId — GET /crm/v1/contacts/external/{externalContactId}  —  externalContactId:string!
+crm.contacts.getContactByMessengerContactId — GET /crm/v1/contacts/messenger-external/{messengerContactId}  —  messengerContactId:string!
+crm.contacts.getContactEduStatistics — GET /crm/v1/contacts/{contactId}/edu-statistic  —  contactId:string!
+crm.contacts.getContactHistory — GET /crm/v1/contacts/{contactId}/history  —  fromDate:string! toDate:string! contactId:string!
+crm.contacts.listContactDeals — GET /crm/v1/contacts/{contactId}/deals  —  contactId:string!
+crm.contacts.listContactEduPayments — GET /crm/v1/contacts/{contactId}/edu-payments  —  contactId:string!
+crm.contacts.searchContacts — POST /crm/v1/contacts/get-list
+crm.contacts.searchContactsByEmail — POST /crm/v1/contacts/get-list-by-email
+crm.contacts.updateContact — PUT /crm/v1/contacts/{contactId}  —  contactId:string!
+crm.customTabs.addCustomTabAttributes — POST /crm/v1/custom-tab/{customTabId}/relation  —  customTabId:string!
+crm.customTabs.createCustomTab — POST /crm/v1/custom-tab
+crm.customTabs.deleteCustomTab — DELETE /crm/v1/custom-tab/{customTabId}  —  customTabId:string!
+crm.customTabs.listCustomTabs — GET /crm/v1/custom-tab
+crm.customTabs.removeCustomTabAttributes — DELETE /crm/v1/custom-tab/{customTabId}/relation  —  customTabId:string!
+crm.customTabs.updateCustomTab — PUT /crm/v1/custom-tab/{customTabId}  —  customTabId:string!
+crm.dealAttributes.createDealAttribute — POST /crm/v1/pipelines/{pipelineId}/attributes  —  pipelineId:string!
+crm.dealAttributes.deleteDealAttribute — DELETE /crm/v1/pipelines/{pipelineId}/attributes/{attributeId}  —  pipelineId:string! attributeId:string!
+crm.dealAttributes.deleteDealAttributeValue — DELETE /crm/v1/deals/{dealId}/attributes/{attributeId}  —  dealId:string! attributeId:string!
+crm.dealAttributes.listDealAttributeValues — GET /crm/v1/deals/{dealId}/attributes  —  dealId:string!
+crm.dealAttributes.listDealAttributes — GET /crm/v1/pipelines/{pipelineId}/attributes  —  pipelineId:string!
+crm.dealAttributes.listDealAttributesByPipeline — GET /crm/v1/deals/attributes/{pipelineId}  —  pipelineId:string!
+crm.dealAttributes.setDealAttributeValue — POST /crm/v1/deals/{dealId}/attributes  —  dealId:string!
+crm.dealAttributes.updateDealAttribute — PUT /crm/v1/pipelines/{pipelineId}/attributes/{attributeId}  —  pipelineId:string! attributeId:string!
+crm.dealAttributes.updateDealAttributeValue — PUT /crm/v1/deals/{dealId}/attributes/{attributeId}  —  dealId:string! attributeId:string!
+crm.dealContacts.attachContactToDeal — POST /crm/v1/deals/{dealId}/contacts/{contactId}  —  dealId:string! contactId:string!
+crm.dealContacts.detachContactFromDeal — DELETE /crm/v1/deals/{dealId}/contacts/{contactId}  —  dealId:string! contactId:string!
+crm.dealContacts.listDealContacts — GET /crm/v1/deals/{dealId}/contacts  —  dealId:string!
+crm.dealExpenses.createDealExpense — POST /crm/v1/deal-expenses
+crm.dealExpenses.deleteDealExpense — DELETE /crm/v1/deal-expenses/{id}  —  id:string!
+crm.dealExpenses.getDealExpense — GET /crm/v1/deal-expenses/{id}  —  id:string!
+crm.dealExpenses.listDealExpenses — GET /crm/v1/deal-expenses/deal/{dealId}  —  dealId:string!
+crm.dealExpenses.updateDealExpense — PUT /crm/v1/deal-expenses/{id}  —  id:string!
+crm.dealProducts.addProductToDeal — POST /crm/v1/products/deals
+crm.dealProducts.listContactDealProducts — GET /crm/v1/products/contacts/{contactId}/deals  —  contactId:string!
+crm.dealProducts.listDealProducts — GET /crm/v1/products/deals/{id}  —  id:int!
+crm.dealProducts.removeProductFromDeal — DELETE /crm/v1/products/categories/{categoryId}/{productId}/deals/{headId}  —  headId:int! categoryId:string! productId:string!
+crm.dealProducts.updateDealProduct — PUT /crm/v1/products/deals/{id}  —  id:int!
+crm.deals.changeDealPipeline — POST /crm/v1/deals/{dealId}/change-pipeline  —  dealId:string!
+crm.deals.createDeal — POST /crm/v1/deals
+crm.deals.deleteDeal — DELETE /crm/v1/deals/{dealId}  —  dealId:string!
+crm.deals.deleteDealExpiration — DELETE /crm/v1/deals/{dealId}/expiration  —  dealId:string!
+crm.deals.getDeal — GET /crm/v1/deals/{dealId}  —  dealId:string!
+crm.deals.getDealHistory — GET /crm/v1/deals/{dealId}/history  —  fromDate:string! toDate:string! dealId:string!
+crm.deals.searchDeals — POST /crm/v1/deals/get-list
+crm.deals.setDealExpiration — PUT /crm/v1/deals/{dealId}/expiration  —  dealId:string!
+crm.deals.updateDeal — PUT /crm/v1/deals/{dealId}  —  dealId:string!
+crm.failReasons.createFailReason — POST /crm/v1/pipelines/{pipelineId}/fail-reasons  —  pipelineId:string!
+crm.failReasons.deleteFailReason — DELETE /crm/v1/pipelines/{pipelineId}/fail-reasons/{reasonId}  —  pipelineId:string! reasonId:string!
+crm.failReasons.listDealFailReasonEntries — GET /crm/v1/pipelines/{pipelineId}/deals/{dealId}/fail-reasons  —  limit:int! offset:int! fromDate:string! toDate:string! pipelineId:string! dealId:string!
+crm.failReasons.listFailReasons — GET /crm/v1/pipelines/{pipelineId}/fail-reasons  —  pipelineId:string!
+crm.failReasons.updateFailReason — PUT /crm/v1/pipelines/{pipelineId}/fail-reasons/{reasonId}  —  pipelineId:string! reasonId:string!
+crm.managerSettings.createManagerSettings — POST /crm/v1/manager-settings
+crm.managerSettings.deleteManagerSettings — DELETE /crm/v1/manager-settings/{id}  —  id:int!
+crm.managerSettings.getManagerSettingsBySection — GET /crm/v1/manager-settings/{id}  —  id:int!
+crm.managerSettings.listManagerSettingSections — GET /crm/v1/manager-settings/sections
+crm.managerSettings.listManagerSettings — GET /crm/v1/manager-settings/managers
+crm.managerSettings.updateManagerSettings — PUT /crm/v1/manager-settings/{id}  —  id:int!
+crm.messengerTypes.listMessengerTypes — GET /crm/v1/messenger-types
+crm.payments.approvePayment — POST /crm/v1/payments/{paymentId}/approve  —  paymentId:string!
+crm.payments.cancelPayment — POST /crm/v1/payments/{paymentId}/cancel  —  paymentId:string!
+crm.payments.createPayment — POST /crm/v1/payments
+crm.payments.generateContactPaymentLink — POST /crm/v1/payments/contact-generate-payment-link
+crm.payments.generateDealPaymentLink — POST /crm/v1/payments/deal-generate-payment-link
+crm.payments.listContactPayments — GET /crm/v1/payments/contacts/{contactId}  —  contactId:string!
+crm.payments.listDealPayments — GET /crm/v1/payments/deals/{dealId}  —  dealId:string!
+crm.payments.listPaymentMethods — GET /crm/v1/payments/user-payment-methods
+crm.payments.listPayments — GET /crm/v1/payments/all
+crm.pipelineSteps.createPipelineStep — POST /crm/v1/pipelines/{pipelineId}/steps  —  pipelineId:string!
+crm.pipelineSteps.deletePipelineStep — DELETE /crm/v1/pipelines/{pipelineId}/steps/{stepId}  —  pipelineId:string! stepId:string!
+crm.pipelineSteps.listPipelineSteps — GET /crm/v1/pipelines/{pipelineId}/steps  —  pipelineId:string!
+crm.pipelineSteps.updatePipelineStep — PUT /crm/v1/pipelines/{pipelineId}/steps/{stepId}  —  pipelineId:string! stepId:string!
+crm.pipelines.createPipeline — POST /crm/v1/pipelines
+crm.pipelines.getPipeline — GET /crm/v1/pipelines/{pipelineId}  —  pipelineId:string!
+crm.pipelines.listPipelines — GET /crm/v1/pipelines
+crm.pipelines.updatePipeline — PUT /crm/v1/pipelines/{pipelineId}  —  pipelineId:string!
+crm.productCategories.createProductCategory — POST /crm/v1/products/categories
+crm.productCategories.deleteProductCategory — DELETE /crm/v1/products/categories/{categoryId}  —  categoryId:string!
+crm.productCategories.listProductCategories — GET /crm/v1/products/categories
+crm.productCategories.updateProductCategory — PUT /crm/v1/products/categories/{categoryId}  —  categoryId:string!
+crm.products.addProductSections — POST /crm/v1/products/{productId}/sections  —  productId:string!
+crm.products.createProduct — POST /crm/v1/products
+crm.products.deleteProduct — DELETE /crm/v1/products/{productId}  —  productId:string!
+crm.products.deleteProductSection — DELETE /crm/v1/products/{productId}/sections/{sectionId}  —  sectionId:int! productId:string!
+crm.products.getProduct — GET /crm/v1/products/{productId}  —  productId:string!
+crm.products.searchProducts — POST /crm/v1/products/all
+crm.products.updateProduct — PUT /crm/v1/products/{productId}  —  productId:string!
+crm.products.updateProductPrices — PUT /crm/v1/products/{productId}/prices  —  productId:string!
+crm.products.updateProductSections — PUT /crm/v1/products/{productId}/sections  —  productId:string!
+crm.tags.attachTagToContact — POST /crm/v1/contact-tags/{tagId}/contact/{contactId}  —  tagId:string! contactId:string!
+crm.tags.createContactTag — POST /crm/v1/contact-tags
+crm.tags.createTaskTag — POST /crm/v1/task-tags
+crm.tags.deleteContactTag — DELETE /crm/v1/contact-tags/{tagId}  —  tagId:string!
+crm.tags.deleteTaskTag — DELETE /crm/v1/task-tags/{tagId}  —  tagId:string!
+crm.tags.detachTagFromContact — DELETE /crm/v1/contact-tags/{tagId}/contact/{contactId}  —  tagId:string! contactId:string!
+crm.tags.detachTagFromTask — DELETE /crm/v1/task-tags/{tagId}/task/{taskId}  —  tagId:string! taskId:string!
+crm.tags.listContactTags — GET /crm/v1/contact-tags  —  name:string search:string
+crm.tags.listTaskTags — GET /crm/v1/task-tags  —  name:string search:string
+crm.tags.updateContactTag — PUT /crm/v1/contact-tags/{tagId}  —  tagId:string!
+crm.tags.updateTaskTag — PUT /crm/v1/task-tags/{tagId}  —  tagId:string!
+crm.taskChecklists.changeChecklistItemOrder — POST /crm/v1/checklists/{checklistId}/items/{itemId}  —  checklistId:string! itemId:string!
+crm.taskChecklists.createChecklistItem — POST /crm/v1/checklists/{checklistId}/items  —  checklistId:string!
+crm.taskChecklists.createTaskChecklist — POST /crm/v1/tasks/{taskId}/checklists/single  —  taskId:string!
+crm.taskChecklists.createTaskChecklists — POST /crm/v1/tasks/{taskId}/checklists  —  taskId:string!
+crm.taskChecklists.deleteChecklistItem — DELETE /crm/v1/checklists/{checklistId}/items/{itemId}  —  checklistId:string! itemId:string!
+crm.taskChecklists.deleteTaskChecklist — DELETE /crm/v1/tasks/{taskId}/checklists/{checklistId}  —  taskId:string! checklistId:string!
+crm.taskChecklists.listTaskChecklists — GET /crm/v1/tasks/{taskId}/checklists  —  taskId:string!
+crm.taskChecklists.updateChecklistItem — PUT /crm/v1/checklists/{checklistId}/items/{itemId}  —  checklistId:string! itemId:string!
+crm.taskChecklists.updateTaskChecklist — PUT /crm/v1/tasks/{taskId}/checklists/{checklistId}/single  —  taskId:string! checklistId:string!
+crm.taskChecklists.updateTaskChecklists — PUT /crm/v1/tasks/{taskId}/checklists  —  taskId:string!
+crm.tasks.attachEntitiesToTask — POST /crm/v1/tasks/{taskId}/entity-attach  —  taskId:string!
+crm.tasks.changeTaskOrder — POST /crm/v1/tasks/{taskId}/steps/{stepId}/order  —  taskId:string! stepId:string!
+crm.tasks.createTask — POST /crm/v1/tasks
+crm.tasks.deleteTask — DELETE /crm/v1/tasks/{taskId}  —  taskId:string!
+crm.tasks.deleteTaskAttributeValue — DELETE /crm/v1/{boardId}/attributes/{attributeId}/values/{valueId}  —  boardId:string! attributeId:string! valueId:string!
+crm.tasks.detachContactFromTask — DELETE /crm/v1/task-contacts/{taskId}/contact/{contactId}  —  taskId:string! contactId:string!
+crm.tasks.detachDealFromTask — DELETE /crm/v1/task-deals/{taskId}/deal/{dealId}  —  taskId:string! dealId:string!
+crm.tasks.detachTaskFromTask — DELETE /crm/v1/task-to-task/{taskHeadId}/task/{taskId}  —  taskHeadId:int! taskId:string!
+crm.tasks.getTask — GET /crm/v1/tasks/{taskId}  —  taskId:string!
+crm.tasks.getTaskHistory — GET /crm/v1/tasks/{taskId}/history  —  fromDate:string! toDate:string! taskId:string!
+crm.tasks.searchTasks — POST /crm/v1/tasks/list
+crm.tasks.setTaskAttributeValue — POST /crm/v1/tasks/{taskId}/attributes  —  taskId:string!
+crm.tasks.setTaskParent — POST /crm/v1/tasks/{taskId}/parent  —  taskId:string!
+crm.tasks.updateTask — PUT /crm/v1/tasks/{taskId}  —  taskId:string!
+crm.tasks.updateTaskAttributeValue — PUT /crm/v1/{boardId}/attributes/{attributeId}/values/{valueId}  —  boardId:string! attributeId:string! valueId:string!
+crm.telephony.attachCallToDeal — POST /crm/v1/deals/{dealId}/attach-call  —  dealId:string!
+crm.telephony.listCalls — POST /crm/v1/telephony/calls/get-list
+crm.telephony.listContactCalls — POST /crm/v1/contacts/{contactId}/get-calls  —  contactId:string!
+crm.telephony.listDealCalls — POST /crm/v1/deals/{dealId}/get-calls  —  dealId:string!
+crm.users.listUsers — GET /crm/v1/users
+
+### edu
+edu.certificateSections.createCertificateSection — POST /edu/public/v1/{schoolId}/{courseId}/certificate-section  —  schoolId:int! courseId:int!
+edu.certificateSections.deleteCertificateSection — DELETE /edu/public/v1/{schoolId}/{courseId}/certificate-section/{certificateSectionId}  —  schoolId:int! courseId:int! certificateSectionId:int!
+edu.certificateSections.updateCertificateSection — PUT /edu/public/v1/{schoolId}/{courseId}/certificate-section  —  schoolId:int! courseId:int!
+edu.courseTariffs.createCourseTariff — POST /edu/public/v1/courses/{schoolId}/{courseId}/tariffs  —  schoolId:int! courseId:int!
+edu.courseTariffs.createPaymentMethod — POST /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/payment-method  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.createTariffRenewal — POST /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/tariff-renewal  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.deleteCourseTariff — DELETE /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.deletePaymentMethod — DELETE /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/payment-method/{paymentId}  —  schoolId:int! courseId:int! courseTariffId:int! paymentId:int!
+edu.courseTariffs.deleteTariffAdvertisingText — DELETE /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/advertising-text  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.deleteTariffRenewal — DELETE /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/tariff-renewal/{id}  —  schoolId:int! courseId:int! courseTariffId:int! id:int!
+edu.courseTariffs.duplicateCourseTariff — POST /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/duplicate  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.listCourseTariffs — GET /edu/public/v1/courses/{courseId}/tariffs  —  courseId:int! ids[]:array excludeIds[]:array status:int
+edu.courseTariffs.reorderCourseTariffs — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/order  —  schoolId:int! courseId:int!
+edu.courseTariffs.updateCourseTariff — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.updateCourseTariffSettings — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/settings  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.updatePaymentMethod — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/payment-method/{paymentId}  —  schoolId:int! courseId:int! courseTariffId:int! paymentId:int!
+edu.courseTariffs.updateTariffAccessRestriction — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/access-restriction-settings  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.updateTariffContentAccess — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/accesses/contents/{courseTariffId}  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.updateTariffFunctionalityAccess — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/accesses/functionality/{courseTariffId}  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courseTariffs.updateTariffRenewal — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/tariff-renewal/{id}  —  schoolId:int! courseId:int! courseTariffId:int! id:int!
+edu.courseTariffs.updateTariffsEntityAccess — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/accesses/entities  —  schoolId:int! courseId:int!
+edu.courseTariffs.upsertTariffAdvertisingText — PUT /edu/public/v1/courses/{schoolId}/{courseId}/tariffs/{courseTariffId}/advertising-text  —  schoolId:int! courseId:int! courseTariffId:int!
+edu.courses.batchCopyCourseContent — POST /edu/public/v1/courses/{courseId}/batch/copy  —  courseId:int!
+edu.courses.batchDeleteCourseContent — DELETE /edu/public/v1/courses/{courseId}/batch/delete  —  courseId:int!
+edu.courses.batchUpdateCourseContentAccess — POST /edu/public/v1/courses/{courseId}/batch/access  —  courseId:int!
+edu.courses.createCourse — POST /edu/public/v1/courses
+edu.courses.deleteCourse — DELETE /edu/public/v1/courses/{schoolId}/{courseId}  —  schoolId:int! courseId:int!
+edu.courses.duplicateCourse — POST /edu/public/v1/courses/{schoolId}/{courseId}/duplicate  —  schoolId:int! courseId:int!
+edu.courses.listCourses — GET /edu/public/v1/courses
+edu.courses.updateCourse — PUT /edu/public/v1/courses/{schoolId}/{courseId}  —  schoolId:int! courseId:int!
+edu.domains.checkSubdomainName — GET /edu/public/v1/domains/{name}/{systemDomainId}/check  —  name:string! systemDomainId:int!
+edu.domains.listDomains — GET /edu/public/v1/domains
+edu.domains.listSystemDomains — GET /edu/public/v1/domains/available
+edu.forms.createForm — POST /edu/public/v1/{schoolId}/{courseId}/form  —  schoolId:int! courseId:int!
+edu.forms.deleteForm — DELETE /edu/public/v1/{schoolId}/{courseId}/form/{formId}  —  schoolId:int! courseId:int! formId:int!
+edu.forms.saveFormQuestions — POST /edu/public/v1/{schoolId}/{courseId}/form/{formId}/questions  —  schoolId:int! courseId:int! formId:int!
+edu.forms.updateForm — PUT /edu/public/v1/{schoolId}/{courseId}/form/{formId}  —  schoolId:int! courseId:int! formId:int!
+edu.homeworkTasks.createHomework — POST /edu/public/v1/homework/{schoolId}  —  schoolId:int!
+edu.homeworkTasks.deleteHomework — DELETE /edu/public/v1/homework/{schoolId}/{courseId}/{homeworkId}  —  schoolId:int! courseId:int! homeworkId:int!
+edu.homeworkTasks.updateHomework — PUT /edu/public/v1/homework/{schoolId}/{homeworkId}  —  schoolId:int! homeworkId:int!
+edu.homeworks.getStudentHomework — GET /edu/public/v1/homeworks/{studentHomeworkId}  —  studentHomeworkId:int!
+edu.homeworks.listHomeworksForChecking — GET /edu/public/v1/homeworks/list/checking  —  limit:int! offset:int! status:string courseId:int schoolId:int
+edu.homeworks.rateStudentHomework — POST /edu/public/v1/homeworks/{studentHomeworkId}/rate  —  studentHomeworkId:int!
+edu.lessons.createLesson — POST /edu/public/v1/courses/{schoolId}/{courseId}/lesson  —  schoolId:int! courseId:int!
+edu.lessons.deleteLesson — DELETE /edu/public/v1/courses/{schoolId}/{courseId}/lesson/{lessonId}  —  schoolId:int! courseId:int! lessonId:int!
+edu.lessons.listCourseLessonsContent — GET /edu/public/v1/courses/{schoolId}/{courseId}/lessons/content  —  schoolId:int! courseId:int!
+edu.lessons.listCourseSectionsWithLessons — GET /edu/public/v1/courses/{schoolId}/{courseId}/lessons  —  schoolId:int! courseId:int! dateFrom:string dateTo:string rating:int access:string module:string
+edu.lessons.updateLesson — PUT /edu/public/v1/courses/{schoolId}/{courseId}/lesson/{lessonId}  —  schoolId:int! courseId:int! lessonId:int!
+edu.schools.createSchool — POST /edu/public/v1/schools
+edu.schools.deleteSchool — DELETE /edu/public/v1/schools/{schoolId}  —  schoolId:int!
+edu.schools.listSchools — GET /edu/public/v1/schools
+edu.schools.reorderSchools — PUT /edu/public/v1/schools/order
+edu.schools.updateSchool — PUT /edu/public/v1/schools/{schoolId}  —  schoolId:int!
+edu.sections.createSection — POST /edu/public/v1/courses/{schoolId}/{courseId}/section  —  schoolId:int! courseId:int!
+edu.sections.deleteSection — DELETE /edu/public/v1/courses/{schoolId}/{courseId}/section/{sectionId}  —  schoolId:int! courseId:int! sectionId:int!
+edu.sections.listSections — GET /edu/public/v1/courses/{schoolId}/{courseId}/section  —  schoolId:int! courseId:int!
+edu.sections.updateSection — PUT /edu/public/v1/courses/{schoolId}/{courseId}/section/{sectionId}  —  schoolId:int! courseId:int! sectionId:int!
+edu.students.changeStudentCourseProgress — POST /edu/public/v1/students/{courseId}/change-progress  —  courseId:int!
+edu.students.changeStudentCourseStatus — POST /edu/public/v1/students/{courseId}/change-status  —  courseId:int!
+edu.students.createStudent — POST /edu/public/v1/students
+edu.students.deleteStudent — DELETE /edu/public/v1/students/{studentId}  —  studentId:int!
+edu.students.getStudentCourseStatistics — GET /edu/public/v1/students/course-statistics/{studentId}  —  studentId:int!
+edu.students.markStudentsAsPaid — POST /edu/public/v1/students/{courseId}/mark-as-paid  —  courseId:int!
+edu.students.removeStudentFromCourse — DELETE /edu/public/v1/students/{studentId}/{courseId}  —  studentId:int! courseId:int!
+edu.students.searchAuditory — POST /edu/public/v1/students/auditory
+edu.students.searchCourseStudents — POST /edu/public/v1/students/by-course/{courseId}  —  courseId:int!
+edu.students.updateStudentsAvailabilityDate — POST /edu/public/v1/students/{courseId}/update-availability-date  —  courseId:int!
+edu.studentsGroups.listCourseGroups — GET /edu/public/v1/groups/{courseId}  —  courseId:int!
+edu.tags.listTags — GET /edu/public/v1/tags
+edu.tests.createTest — POST /edu/public/v1/{schoolId}/{courseId}/tests  —  schoolId:int! courseId:int!
+edu.tests.deleteTest — DELETE /edu/public/v1/{schoolId}/{courseId}/tests/{testId}  —  schoolId:int! courseId:int! testId:int!
+edu.tests.saveTestQuestions — POST /edu/public/v1/{schoolId}/{courseId}/tests/{testId}/questions  —  schoolId:int! courseId:int! testId:int!
+edu.tests.updateTest — PUT /edu/public/v1/{schoolId}/{courseId}/tests/{testId}  —  schoolId:int! courseId:int! testId:int!
+
+### email
+email.balance.getBalance — GET /balance
+email.balance.getBalanceByCurrency — GET /balance/{currency}  —  currency:string!
+email.balance.getDetailedBalance — GET /user/balance/detail
+email.blacklist.addToBlacklist — POST /blacklist
+email.blacklist.getBlacklist — GET /blacklist
+email.blacklist.removeFromBlacklist — DELETE /blacklist
+email.campaigns.cancelCampaign — DELETE /campaigns/{id}  —  id:int!
+email.campaigns.createCampaign — POST /campaigns
+email.campaigns.getCampaignById — GET /campaigns/{id}  —  id:int!
+email.campaigns.getCampaignCountryStats — GET /campaigns/{id}/countries  —  id:int!
+email.campaigns.getCampaignReferralStats — GET /campaigns/{id}/referrals  —  id:int!
+email.campaigns.getCampaigns — GET /campaigns  —  limit:int offset:int order:string status:array planed:bool
+email.campaigns.getCampaignsByList — GET /addressbooks/{id}/campaigns  —  id:int! limit:int offset:int
+email.campaigns.updateCampaign — PATCH /campaigns/{id}  —  id:int!
+email.emailAddress.deleteEmailGlobally — DELETE /emails/{email}  —  email:string!
+email.emailAddress.getEmailCampaignInfo — GET /campaigns/{id}/email/{email}  —  id:int! email:string!
+email.emailAddress.getEmailCampaignStats — GET /emails/{email}/campaigns  —  email:string!
+email.emailAddress.getEmailDetails — GET /emails/{email}/details  —  email:string!
+email.emailAddress.getEmailFromList — GET /addressbooks/{id}/emails/{email}  —  id:int! email:string!
+email.emailAddress.getEmailInfo — GET /emails/{email}  —  email:string!
+email.emailAddress.getMultipleEmailsCampaignStats — POST /emails/campaigns
+email.emailAddress.getMultipleEmailsInfo — POST /emails
+email.emailAddress.updateContactVariables — POST /addressbooks/{id}/emails/variable  —  id:int!
+email.mailingLists.addEmailsToMailingList — POST /addressbooks/{id}/emails  —  id:int!
+email.mailingLists.createMailingList — POST /addressbooks
+email.mailingLists.deleteEmailsFromMailingList — DELETE /addressbooks/{id}/emails  —  id:int!
+email.mailingLists.deleteMailingList — DELETE /addressbooks/{id}  —  id:int!
+email.mailingLists.getCampaignCostByList — GET /addressbooks/{id}/cost  —  id:int!
+email.mailingLists.getContactsByVariable — GET /addressbooks/{id}/variables/{variableName}/{searchValue}  —  id:int! variableName:string! searchValue:string!
+email.mailingLists.getEmailsFromMailingList — GET /addressbooks/{id}/emails  —  id:int! limit:int offset:int order:string active:bool not_active:bool
+email.mailingLists.getEmailsTotalCount — GET /addressbooks/{id}/emails/total  —  id:int! active:bool
+email.mailingLists.getMailingListById — GET /addressbooks/{id}  —  id:int!
+email.mailingLists.getMailingListVariables — GET /addressbooks/{id}/variables  —  id:int!
+email.mailingLists.getMailingLists — GET /addressbooks  —  limit:int offset:int
+email.mailingLists.unsubscribeEmailsFromMailingList — POST /addressbooks/{id}/emails/unsubscribe  —  id:int!
+email.mailingLists.updateContactPhone — PUT /addressbooks/{id}/phone  —  id:int!
+email.mailingLists.updateMailingList — PUT /addressbooks/{id}  —  id:int!
+email.senders.activateSender — POST /senders/{email}/code  —  email:string!
+email.senders.addSender — POST /senders
+email.senders.deleteSender — DELETE /senders
+email.senders.getSenders — GET /senders
+email.senders.requestSenderActivationCode — GET /senders/{email}/code  —  email:string!
+email.tags.createTag — POST /tags
+email.tags.deleteTag — DELETE /tags/{id}  —  id:int!
+email.tags.getTags — GET /tags
+email.tags.pinTagToEmail — POST /tags/pin/email
+email.tags.pinTagToPhone — POST /tags/pin/phone
+email.tags.unpinTagFromEmail — POST /tags/unpin/email
+email.tags.unpinTagFromPhone — POST /tags/unpin/phone
+email.tags.updateTag — PUT /tags/{id}  —  id:int!
+email.templates.createTemplate — POST /template
+email.templates.getTemplateById — GET /template/{template_id}  —  template_id:string! owner:string lang:string
+email.templates.getTemplateBySlug — GET /template/slug/{name_slug}  —  name_slug:string! owner:string lang:string
+email.templates.getTemplates — GET /templates  —  owner:string only_active:bool limit:int offset:int
+email.templates.updateTemplate — POST /template/edit/{id}  —  id:int!
+email.webhooks.createWebhook — POST /v2/email-service/webhook
+email.webhooks.deleteWebhook — DELETE /v2/email-service/webhook/{id}  —  id:int!
+email.webhooks.getWebhookById — GET /v2/email-service/webhook/{id}  —  id:int!
+email.webhooks.getWebhooks — GET /v2/email-service/webhook
+email.webhooks.updateWebhook — PUT /v2/email-service/webhook/{id}  —  id:int!
+
+### facebook
+facebook.account.getAccount — GET /messenger/account
+facebook.bots.getBotStatistics — GET /messenger/bots/statistics  —  bot_id:string!
+facebook.bots.getBots — GET /messenger/bots
+facebook.campaigns.getCampaignRecipients — GET /messenger/campaigns/recipients  —  id:string!
+facebook.campaigns.getCampaignReport — GET /messenger/campaigns/report  —  id:string!
+facebook.campaigns.sendCampaign — POST /messenger/campaigns/send
+facebook.chats.getChatMessages — GET /messenger/chats/messages  —  contact_id:string!
+facebook.chats.getChats — GET /messenger/chats  —  bot_id:string
+facebook.contacts.assignContactOperator — POST /messenger/contacts/operators/assign
+facebook.contacts.assignContactOperatorGroup — POST /messenger/contacts/operators/assignGroup
+facebook.contacts.closeContactChat — POST /messenger/contacts/closeChat
+facebook.contacts.createContactNote — POST /messenger/contacts/createNote
+facebook.contacts.deleteContact — POST /messenger/contacts/delete
+facebook.contacts.deleteContactNote — POST /messenger/contacts/deleteNote
+facebook.contacts.deleteContactPauseAutomation — POST /messenger/contacts/deletePauseAutomation
+facebook.contacts.deleteContactTag — POST /messenger/contacts/deleteTag
+facebook.contacts.deleteContactVariable — POST /messenger/contacts/deleteVariable
+facebook.contacts.disableContact — POST /messenger/contacts/disable
+facebook.contacts.enableContact — POST /messenger/contacts/enable
+facebook.contacts.getContact — GET /messenger/contacts/get  —  id:string!
+facebook.contacts.getContactNotes — GET /messenger/contacts/notes  —  bot_id:string! contact_id:string!
+facebook.contacts.getContactPauseAutomation — GET /messenger/contacts/getPauseAutomation  —  contact_id:string!
+facebook.contacts.getContactsByTag — GET /messenger/contacts/getByTag  —  tag:string! bot_id:string!
+facebook.contacts.getContactsByVariable — GET /messenger/contacts/getByVariable  —  variable_id:string variable_name:string bot_id:string variable_value:string!
+facebook.contacts.markContactMessagesRead — PUT /messenger/contacts/mark-read  —  contact_id:string!
+facebook.contacts.markContactMessagesUnread — PUT /messenger/contacts/mark-unread  —  contact_id:string!
+facebook.contacts.openContactChat — POST /messenger/contacts/openChat
+facebook.contacts.reactToMessage — POST /messenger/contacts/react
+facebook.contacts.sendMessage — POST /messenger/contacts/send
+facebook.contacts.sendTextMessage — POST /messenger/contacts/sendText
+facebook.contacts.sendTyping — POST /messenger/contacts/sendTyping
+facebook.contacts.setContactPauseAutomation — POST /messenger/contacts/setPauseAutomation
+facebook.contacts.setContactTags — POST /messenger/contacts/setTag
+facebook.contacts.setContactVariable — POST /messenger/contacts/setVariable
+facebook.contacts.unassignContactOperator — POST /messenger/contacts/operators/unAssign
+facebook.contacts.updateContactNote — POST /messenger/contacts/updateNote
+facebook.flows.getFlows — GET /messenger/flows  —  bot_id:string!
+facebook.flows.runFlow — POST /messenger/flows/run
+facebook.flows.runFlowByTrigger — POST /messenger/flows/runByTrigger
+facebook.tags.getTags — GET /messenger/tags  —  bot_id:string!
+facebook.templates.createTemplate — POST /messenger/templates
+facebook.templates.deleteTemplate — DELETE /messenger/templates/{id}  —  id:string! bot_id:string!
+facebook.templates.getTemplates — GET /messenger/templates  —  bot_id:string! name:string locale:string status:string
+facebook.triggers.getTriggers — GET /messenger/triggers  —  bot_id:string!
+facebook.variables.getVariables — GET /messenger/variables  —  bot_id:string!
+
+### file-manager
+file-manager.directory.createDirectory — POST /fm/public/v1/directory
+file-manager.directory.getDirectoryContents — GET /fm/public/v1/directory/{path}  —  path:string!
+file-manager.directory.getDirectoryTree — GET /fm/public/v1/directory
+file-manager.directory.getStorageStats — GET /fm/public/v1/directory/size
+file-manager.directory.searchFiles — GET /fm/public/v1/directory/find  —  search:string! path:string!
+file-manager.file.checkFileExists — POST /fm/public/v1/file/exist
+file-manager.file.deleteFile — DELETE /fm/public/v1/file
+file-manager.file.filterFiles — POST /fm/public/v1/file/filter
+file-manager.file.uploadFile — POST /fm/public/v1/file
+
+### instagram
+instagram.account.getAccount — GET /instagram/account
+instagram.bots.getBotStatistics — GET /instagram/bots/statistics  —  bot_id:string!
+instagram.bots.getBots — GET /instagram/bots
+instagram.campaigns.getCampaignRecipients — GET /instagram/campaigns/recipients  —  id:string!
+instagram.campaigns.getCampaignReport — GET /instagram/campaigns/report  —  id:string!
+instagram.campaigns.sendCampaign — POST /instagram/campaigns/send
+instagram.chats.getChatMessages — GET /instagram/chats/messages  —  contact_id:string!
+instagram.chats.getChats — GET /instagram/chats  —  bot_id:string
+instagram.contacts.assignContactOperator — POST /instagram/contacts/operators/assign
+instagram.contacts.assignContactOperatorGroup — POST /instagram/contacts/operators/assignGroup
+instagram.contacts.closeContactChat — POST /instagram/contacts/closeChat
+instagram.contacts.createContactNote — POST /instagram/contacts/createNote
+instagram.contacts.deleteContact — POST /instagram/contacts/delete
+instagram.contacts.deleteContactNote — POST /instagram/contacts/deleteNote
+instagram.contacts.deleteContactPauseAutomation — POST /instagram/contacts/deletePauseAutomation
+instagram.contacts.deleteContactTag — POST /instagram/contacts/deleteTag
+instagram.contacts.deleteContactVariable — POST /instagram/contacts/deleteVariable
+instagram.contacts.disableContact — POST /instagram/contacts/disable
+instagram.contacts.enableContact — POST /instagram/contacts/enable
+instagram.contacts.getContact — GET /instagram/contacts/get  —  id:string!
+instagram.contacts.getContactNotes — GET /instagram/contacts/notes  —  bot_id:string! contact_id:string!
+instagram.contacts.getContactPauseAutomation — GET /instagram/contacts/getPauseAutomation  —  contact_id:string!
+instagram.contacts.getContactsByTag — GET /instagram/contacts/getByTag  —  tag:string! bot_id:string!
+instagram.contacts.getContactsByVariable — GET /instagram/contacts/getByVariable  —  variable_id:string variable_name:string bot_id:string variable_value:string!
+instagram.contacts.markContactMessagesRead — PUT /instagram/contacts/mark-read  —  contact_id:string!
+instagram.contacts.markContactMessagesUnread — PUT /instagram/contacts/mark-unread  —  contact_id:string!
+instagram.contacts.openContactChat — POST /instagram/contacts/openChat
+instagram.contacts.reactToMessage — POST /instagram/contacts/react
+instagram.contacts.sendMessages — POST /instagram/contacts/send
+instagram.contacts.setContactPauseAutomation — POST /instagram/contacts/setPauseAutomation
+instagram.contacts.setContactTags — POST /instagram/contacts/setTag
+instagram.contacts.setContactVariable — POST /instagram/contacts/setVariable
+instagram.contacts.unassignContactOperator — POST /instagram/contacts/operators/unAssign
+instagram.contacts.updateContactNote — POST /instagram/contacts/updateNote
+instagram.flows.getFlows — GET /instagram/flows  —  bot_id:string!
+instagram.flows.runFlow — POST /instagram/flows/run
+instagram.flows.runFlowByTrigger — POST /instagram/flows/runByTrigger
+instagram.tags.getTags — GET /instagram/tags  —  bot_id:string!
+instagram.triggers.getTriggers — GET /instagram/triggers  —  bot_id:string!
+instagram.variables.getVariables — GET /instagram/variables  —  bot_id:string!
+
+### live-chat
+live-chat.account.getAccount — GET /live-chat/account
+live-chat.bots.getBotStatistics — GET /live-chat/bots/statistics  —  bot_id:string!
+live-chat.bots.getBots — GET /live-chat/bots
+live-chat.chats.getChatMessages — GET /live-chat/chats/messages  —  contact_id:string!
+live-chat.chats.getChats — GET /live-chat/chats  —  bot_id:string
+live-chat.contacts.assignContactOperator — POST /live-chat/contacts/operators/assign
+live-chat.contacts.assignContactOperatorGroup — POST /live-chat/contacts/operators/assignGroup
+live-chat.contacts.closeContactChat — POST /live-chat/contacts/closeChat
+live-chat.contacts.createContactNote — POST /live-chat/contacts/createNote
+live-chat.contacts.deleteContact — POST /live-chat/contacts/delete
+live-chat.contacts.deleteContactNote — POST /live-chat/contacts/deleteNote
+live-chat.contacts.deleteContactPauseAutomation — POST /live-chat/contacts/deletePauseAutomation
+live-chat.contacts.deleteContactTag — POST /live-chat/contacts/deleteTag
+live-chat.contacts.deleteContactVariable — POST /live-chat/contacts/deleteVariable
+live-chat.contacts.disableContact — POST /live-chat/contacts/disable
+live-chat.contacts.enableContact — POST /live-chat/contacts/enable
+live-chat.contacts.getContact — GET /live-chat/contacts/get  —  id:string!
+live-chat.contacts.getContactNotes — GET /live-chat/contacts/notes  —  bot_id:string! contact_id:string!
+live-chat.contacts.getContactPauseAutomation — GET /live-chat/contacts/getPauseAutomation  —  contact_id:string!
+live-chat.contacts.getContactsByTag — GET /live-chat/contacts/getByTag  —  tag:string! bot_id:string!
+live-chat.contacts.getContactsByVariable — GET /live-chat/contacts/getByVariable  —  variable_id:string variable_name:string bot_id:string variable_value:string!
+live-chat.contacts.markContactMessagesRead — PUT /live-chat/contacts/mark-read  —  contact_id:string!
+live-chat.contacts.markContactMessagesUnread — PUT /live-chat/contacts/mark-unread  —  contact_id:string!
+live-chat.contacts.openContactChat — POST /live-chat/contacts/openChat
+live-chat.contacts.sendMessages — POST /live-chat/contacts/send
+live-chat.contacts.setContactName — POST /live-chat/contacts/setName
+live-chat.contacts.setContactPauseAutomation — POST /live-chat/contacts/setPauseAutomation
+live-chat.contacts.setContactTags — POST /live-chat/contacts/setTag
+live-chat.contacts.setContactVariable — POST /live-chat/contacts/setVariable
+live-chat.contacts.unassignContactOperator — POST /live-chat/contacts/operators/unAssign
+live-chat.contacts.updateContactNote — POST /live-chat/contacts/updateNote
+live-chat.flows.getFlows — GET /live-chat/flows  —  bot_id:string!
+live-chat.flows.runFlow — POST /live-chat/flows/run
+live-chat.flows.runFlowByTrigger — POST /live-chat/flows/runByTrigger
+live-chat.tags.getTags — GET /live-chat/tags  —  bot_id:string!
+live-chat.triggers.getTriggers — GET /live-chat/triggers  —  bot_id:string!
+live-chat.variables.getVariables — GET /live-chat/variables  —  bot_id:string!
+
+### popups
+popups.popup.deletePopup — DELETE /v2/pop-ups/popups/{popupId}  —  popupId:string!
+popups.popup.listPopupConditions — GET /v2/pop-ups/popups/conditions
+popups.popup.listPopups — GET /v2/pop-ups/popups/list/{projectId}  —  projectId:string!
+popups.popup.listQuizPopups — GET /v2/pop-ups/popups/list/quiz/{projectId}  —  projectId:string!
+popups.popup.setPopupState — POST /v2/pop-ups/popups/{popupId}/set-state  —  popupId:string!
+popups.popupStatistic.getAggregatedNpsStatistics — GET /v2/pop-ups/statistics/nps/{popupId}/aggregated  —  popupId:string!
+popups.popupStatistic.getNpsStatistics — GET /v2/pop-ups/statistics/nps/{popupId}  —  popupId:string!
+popups.popupStatistic.getPopupStatistics — GET /v2/pop-ups/statistics/popup/{popupId}  —  popupId:string!
+popups.project.createProject — POST /v2/pop-ups/widgets
+popups.project.listProjects — GET /v2/pop-ups/widgets/list
+popups.projectStatistic.getProjectStatistics — GET /v2/pop-ups/statistics/widget/{projectId}  —  projectId:string!
+popups.subscribers.getSubscriber — GET /v2/pop-ups/subscribers/get/{subscriberId}  —  subscriberId:int!
+popups.subscribers.listSubscribersByPopup — GET /v2/pop-ups/subscribers/by-popup/{popupId}  —  popupId:string!
+popups.subscribers.listSubscribersByProject — GET /v2/pop-ups/subscribers/by-project/{projectId}  —  projectId:string!
+popups.tariff.getTariffLimits — GET /v2/pop-ups/tariff/limits
+
+### sms
+sms.campaigns.calculateSmsCost — GET /sms/campaigns/cost  —  addressBookId:int phones:array body:string! sender:string! route:mixed
+sms.campaigns.cancelSmsCampaign — PUT /sms/campaigns/cancel/{id}  —  id:int!
+sms.campaigns.createSmsCampaign — POST /sms/campaigns
+sms.campaigns.deleteSmsCampaign — DELETE /sms/campaigns
+sms.campaigns.getSmsCampaignInfo — GET /sms/campaigns/info/{id}  —  id:int!
+sms.campaigns.getSmsCampaigns — GET /sms/campaigns/list  —  dateFrom:string dateTo:string
+sms.campaigns.sendSmsToNumbers — POST /sms/send
+sms.compliance.addSmsBlacklist — POST /sms/black_list
+sms.compliance.getSmsBlacklist — GET /sms/black_list
+sms.compliance.removeSmsBlacklist — DELETE /sms/black_list
+sms.configuration.getSmsSenders — GET /sms/senders
+sms.contacts.addSmsNumbers — POST /sms/numbers
+sms.contacts.addSmsNumbersWithVariables — POST /sms/numbers/variables
+sms.contacts.getSmsNumberInfo — GET /sms/numbers/info/{addressBookId}/{phoneNumber}  —  addressBookId:int! phoneNumber:string!
+sms.contacts.removeSmsNumbers — DELETE /sms/numbers
+sms.contacts.updateContactPhone — PUT /addressbooks/{id}/phone  —  id:int!
+sms.contacts.updateSmsVariablesBatch — PUT /sms/numbers
+sms.contacts.updateSmsVariablesSingle — POST /addressbooks/{id}/phones/variable  —  id:int!
+
+### smtp
+smtp.bounces.getSmtpBouncesDay — GET /smtp/bounces/day  —  date:string limit:int offset:int
+smtp.bounces.getSmtpBouncesTotal — GET /smtp/bounces/day/total
+smtp.configuration.addSmtpDomain — POST /v2/email-service/smtp/sender_domains/{domain}  —  domain:string!
+smtp.configuration.addSmtpSender — POST /senders
+smtp.configuration.getSmtpAllowedDomains — GET /v2/email-service/smtp/sender_domains
+smtp.configuration.getSmtpIps — GET /smtp/ips
+smtp.configuration.getSmtpSenders — GET /smtp/senders
+smtp.emails.getSmtpEmailInfo — GET /smtp/emails/{id}  —  id:string!
+smtp.emails.getSmtpEmails — GET /smtp/emails  —  limit:int offset:int from:string to:string sender:string recipient:string country:string
+smtp.emails.getSmtpEmailsBatchInfo — POST /smtp/emails/info
+smtp.emails.getSmtpEmailsTotal — GET /smtp/emails/total
+smtp.emails.sendSmtpEmail — POST /smtp/emails
+smtp.unsubscribe.getSmtpUnsubscribed — GET /smtp/unsubscribe  —  date:string limit:int offset:int
+smtp.unsubscribe.removeSmtpUnsubscribe — DELETE /smtp/unsubscribe
+smtp.unsubscribe.resubscribeSmtpRecipient — POST /smtp/resubscribe
+smtp.unsubscribe.searchSmtpUnsubscribe — GET /smtp/unsubscribe/search  —  email:string!
+smtp.unsubscribe.unsubscribeSmtpRecipients — POST /smtp/unsubscribe
+
+### telegram
+telegram.account.getAccount — GET /telegram/account
+telegram.bots.getBotStatistics — GET /telegram/bots/statistics  —  bot_id:string!
+telegram.bots.getBots — GET /telegram/bots
+telegram.campaigns.getCampaignRecipients — GET /telegram/campaigns/recipients  —  id:string!
+telegram.campaigns.getCampaignReport — GET /telegram/campaigns/report  —  id:string!
+telegram.campaigns.sendCampaign — POST /telegram/campaigns/send
+telegram.chats.getChatMessages — GET /telegram/chats/messages  —  contact_id:string!
+telegram.chats.getChats — GET /telegram/chats  —  bot_id:string
+telegram.contacts.assignContactOperator — POST /telegram/contacts/operators/assign
+telegram.contacts.assignContactOperatorGroup — POST /telegram/contacts/operators/assignGroup
+telegram.contacts.closeContactChat — POST /telegram/contacts/closeChat
+telegram.contacts.createContact — POST /telegram/contacts
+telegram.contacts.createContactNote — POST /telegram/contacts/createNote
+telegram.contacts.deleteContact — POST /telegram/contacts/delete
+telegram.contacts.deleteContactNote — POST /telegram/contacts/deleteNote
+telegram.contacts.deleteContactPauseAutomation — POST /telegram/contacts/deletePauseAutomation
+telegram.contacts.deleteContactTag — POST /telegram/contacts/deleteTag
+telegram.contacts.deleteContactVariable — POST /telegram/contacts/deleteVariable
+telegram.contacts.disableContact — POST /telegram/contacts/disable
+telegram.contacts.enableContact — POST /telegram/contacts/enable
+telegram.contacts.getContact — GET /telegram/contacts/get  —  id:string!
+telegram.contacts.getContactByTelegramId — GET /telegram/contacts/getByTelegramId  —  bot_id:string! telegram_id:int! business_connection_id:string
+telegram.contacts.getContactNotes — GET /telegram/contacts/notes  —  bot_id:string! contact_id:string!
+telegram.contacts.getContactPauseAutomation — GET /telegram/contacts/getPauseAutomation  —  contact_id:string!
+telegram.contacts.getContactsByTag — GET /telegram/contacts/getByTag  —  tag:string! bot_id:string!
+telegram.contacts.getContactsByVariable — GET /telegram/contacts/getByVariable  —  variable_id:string variable_name:string bot_id:string variable_value:string!
+telegram.contacts.markContactMessagesRead — PUT /telegram/contacts/mark-read  —  contact_id:string!
+telegram.contacts.markContactMessagesUnread — PUT /telegram/contacts/mark-unread  —  contact_id:string!
+telegram.contacts.openContactChat — POST /telegram/contacts/openChat
+telegram.contacts.reactToMessage — POST /telegram/contacts/react
+telegram.contacts.sendMessage — POST /telegram/contacts/send
+telegram.contacts.sendTextMessage — POST /telegram/contacts/sendText
+telegram.contacts.setContactPauseAutomation — POST /telegram/contacts/setPauseAutomation
+telegram.contacts.setContactTags — POST /telegram/contacts/setTag
+telegram.contacts.setContactVariable — POST /telegram/contacts/setVariable
+telegram.contacts.unassignContactOperator — POST /telegram/contacts/operators/unAssign
+telegram.contacts.updateContactNote — POST /telegram/contacts/updateNote
+telegram.flows.getFlows — GET /telegram/flows  —  bot_id:string!
+telegram.flows.runFlow — POST /telegram/flows/run
+telegram.flows.runFlowByTrigger — POST /telegram/flows/runByTrigger
+telegram.tags.getTags — GET /telegram/tags  —  bot_id:string!
+telegram.triggers.getTriggers — GET /telegram/triggers  —  bot_id:string!
+telegram.variables.getVariables — GET /telegram/variables  —  bot_id:string!
+
+### tiktok
+tiktok.account.getAccount — GET /tiktok/account
+tiktok.bots.getBotStatistics — GET /tiktok/bots/statistics  —  bot_id:string!
+tiktok.bots.getBots — GET /tiktok/bots
+tiktok.campaigns.getCampaignRecipients — GET /tiktok/campaigns/recipients  —  id:string!
+tiktok.campaigns.getCampaignReport — GET /tiktok/campaigns/report  —  id:string!
+tiktok.campaigns.sendCampaign — POST /tiktok/campaigns/send
+tiktok.chats.getChatMessages — GET /tiktok/chats/messages  —  contact_id:string!
+tiktok.chats.getChats — GET /tiktok/chats  —  bot_id:string
+tiktok.contacts.assignContactOperator — POST /tiktok/contacts/operators/assign
+tiktok.contacts.assignContactOperatorGroup — POST /tiktok/contacts/operators/assignGroup
+tiktok.contacts.closeContactChat — POST /tiktok/contacts/closeChat
+tiktok.contacts.createContactNote — POST /tiktok/contacts/createNote
+tiktok.contacts.deleteContact — POST /tiktok/contacts/delete
+tiktok.contacts.deleteContactNote — POST /tiktok/contacts/deleteNote
+tiktok.contacts.deleteContactPauseAutomation — POST /tiktok/contacts/deletePauseAutomation
+tiktok.contacts.deleteContactTag — POST /tiktok/contacts/deleteTag
+tiktok.contacts.deleteContactVariable — POST /tiktok/contacts/deleteVariable
+tiktok.contacts.disableContact — POST /tiktok/contacts/disable
+tiktok.contacts.enableContact — POST /tiktok/contacts/enable
+tiktok.contacts.getContact — GET /tiktok/contacts/get  —  id:string!
+tiktok.contacts.getContactNotes — GET /tiktok/contacts/notes  —  bot_id:string! contact_id:string!
+tiktok.contacts.getContactPauseAutomation — GET /tiktok/contacts/getPauseAutomation  —  contact_id:string!
+tiktok.contacts.getContactsByTag — GET /tiktok/contacts/getByTag  —  tag:string! bot_id:string!
+tiktok.contacts.getContactsByVariable — GET /tiktok/contacts/getByVariable  —  variable_id:string variable_name:string bot_id:string variable_value:string!
+tiktok.contacts.markContactMessagesRead — PUT /tiktok/contacts/mark-read  —  contact_id:string!
+tiktok.contacts.markContactMessagesUnread — PUT /tiktok/contacts/mark-unread  —  contact_id:string!
+tiktok.contacts.openContactChat — POST /tiktok/contacts/openChat
+tiktok.contacts.sendMessages — POST /tiktok/contacts/send
+tiktok.contacts.setContactPauseAutomation — POST /tiktok/contacts/setPauseAutomation
+tiktok.contacts.setContactTags — POST /tiktok/contacts/setTag
+tiktok.contacts.setContactVariable — POST /tiktok/contacts/setVariable
+tiktok.contacts.unassignContactOperator — POST /tiktok/contacts/operators/unAssign
+tiktok.contacts.updateContactNote — POST /tiktok/contacts/updateNote
+tiktok.flows.getFlows — GET /tiktok/flows  —  bot_id:string!
+tiktok.flows.runFlow — POST /tiktok/flows/run
+tiktok.flows.runFlowByTrigger — POST /tiktok/flows/runByTrigger
+tiktok.tags.getTags — GET /tiktok/tags  —  bot_id:string!
+tiktok.triggers.getTriggers — GET /tiktok/triggers  —  bot_id:string!
+tiktok.variables.getVariables — GET /tiktok/variables  —  bot_id:string!
+
+### verifier
+verifier.mailingListVerification.getVerificationProgress — GET /verifier-service/get-progress  —  id:int!
+verifier.mailingListVerification.getVerificationResults — GET /verifier-service/check  —  id:int! start:int count:int
+verifier.mailingListVerification.getVerifiedLists — GET /verifier-service/check-list  —  start:int count:int
+verifier.mailingListVerification.verifyMailingList — POST /verifier-service/send-list-to-verify
+verifier.reports.createVerificationReport — POST /verifier-service/make-report
+verifier.reports.downloadVerificationReport — GET /verifier-service/get-report  —  id:int! format:int
+verifier.reports.viewVerificationReport — GET /verifier-service/check-report  —  id:int! format:int
+verifier.singleEmailVerification.getSingleVerificationResult — GET /verifier-service/get-single-result  —  email:string!
+verifier.singleEmailVerification.verifySingleEmail — POST /verifier-service/send-single-to-verify
+
+### viber
+viber.campaigns.createViberCampaign — POST /viber
+viber.campaigns.getViberCampaignStats — GET /viber/task/{id}  —  id:int!
+viber.campaigns.getViberCampaigns — GET /viber/task  —  limit:int offset:int
+viber.campaigns.getViberRecipients — GET /viber/task/{id}/recipients  —  id:int!
+viber.compliance.addViberBlacklist — POST /v2/viber-service/phone-exception
+viber.compliance.getViberBlacklist — GET /v2/viber-service/phone-exception  —  limit:int offset:int
+viber.compliance.removeViberBlacklist — DELETE /v2/viber-service/phone-exception
+viber.configuration.getViberSenderProfile — GET /viber/senders/{id}  —  id:int!
+viber.configuration.getViberSenders — GET /viber/senders
+
+### viber-chatbot
+viber-chatbot.account.getAccount — GET /viber/chatbots/account
+viber-chatbot.bots.getBotStatistics — GET /viber/chatbots/bots/statistics  —  bot_id:string!
+viber-chatbot.bots.getBots — GET /viber/chatbots/bots
+viber-chatbot.campaigns.getCampaignRecipients — GET /viber/chatbots/campaigns/recipients  —  id:string!
+viber-chatbot.campaigns.getCampaignReport — GET /viber/chatbots/campaigns/report  —  id:string!
+viber-chatbot.campaigns.sendCampaign — POST /viber/chatbots/campaigns/send
+viber-chatbot.chats.getChatMessages — GET /viber/chatbots/chats/messages  —  contact_id:string!
+viber-chatbot.chats.getChats — GET /viber/chatbots/chats  —  bot_id:string
+viber-chatbot.contacts.assignContactOperator — POST /viber/chatbots/contacts/operators/assign
+viber-chatbot.contacts.assignContactOperatorGroup — POST /viber/chatbots/contacts/operators/assignGroup
+viber-chatbot.contacts.closeContactChat — POST /viber/chatbots/contacts/closeChat
+viber-chatbot.contacts.createContactNote — POST /viber/chatbots/contacts/createNote
+viber-chatbot.contacts.deleteContact — POST /viber/chatbots/contacts/delete
+viber-chatbot.contacts.deleteContactNote — POST /viber/chatbots/contacts/deleteNote
+viber-chatbot.contacts.deleteContactPauseAutomation — POST /viber/chatbots/contacts/deletePauseAutomation
+viber-chatbot.contacts.deleteContactTag — POST /viber/chatbots/contacts/deleteTag
+viber-chatbot.contacts.deleteContactVariable — POST /viber/chatbots/contacts/deleteVariable
+viber-chatbot.contacts.disableContact — POST /viber/chatbots/contacts/disable
+viber-chatbot.contacts.enableContact — POST /viber/chatbots/contacts/enable
+viber-chatbot.contacts.getContact — GET /viber/chatbots/contacts/get  —  id:string!
+viber-chatbot.contacts.getContactNotes — GET /viber/chatbots/contacts/notes  —  bot_id:string! contact_id:string!
+viber-chatbot.contacts.getContactPauseAutomation — GET /viber/chatbots/contacts/getPauseAutomation  —  contact_id:string!
+viber-chatbot.contacts.getContactsByTag — GET /viber/chatbots/contacts/getByTag  —  tag:string! bot_id:string!
+viber-chatbot.contacts.getContactsByVariable — GET /viber/chatbots/contacts/getByVariable  —  variable_id:string variable_name:string bot_id:string variable_value:string!
+viber-chatbot.contacts.markContactMessagesRead — PUT /viber/chatbots/contacts/mark-read  —  contact_id:string!
+viber-chatbot.contacts.markContactMessagesUnread — PUT /viber/chatbots/contacts/mark-unread  —  contact_id:string!
+viber-chatbot.contacts.openContactChat — POST /viber/chatbots/contacts/openChat
+viber-chatbot.contacts.sendMessages — POST /viber/chatbots/contacts/send
+viber-chatbot.contacts.setContactPauseAutomation — POST /viber/chatbots/contacts/setPauseAutomation
+viber-chatbot.contacts.setContactTags — POST /viber/chatbots/contacts/setTag
+viber-chatbot.contacts.setContactVariable — POST /viber/chatbots/contacts/setVariable
+viber-chatbot.contacts.unassignContactOperator — POST /viber/chatbots/contacts/operators/unAssign
+viber-chatbot.contacts.updateContactNote — POST /viber/chatbots/contacts/updateNote
+viber-chatbot.flows.getFlows — GET /viber/chatbots/flows  —  bot_id:string!
+viber-chatbot.flows.runFlow — POST /viber/chatbots/flows/run
+viber-chatbot.flows.runFlowByTrigger — POST /viber/chatbots/flows/runByTrigger
+viber-chatbot.tags.getTags — GET /viber/chatbots/tags  —  bot_id:string!
+viber-chatbot.triggers.getTriggers — GET /viber/chatbots/triggers  —  bot_id:string!
+viber-chatbot.variables.getVariables — GET /viber/chatbots/variables  —  bot_id:string!
+
+### web-push
+web-push.campaigns.createWebPushCampaign — POST /push/tasks
+web-push.campaigns.getWebPushCampaignStats — GET /push/tasks/{id}  —  id:int!
+web-push.campaigns.getWebPushCampaigns — GET /push/tasks  —  limit:int offset:int from:string to:string website_id:int
+web-push.configuration.getWebPushCode — GET /push/websites/{id}/code  —  id:int!
+web-push.subscribers.getWebPushSubscribersTotal — GET /push/websites/{id}/subscriptions/total  —  id:int!
+web-push.subscribers.getWebPushSubscriptions — GET /push/websites/{id}/subscriptions  —  id:int! limit:int offset:int subscription_date_from:string subscription_date_to:string
+web-push.subscribers.setWebPushSubscriberState — POST /push/subscriptions/state
+web-push.websites.getWebPushVariables — GET /push/websites/{id}/variables  —  id:int!
+web-push.websites.getWebPushWebsiteInfo — GET /push/websites/info/{id}  —  id:int!
+web-push.websites.getWebPushWebsites — GET /push/websites  —  limit:int offset:int
+web-push.websites.getWebPushWebsitesTotal — GET /push/websites/total
+
+### whatsapp
+whatsapp.account.getAccount — GET /whatsapp/account
+whatsapp.bots.getBotStatistics — GET /whatsapp/bots/statistics  —  bot_id:string!
+whatsapp.bots.getBots — GET /whatsapp/bots
+whatsapp.campaigns.getCampaignRecipients — GET /whatsapp/campaigns/recipients  —  id:string!
+whatsapp.campaigns.getCampaignReport — GET /whatsapp/campaigns/report  —  id:string!
+whatsapp.campaigns.sendCampaign — POST /whatsapp/campaigns/send
+whatsapp.campaigns.sendTemplateCampaign — POST /whatsapp/campaigns/sendTemplate
+whatsapp.chats.getChatMessages — GET /whatsapp/chats/messages  —  contact_id:string!
+whatsapp.chats.getChats — GET /whatsapp/chats  —  bot_id:string
+whatsapp.contacts.assignContactOperator — POST /whatsapp/contacts/operators/assign
+whatsapp.contacts.assignContactOperatorGroup — POST /whatsapp/contacts/operators/assignGroup
+whatsapp.contacts.closeContactChat — POST /whatsapp/contacts/closeChat
+whatsapp.contacts.createContact — POST /whatsapp/contacts
+whatsapp.contacts.createContactNote — POST /whatsapp/contacts/createNote
+whatsapp.contacts.deleteContact — POST /whatsapp/contacts/delete
+whatsapp.contacts.deleteContactNote — POST /whatsapp/contacts/deleteNote
+whatsapp.contacts.deleteContactPauseAutomation — POST /whatsapp/contacts/deletePauseAutomation
+whatsapp.contacts.deleteContactTag — POST /whatsapp/contacts/deleteTag
+whatsapp.contacts.deleteContactVariable — POST /whatsapp/contacts/deleteVariable
+whatsapp.contacts.disableContact — POST /whatsapp/contacts/disable
+whatsapp.contacts.enableContact — POST /whatsapp/contacts/enable
+whatsapp.contacts.getContact — GET /whatsapp/contacts/get  —  id:string!
+whatsapp.contacts.getContactByPhone — GET /whatsapp/contacts/getByPhone  —  phone:string! bot_id:string!
+whatsapp.contacts.getContactNotes — GET /whatsapp/contacts/notes  —  bot_id:string! contact_id:string!
+whatsapp.contacts.getContactPauseAutomation — GET /whatsapp/contacts/getPauseAutomation  —  contact_id:string!
+whatsapp.contacts.getContactsByTag — GET /whatsapp/contacts/getByTag  —  tag:string! bot_id:string!
+whatsapp.contacts.getContactsByVariable — GET /whatsapp/contacts/getByVariable  —  variable_id:string variable_name:string bot_id:string variable_value:string!
+whatsapp.contacts.markContactMessagesRead — PUT /whatsapp/contacts/mark-read  —  contact_id:string!
+whatsapp.contacts.markContactMessagesUnread — PUT /whatsapp/contacts/mark-unread  —  contact_id:string!
+whatsapp.contacts.openContactChat — POST /whatsapp/contacts/openChat
+whatsapp.contacts.reactToMessage — POST /whatsapp/contacts/react
+whatsapp.contacts.sendMessage — POST /whatsapp/contacts/send
+whatsapp.contacts.sendMessageByPhone — POST /whatsapp/contacts/sendByPhone
+whatsapp.contacts.sendTemplateMessage — POST /whatsapp/contacts/sendTemplate
+whatsapp.contacts.sendTemplateMessageByPhone — POST /whatsapp/contacts/sendTemplateByPhone
+whatsapp.contacts.sendTyping — POST /whatsapp/contacts/sendTyping
+whatsapp.contacts.setContactName — POST /whatsapp/contacts/setName
+whatsapp.contacts.setContactPauseAutomation — POST /whatsapp/contacts/setPauseAutomation
+whatsapp.contacts.setContactTags — POST /whatsapp/contacts/setTag
+whatsapp.contacts.setContactVariable — POST /whatsapp/contacts/setVariable
+whatsapp.contacts.unassignContactOperator — POST /whatsapp/contacts/operators/unAssign
+whatsapp.contacts.updateContactNote — POST /whatsapp/contacts/updateNote
+whatsapp.flows.getFlows — GET /whatsapp/flows  —  bot_id:string!
+whatsapp.flows.runFlow — POST /whatsapp/flows/run
+whatsapp.flows.runFlowByTrigger — POST /whatsapp/flows/runByTrigger
+whatsapp.tags.getTags — GET /whatsapp/tags  —  bot_id:string!
+whatsapp.templates.createTemplate — POST /whatsapp/templates
+whatsapp.templates.deleteTemplate — DELETE /whatsapp/templates/{id}  —  id:string! bot_id:string!
+whatsapp.templates.getTemplates — GET /whatsapp/templates  —  bot_id:string! name:string locale:string status:string category:string
+whatsapp.triggers.getTriggers — GET /whatsapp/triggers  —  bot_id:string!
+whatsapp.variables.getVariables — GET /whatsapp/variables  —  bot_id:string!
