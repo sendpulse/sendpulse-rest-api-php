@@ -44,7 +44,7 @@ All implement Sendpulse\RestApi\Exception\SendPulseExceptionInterface:
   ApiException (other 4xx/5xx), NetworkException (transport), ProtocolException (bad JSON).
 - AuthException / ForbiddenException / RateLimitException / ApiException expose ->httpStatus and ->rawBody.
 
-## Endpoints (793)
+## Endpoints (803)
 
 ### a360
 a360.autoresponders.autorespondersConversions — GET /a360/autoresponders/{id}/conversions  —  id:int!
@@ -461,11 +461,6 @@ email.templates.getTemplateById — GET /template/{template_id}  —  template_i
 email.templates.getTemplateBySlug — GET /template/slug/{name_slug}  —  name_slug:string! owner:string lang:string
 email.templates.getTemplates — GET /templates  —  owner:string only_active:bool limit:int offset:int
 email.templates.updateTemplate — POST /template/edit/{id}  —  id:int!
-email.webhooks.createWebhook — POST /v2/email-service/webhook
-email.webhooks.deleteWebhook — DELETE /v2/email-service/webhook/{id}  —  id:int!
-email.webhooks.getWebhookById — GET /v2/email-service/webhook/{id}  —  id:int!
-email.webhooks.getWebhooks — GET /v2/email-service/webhook
-email.webhooks.updateWebhook — PUT /v2/email-service/webhook/{id}  —  id:int!
 
 ### facebook
 facebook.account.getAccount — GET /messenger/account
@@ -823,6 +818,23 @@ web-push.websites.getWebPushVariables — GET /push/websites/{id}/variables  —
 web-push.websites.getWebPushWebsiteInfo — GET /push/websites/info/{id}  —  id:int!
 web-push.websites.getWebPushWebsites — GET /push/websites  —  limit:int offset:int
 web-push.websites.getWebPushWebsitesTotal — GET /push/websites/total
+
+### webhook
+webhook.actions.getActionEvents — GET /actions/events
+webhook.actions.getActions — GET /actions  —  scope:string event:string order:string order_by:string
+webhook.actions.getPaymentOrderStatuses — GET /actions/payment-order-statuses
+webhook.webhooks.addWebhookEvent — POST /webhooks/{webhook}/events/{action}  —  webhook:string! action:string!
+webhook.webhooks.createWebhook — POST /webhooks
+webhook.webhooks.deleteWebhook — DELETE /webhooks/{webhook}  —  webhook:string!
+webhook.webhooks.getWebhookById — GET /webhooks/{webhook}  —  webhook:string!
+webhook.webhooks.getWebhookLogs — GET /webhooks/{webhook}/logs  —  limit:int cursor:mixed webhook:string!
+webhook.webhooks.getWebhooks — GET /webhooks  —  status:int search:string order:string order_by:string
+webhook.webhooks.regenerateWebhookSecret — POST /webhooks/{webhook}/secret  —  webhook:string!
+webhook.webhooks.removeWebhookEvent — DELETE /webhooks/{webhook}/events/{action}  —  webhook:string! action:string!
+webhook.webhooks.retryWebhookDelivery — POST /webhooks/{webhook}/logs/retry  —  webhook:string!
+webhook.webhooks.testWebhook — POST /webhooks/{webhook}/test  —  webhook:string!
+webhook.webhooks.updateWebhook — POST /webhooks/{webhook}  —  webhook:string!
+webhook.webhooks.updateWebhookStatus — POST /webhooks/{webhook}/status  —  webhook:string!
 
 ### whatsapp
 whatsapp.account.getAccount — GET /whatsapp/account

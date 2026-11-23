@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.1.0] — 2026-11-13
+
+### Added
+- **`webhook` service** — manage SendPulse webhooks as a first-class service:
+  `$client->webhook->webhooks->getWebhooks()`, `getWebhookById(['webhook' => ID])`,
+  `createWebhook([...])`, `updateWebhook`, `deleteWebhook`, plus `testWebhook`,
+  `getWebhookLogs`, `retryWebhookDelivery`, secret/status/event helpers.
+
+### Changed
+- Regenerated `a360` and `bulk-email` operation maps from the latest OpenAPI specs.
+
+---
+
 ## [4.0.0] — 2026-11-11
 
 Thin-client rewrite. Typed DTO models and per-service facades are replaced by a
