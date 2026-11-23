@@ -1,7 +1,7 @@
 <?php
 
 // GENERATED IDE/PHPStan stubs — not autoloaded at runtime. Do not edit by hand.
-// Regenerate with generate-stubs.php. 793 operations.
+// Regenerate with generate-stubs.php. 803 operations.
 
 namespace Sendpulse\RestApi\Stub {
     /**
@@ -104,7 +104,6 @@ namespace Sendpulse\RestApi\Stub {
      * @property-read Email\Senders $senders
      * @property-read Email\Tags $tags
      * @property-read Email\Templates $templates
-     * @property-read Email\Webhooks $webhooks
      */
     class Email
     {
@@ -278,6 +277,15 @@ namespace Sendpulse\RestApi\Stub {
      * @property-read WebPush\Websites $websites
      */
     class WebPush
+    {
+        public function __get(string $name) {}
+    }
+
+    /**
+     * @property-read Webhook\Actions $actions
+     * @property-read Webhook\Webhooks $webhooks
+     */
+    class Webhook
     {
         public function __get(string $name) {}
     }
@@ -3363,44 +3371,6 @@ namespace Sendpulse\RestApi\Stub\Email {
          */
         public function updateTemplate(array $params): array {}
     }
-
-    class Webhooks
-    {
-        /**
-         * POST /v2/email-service/webhook
-         * @param array<string, mixed> $params
-         * @return array<mixed>
-         */
-        public function createWebhook(array $params = []): array {}
-
-        /**
-         * DELETE /v2/email-service/webhook/{id}
-         * @param array{id: int, ...} $params
-         * @return array<mixed>
-         */
-        public function deleteWebhook(array $params): array {}
-
-        /**
-         * GET /v2/email-service/webhook/{id}
-         * @param array{id: int, ...} $params
-         * @return array<mixed>
-         */
-        public function getWebhookById(array $params): array {}
-
-        /**
-         * GET /v2/email-service/webhook
-         * @param array<string, mixed> $params
-         * @return array<mixed>
-         */
-        public function getWebhooks(array $params = []): array {}
-
-        /**
-         * PUT /v2/email-service/webhook/{id}
-         * @param array{id: int, ...} $params
-         * @return array<mixed>
-         */
-        public function updateWebhook(array $params): array {}
-    }
 }
 
 namespace Sendpulse\RestApi\Stub\Facebook {
@@ -5983,6 +5953,119 @@ namespace Sendpulse\RestApi\Stub\WebPush {
          * @return array<mixed>
          */
         public function getWebPushWebsitesTotal(array $params = []): array {}
+    }
+}
+
+namespace Sendpulse\RestApi\Stub\Webhook {
+    class Actions
+    {
+        /**
+         * GET /actions/events
+         * @param array<string, mixed> $params
+         * @return array<mixed>
+         */
+        public function getActionEvents(array $params = []): array {}
+
+        /**
+         * GET /actions
+         * @param array{scope?: string, event?: string, order?: string, order_by?: string, ...} $params
+         * @return array<mixed>
+         */
+        public function getActions(array $params = []): array {}
+
+        /**
+         * GET /actions/payment-order-statuses
+         * @param array<string, mixed> $params
+         * @return array<mixed>
+         */
+        public function getPaymentOrderStatuses(array $params = []): array {}
+    }
+
+    class Webhooks
+    {
+        /**
+         * POST /webhooks/{webhook}/events/{action}
+         * @param array{webhook: string, action: string, ...} $params
+         * @return array<mixed>
+         */
+        public function addWebhookEvent(array $params): array {}
+
+        /**
+         * POST /webhooks
+         * @param array<string, mixed> $params
+         * @return array<mixed>
+         */
+        public function createWebhook(array $params = []): array {}
+
+        /**
+         * DELETE /webhooks/{webhook}
+         * @param array{webhook: string, ...} $params
+         * @return array<mixed>
+         */
+        public function deleteWebhook(array $params): array {}
+
+        /**
+         * GET /webhooks/{webhook}
+         * @param array{webhook: string, ...} $params
+         * @return array<mixed>
+         */
+        public function getWebhookById(array $params): array {}
+
+        /**
+         * GET /webhooks/{webhook}/logs
+         * @param array{limit?: int, cursor?: mixed, webhook: string, ...} $params
+         * @return array<mixed>
+         */
+        public function getWebhookLogs(array $params): array {}
+
+        /**
+         * GET /webhooks
+         * @param array{status?: int, search?: string, order?: string, order_by?: string, ...} $params
+         * @return array<mixed>
+         */
+        public function getWebhooks(array $params = []): array {}
+
+        /**
+         * POST /webhooks/{webhook}/secret
+         * @param array{webhook: string, ...} $params
+         * @return array<mixed>
+         */
+        public function regenerateWebhookSecret(array $params): array {}
+
+        /**
+         * DELETE /webhooks/{webhook}/events/{action}
+         * @param array{webhook: string, action: string, ...} $params
+         * @return array<mixed>
+         */
+        public function removeWebhookEvent(array $params): array {}
+
+        /**
+         * POST /webhooks/{webhook}/logs/retry
+         * @param array{webhook: string, ...} $params
+         * @return array<mixed>
+         */
+        public function retryWebhookDelivery(array $params): array {}
+
+        /**
+         * POST /webhooks/{webhook}/test
+         * @param array{webhook: string, ...} $params
+         * @return array<mixed>
+         */
+        public function testWebhook(array $params): array {}
+
+        /**
+         * POST /webhooks/{webhook}
+         * @param array{webhook: string, ...} $params
+         * @return array<mixed>
+         */
+        public function updateWebhook(array $params): array {}
+
+        /**
+         * POST /webhooks/{webhook}/status
+         * @param array{webhook: string, ...} $params
+         * @return array<mixed>
+         */
+        public function updateWebhookStatus(array $params): array {}
     }
 }
 
